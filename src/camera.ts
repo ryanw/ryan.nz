@@ -16,7 +16,7 @@ export class Camera {
 
 	get view(): Matrix4 {
 		return Matrix4.translation(...this.position)
-			.multiply(Matrix4.rotation(this.rotation))
+			.multiply(Matrix4.rotation(...this.rotation))
 			.multiply(Matrix4.scaling(...this.scaling));
 	}
 

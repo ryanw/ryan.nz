@@ -11,7 +11,7 @@ export class WebGLRenderer {
 	program: Program;
 	meshes: Mesh[] = [];
 	models: Matrix4[] = [];
-	scale: number = 1.0;
+	scale: number = 0.25;
 	camera: Camera = new Camera();
 	maxFps: number = 30;
 	lastFrameAt: number = 0;
@@ -30,7 +30,7 @@ export class WebGLRenderer {
 
 		this.initWebGL();
 		const m = this.addMesh(new WireTerrain());
-		this.models[m] = Matrix4.translation(1.0, 0.0, -5.0);
+		this.models[m] = Matrix4.scaling(0.5, 1.0, 0.5).multiply(Matrix4.translation(1.0, -0.75, -5.0)).multiply(Matrix4.rotation(0.1, Math.PI * 0.25, 0.0));
 	}
 
 	/**

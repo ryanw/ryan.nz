@@ -11,8 +11,8 @@ export class WireTerrain extends Mesh {
 	build() {
 		noiseHistory = {};
 		const vertices: number[] = [];
-		const w = 10;
-		const d = 8;
+		const w = 16;
+		const d = 16;
 		const y = 0;
 
 		function addVertex(x: number, y: number, z: number) {
@@ -65,6 +65,7 @@ function noise(x: number, y: number): number {
 	if (noiseHistory[key]) {
 		return noiseHistory[key];
 	}
-	return noiseHistory[key] = (Math.sin(x * 1.0) * Math.cos(y * 1.0)) - 1.0;
+	const s = 0.666;
+	return noiseHistory[key] = (Math.sin(x * s) * Math.cos(y * s)) * 0.5;
 }
 

@@ -50,7 +50,8 @@ export class Matrix4 {
 		]);
 	}
 
-	static rotation(axisangle: Vector3): Matrix4 {
+	static rotation(x: number, y: number, z: number): Matrix4 {
+		const axisangle: Vector3 = [x, y, z];
 		const cosSin = (axis: number): [number, number] => {
 			return [Math.cos(axisangle[axis]), Math.sin(axisangle[axis])];
 		};
