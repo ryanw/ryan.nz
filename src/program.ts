@@ -4,6 +4,8 @@ import fragSource from './shaders/wireframe.frag.shader';
 export class Program {
 	prog: WebGLProgram;
 	positionAttrib: number;
+	viewProjUniform: WebGLUniformLocation;
+	modelUniform: WebGLUniformLocation;
 
 	constructor(gl?: WebGLRenderingContext) {
 		if (gl) {
@@ -31,14 +33,19 @@ export class Program {
 			throw `Could not compile WebGL program: ${info}`;
 		}
 
-		// Attribute locations
+		// Attribute/Uniform locations
 		this.positionAttrib = gl.getAttribLocation(program, 'position');
+		this.viewProjUniform = gl.getUniformLocation(program, 'view_proj');
+		this.modelUniform = gl.getUniformLocation(program, 'model');
 
 		this.prog = program;
 	}
 
 	bind(gl: WebGLRenderingContext) {
 		gl.useProgram(this.prog);
+
+		// Attributes
+		// Position
 		gl.enableVertexAttribArray(this.positionAttrib);
 		gl.vertexAttribPointer(this.positionAttrib, 3, gl.FLOAT, false, 0, 0);
 	}

@@ -1,12 +1,16 @@
+import { Matrix4 } from './geom';
 import { Mesh } from './mesh';
 import { Program } from './program';
+import { Camera } from './camera';
 
 
 export class WebGLRenderer {
 	canvas: HTMLCanvasElement;
 	program: Program;
 	meshes: Mesh[] = [];
-	scale: number = 0.25;
+	models: Matrix4[] = [];
+	scale: number = 0.2;
+	camera: Camera = new Camera();
 	private context: WebGLRenderingContext;
 
 	constructor() {
@@ -48,6 +52,7 @@ export class WebGLRenderer {
 	private initWebGL() {
 		const gl = this.gl;
 
+		gl.enable(gl.DEPTH_TEST);
 		this.program = new Program(gl);
 	}
 
@@ -63,10 +68,23 @@ export class WebGLRenderer {
 
 	draw() {
 		const gl = this.gl;
+		gl.viewport(0, 0, this.camera.width, this.camera.height);
 		this.program.bind(gl);
 		this.clear();
 
-		for (const mesh of this.meshes) {
+
+		// Uniforms
+		const proj = this.camera.projection.clone();
+		const view = this.camera.view.clone();
+		const viewProj = view.multiply(proj);;
+		gl.uniformMatrix4fv(this.program.viewProjUniform, false, proj.toArray());
+
+		for (const i in this.meshes) {
+			this.models[i] = this.models[i].multiply(Matrix4.rotation([0.01, 0.01, 0.0]));
+
+			const mesh = this.meshes[i];
+			const model = this.models[i];
+			gl.uniformMatrix4fv(this.program.modelUniform, false, model.toArray());
 			mesh.draw(gl);
 		}
 	}
@@ -75,6 +93,7 @@ export class WebGLRenderer {
 		const gl = this.gl;
 		mesh.allocate(gl);
 		mesh.upload(gl);
+		this.models.push(Matrix4.translation(0.0, 0.0, -5.0));
 		this.meshes.push(mesh);
 	}
 
@@ -96,6 +115,7 @@ export class WebGLRenderer {
 	updateSize() {
 		const width = this.parentElement.clientWidth * this.scale | 0;
 		const height = this.parentElement.clientHeight * this.scale | 0;
+		this.camera.resize(width, height);
 
 		this.canvas.style.imageRendering = 'crisp-edges';
 		this.canvas.style.width = this.parentElement.clientWidth + 'px';
