@@ -30,7 +30,11 @@ export class WebGLRenderer {
 
 		this.initWebGL();
 		const m = this.addMesh(new WireTerrain());
-		this.models[m] = Matrix4.scaling(0.5, 1.0, 0.5).multiply(Matrix4.translation(1.0, -0.75, -5.0)).multiply(Matrix4.rotation(0.1, Math.PI * 0.25, 0.0));
+		this.models[m] = Matrix4.translation(0.0, 0.0, 0.0)
+			.multiply(Matrix4.scaling(0.33, 0.4, 0.33));
+
+		this.camera.position = [0.0, -1.0, 0.0];
+		this.camera.rotation = [0.25,  0.0, 0.0];
 	}
 
 	/**
@@ -82,6 +86,7 @@ export class WebGLRenderer {
 			const model = this.models[i];
 			if (mesh instanceof WireTerrain) {
 				mesh.offset[0] += 20.0 * dt;
+				this.camera.rotation[1] += 0.25 * dt;
 				mesh.build();
 			}
 		}

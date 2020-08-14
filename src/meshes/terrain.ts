@@ -1,4 +1,5 @@
 import { Mesh } from '../mesh';
+import SimplexNoise from '../simplex-noise';
 
 export class WireTerrain extends Mesh {
 	offset = [0, 0];
@@ -9,7 +10,6 @@ export class WireTerrain extends Mesh {
 	}
 
 	build() {
-		noiseHistory = {};
 		const vertices: number[] = [];
 		const w = 16;
 		const d = 16;
@@ -25,8 +25,8 @@ export class WireTerrain extends Mesh {
 		const s = 0.1;
 		ox *= s;
 		oz *= s;
-		for (let z = -d; z < d; z++) {
-			for (let x = -w; x < w; x++) {
+		for (let z = -d; z <= d; z++) {
+			for (let x = -w; x <= w; x++) {
 				let vx, vy, vz;
 
 				// Top
@@ -59,13 +59,9 @@ export class WireTerrain extends Mesh {
 	}
 }
 
-let noiseHistory: { [key: string]: number } = {};
+const simplex = new SimplexNoise(0);
 function noise(x: number, y: number): number {
-	const key = `${x.toFixed(2)},${y.toFixed(2)}`;
-	if (noiseHistory[key]) {
-		return noiseHistory[key];
-	}
-	const s = 0.666;
-	return noiseHistory[key] = (Math.sin(x * s) * Math.cos(y * s)) * 0.5;
+	const s = 8.0;
+	return simplex.noise2D(x / s, y / s);
 }
 
