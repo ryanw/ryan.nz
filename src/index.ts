@@ -1,7 +1,7 @@
-import { WebGlRenderer } from './renderer';
+import { WebGLRenderer } from './renderer';
 
 async function main() {
-	const renderer = new WebGlRenderer();
+	const renderer = new WebGLRenderer();
 	renderer.attach(document.body);
 	while (true) {
 		await renderer.redraw();
