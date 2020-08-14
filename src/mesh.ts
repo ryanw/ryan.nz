@@ -4,12 +4,6 @@ export class Mesh {
 	vertexBuffer: WebGLBuffer;
 	vertices: Float32Array = new Float32Array();
 
-	static createCube(): Mesh {
-		const mesh = new Mesh();
-		mesh.vertices = new Float32Array(CUBE_VERTICES);
-		return mesh;
-	}
-
 	get isAllocated(): boolean {
 		return Boolean(this.vertexBuffer);
 	}
@@ -35,57 +29,7 @@ export class Mesh {
 	}
 
 	draw(gl: WebGLRenderingContext) {
-		this.bind(gl);
 		gl.drawArrays(gl.TRIANGLES, 0, this.vertexCount);
 	}
 }
 
-const CUBE_VERTICES = [
-	-1.0, -1.0, -1.0,
-	-1.0, -1.0, 1.0,
-	-1.0, 1.0, 1.0,
-
-	1.0, 1.0, -1.0,
-	-1.0, -1.0, -1.0,
-	-1.0, 1.0, -1.0,
-
-	1.0, -1.0, 1.0,
-	-1.0, -1.0, -1.0,
-	1.0, -1.0, -1.0,
-
-	1.0, 1.0, -1.0,
-	1.0, -1.0, -1.0,
-	-1.0, -1.0, -1.0,
-
-	-1.0, -1.0, -1.0,
-	-1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0,
-
-	1.0, -1.0, 1.0,
-	-1.0, -1.0, 1.0,
-	-1.0, -1.0, -1.0,
-
-	-1.0, 1.0, 1.0,
-	-1.0, -1.0, 1.0,
-	1.0, -1.0, 1.0,
-
-	1.0, 1.0, 1.0,
-	1.0, -1.0, -1.0,
-	1.0, 1.0, -1.0,
-
-	1.0, -1.0, -1.0,
-	1.0, 1.0, 1.0,
-	1.0, -1.0, 1.0,
-
-	1.0, 1.0, 1.0,
-	1.0, 1.0, -1.0,
-	-1.0, 1.0, -1.0,
-
-	1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0,
-	-1.0, 1.0, 1.0,
-
-	1.0, 1.0, 1.0,
-	-1.0, 1.0, 1.0,
-	1.0, -1.0, 1.0,
-]; 

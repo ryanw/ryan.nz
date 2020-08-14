@@ -21,7 +21,8 @@ body {
   color: var(--fg);
   background: var(--bg);
   font-family: "IBM CGA", "Fixedsys Excelsior", Fixedsys, monospace;
-  text-shadow: 0 0 7px var(--fg);
+  font-smooth: never;
+  text-shadow: 0 2px 5px #000;
 
   text-align: center;
   display: flex;

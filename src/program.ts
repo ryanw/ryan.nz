@@ -45,7 +45,7 @@ export class Program {
 		gl.useProgram(this.prog);
 
 		// Attributes
-		// Position
+		// Position; 3x float
 		gl.enableVertexAttribArray(this.positionAttrib);
 		gl.vertexAttribPointer(this.positionAttrib, 3, gl.FLOAT, false, 0, 0);
 	}
