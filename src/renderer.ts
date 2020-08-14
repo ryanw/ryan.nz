@@ -11,8 +11,10 @@ export class WebGLRenderer {
 	program: Program;
 	meshes: Mesh[] = [];
 	models: Matrix4[] = [];
-	scale: number = 0.5;
+	scale: number = 1.0;
 	camera: Camera = new Camera();
+	maxFps: number = 30;
+	lastFrameAt: number = 0;
 	private context: WebGLRenderingContext;
 
 	constructor() {
@@ -74,10 +76,18 @@ export class WebGLRenderer {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
-	animate() {
+	animate(dt: number) {
+		for (let i = 0; i < this.meshes.length; i++) {
+			const mesh = this.meshes[i];
+			const model = this.models[i];
+			if (mesh instanceof WireTerrain) {
+				mesh.offset[0] += 20.0 * dt;
+				mesh.build();
+			}
+		}
 	}
 
-	draw() {
+	draw(dt: number) {
 		const gl = this.gl;
 		gl.viewport(0, 0, this.camera.width, this.camera.height);
 		this.clear();
@@ -92,11 +102,15 @@ export class WebGLRenderer {
 			const mesh = this.meshes[i];
 			const model = this.models[i];
 			gl.uniformMatrix4fv(this.program.modelUniform, false, model.toArray());
-			if (i <= 1) {
-				mesh.bind(gl);
-				this.program.bind(gl);
-				mesh.draw(gl);
+
+			mesh.bind(gl);
+			this.program.bind(gl);
+
+			if (mesh instanceof WireTerrain) {
+				mesh.build();
+				mesh.upload(gl);
 			}
+			mesh.draw(gl);
 		}
 
 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
@@ -119,8 +133,13 @@ export class WebGLRenderer {
 	async redraw() {
 		return new Promise((resolve) => {
 			window.requestAnimationFrame(() => {
-				this.draw();
-				resolve();
+				const now = performance.now();
+				const frametime = now - this.lastFrameAt;
+				this.animate(frametime / 1000);
+				this.draw(frametime / 1000);
+				this.lastFrameAt = now;
+				const delay = (1000 / this.maxFps) - frametime;
+				setTimeout(resolve, delay);
 			});
 		});
 	}
