@@ -1,9 +1,11 @@
+import { Mesh } from './mesh';
 import vertSource from './shaders/wireframe.vert.shader';
 import fragSource from './shaders/wireframe.frag.shader';
 
 export class Program {
 	prog: WebGLProgram;
 	positionAttrib: number;
+	normalAttrib: number;
 	viewProjUniform: WebGLUniformLocation;
 	modelUniform: WebGLUniformLocation;
 
@@ -34,19 +36,32 @@ export class Program {
 		}
 
 		// Attribute/Uniform locations
-		this.positionAttrib = gl.getAttribLocation(program, 'position');
 		this.viewProjUniform = gl.getUniformLocation(program, 'view_proj');
 		this.modelUniform = gl.getUniformLocation(program, 'model');
+		this.positionAttrib = gl.getAttribLocation(program, 'position');
+		this.normalAttrib = gl.getAttribLocation(program, 'normal');
+
+		if (this.positionAttrib === -1 || this.normalAttrib === -1) {
+			console.error("Sad", this.positionAttrib, this.normalAttrib, vertSource);
+			throw `Failed to locate all shader attributes`;
+		}
 
 		this.prog = program;
 	}
 
-	bind(gl: WebGLRenderingContext) {
+	use(gl: WebGLRenderingContext) {
 		gl.useProgram(this.prog);
+	}
 
-		// Attributes
+	bind(gl: WebGLRenderingContext, mesh: Mesh) {
 		// Position; 3x float
+		gl.bindBuffer(gl.ARRAY_BUFFER, mesh.positionBuffer);
 		gl.enableVertexAttribArray(this.positionAttrib);
 		gl.vertexAttribPointer(this.positionAttrib, 3, gl.FLOAT, false, 0, 0);
+
+		// Normal; 3x float
+		gl.bindBuffer(gl.ARRAY_BUFFER, mesh.normalBuffer);
+		gl.enableVertexAttribArray(this.normalAttrib);
+		gl.vertexAttribPointer(this.normalAttrib, 3, gl.FLOAT, false, 0, 0);
 	}
 }

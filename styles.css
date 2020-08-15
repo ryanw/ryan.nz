@@ -47,13 +47,12 @@ footer ul {
   padding: 0;
 }
 footer li {
+  flex: 1;
   padding: 0;
-  margin: 0 3em;
   list-style: none;
   line-height: 2em;
-}
-footer li::before {
-  content: '* ';
+  text-align: center;
+  padding: 1em;
 }
 
 a {

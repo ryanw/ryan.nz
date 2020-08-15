@@ -3,18 +3,17 @@ import { Mesh } from '../mesh';
 export class Cube extends Mesh {
 	constructor() {
 		super();
-		this.vertices = new Float32Array(CUBE_VERTICES);
+		this.positions = new Float32Array(CUBE_VERTICES);
 	}
 }
 
 export class WireCube extends Mesh {
 	constructor() {
 		super();
-		this.vertices = new Float32Array(WIRE_CUBE_VERTICES);
+		this.positions = new Float32Array(WIRE_CUBE_VERTICES);
 	}
 
 	draw(gl: WebGLRenderingContext) {
-		this.bind(gl);
 		gl.drawArrays(gl.LINES, 0, this.vertexCount);
 	}
 }

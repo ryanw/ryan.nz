@@ -205,3 +205,19 @@ function addVector4(vec: Vector4, other: Vector4): Vector4 {
 	];
 }
 
+
+export function cross(p0: Vector3, p1: Vector3): Vector3 {
+	const x = p0[1] * p1[2] - p0[2] * p1[1];
+	const y = p0[2] * p1[0] - p0[0] * p1[2];
+	const z = p0[0] * p1[1] - p0[1] * p1[0];
+	return [x, y, z];
+}
+
+export function normalize(v: Vector3): Vector3 {
+	const norm = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+	return [
+		v[0] / norm,
+		v[1] / norm,
+		v[2] / norm,
+	];
+}

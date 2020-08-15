@@ -1,7 +1,7 @@
 import { Matrix4 } from './geom';
 import { Mesh } from './mesh';
 import { Cube, WireCube } from './meshes/cube';
-import { WireTerrain } from './meshes/terrain';
+import { Terrain, WireTerrain } from './meshes/terrain';
 import { Program } from './program';
 import { Camera } from './camera';
 
@@ -29,12 +29,6 @@ export class WebGLRenderer {
 		});
 
 		this.initWebGL();
-		const m = this.addMesh(new WireTerrain());
-		this.models[m] = Matrix4.translation(0.0, 0.0, 0.0)
-			.multiply(Matrix4.scaling(0.33, 0.4, 0.33));
-
-		this.camera.position = [0.0, -1.0, 0.0];
-		this.camera.rotation = [0.25,  0.0, 0.0];
 	}
 
 	/**
@@ -84,9 +78,7 @@ export class WebGLRenderer {
 		for (let i = 0; i < this.meshes.length; i++) {
 			const mesh = this.meshes[i];
 			const model = this.models[i];
-			if (mesh instanceof WireTerrain) {
-				mesh.offset[0] += 20.0 * dt;
-				this.camera.rotation[1] += 0.25 * dt;
+			if (mesh instanceof Terrain) {
 				mesh.build();
 			}
 		}
@@ -103,15 +95,14 @@ export class WebGLRenderer {
 		const viewProj = proj.multiply(view);
 		gl.uniformMatrix4fv(this.program.viewProjUniform, false, viewProj.toArray());
 
+		this.program.use(gl);
 		for (let i = 0; i < this.meshes.length; i++) {
 			const mesh = this.meshes[i];
 			const model = this.models[i];
 			gl.uniformMatrix4fv(this.program.modelUniform, false, model.toArray());
+			this.program.bind(gl, mesh);
 
-			mesh.bind(gl);
-			this.program.bind(gl);
-
-			if (mesh instanceof WireTerrain) {
+			if (mesh instanceof Terrain) {
 				mesh.build();
 				mesh.upload(gl);
 			}
@@ -135,16 +126,19 @@ export class WebGLRenderer {
 	/**
 	 * Wait for next animation frame and redraw everything
 	 */
-	async redraw() {
+	async redraw(): Promise<number> {
 		return new Promise((resolve) => {
 			window.requestAnimationFrame(() => {
 				const now = performance.now();
-				const frametime = now - this.lastFrameAt;
-				this.animate(frametime / 1000);
-				this.draw(frametime / 1000);
+				let dt = (now - this.lastFrameAt) / 1000.0;
 				this.lastFrameAt = now;
+
+				this.draw(dt);
+
+				const frametime = performance.now() - now;
 				const delay = (1000 / this.maxFps) - frametime;
-				setTimeout(resolve, delay);
+				dt += delay / 1000.0;
+				setTimeout(() => resolve(dt), delay);
 			});
 		});
 	}
