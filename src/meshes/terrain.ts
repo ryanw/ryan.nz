@@ -1,12 +1,21 @@
 import { Mesh } from '../mesh';
-import SimplexNoise from '../simplex-noise';
+
+export type HeightFunction = (x: number, y: number) => number;
 
 export class Terrain extends Mesh {
 	target = WebGLRenderingContext.TRIANGLES;
 	offset = [-1, -1];
+	private heightFunc: HeightFunction = () => 0.5;
+
+	constructor(heightFunc?: HeightFunction) {
+		super();
+		if (heightFunc) {
+			this.heightFunc = heightFunc;
+		}
+	}
 
 	height(x: number, z: number): number {
-		return 0.5;
+		return this.heightFunc(x, z);
 	}
 
 	createQuad(x: number, z: number, offsetX: number, offsetY: number) {
@@ -72,31 +81,6 @@ export class WeirdTerrain extends WireTerrain {
 		return 0.0;
 	}
 }
-
-
-export class PerlinTerrain extends Terrain {
-	noise = new SimplexNoise(666);
-
-	height(x: number, z: number): number {
-		const grid = 20.0;
-		const s = 2.0;
-		const val = this.noise.noise2D((x | 0) / grid * s, (z | 0) / grid * s);
-		return val * 2;
-	}
-}
-
-export class WirePerlinTerrain extends WireTerrain {
-	target = WebGLRenderingContext.LINES;
-	noise = new SimplexNoise(666);
-
-	height(x: number, z: number): number {
-		const grid = 20.0;
-		const s = 2.0;
-		const val = this.noise.noise2D((x | 0) / grid * s, (z | 0) / grid * s);
-		return val * 2;
-	}
-}
-
 
 
 const QUAD_POINTS = [

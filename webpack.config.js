@@ -1,6 +1,6 @@
 const path = require('path');
 
-const production = false;
+const production = (process.env.NODE_ENV === 'production');
 
 module.exports = {
 	mode: production ? 'production' : 'development',

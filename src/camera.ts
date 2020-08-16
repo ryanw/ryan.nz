@@ -15,9 +15,27 @@ export class Camera {
 	}
 
 	get view(): Matrix4 {
-		return Matrix4.translation(...this.position)
-			.multiply(Matrix4.rotation(...this.rotation))
+		return Matrix4.identity()
+			.multiply(Matrix4.translation(...this.position))
+			.multiply(this.rotationMatrix)
 			.multiply(Matrix4.scaling(...this.scaling));
+	}
+
+	get rotationMatrix(): Matrix4 {
+		return Matrix4.identity()
+			.multiply(Matrix4.rotation(0, 0, this.rotation[2]))
+			.multiply(Matrix4.rotation(0, this.rotation[1], 0))
+			.multiply(Matrix4.rotation(this.rotation[0], 0, 0));
+	}
+
+	translate(x: number, y: number, z: number) {
+		const trans = Matrix4.translation(x, y, z);
+		const rot = this.rotationMatrix;
+		const invRot = rot.inverse();
+
+		let newPosition = trans.multiply(invRot).transformPoint3(this.position);
+		newPosition = rot.transformPoint3(newPosition)
+		this.position = newPosition;
 	}
 
 	resize(width: number, height: number) {
