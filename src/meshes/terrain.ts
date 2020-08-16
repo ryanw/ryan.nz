@@ -1,10 +1,11 @@
 import { Mesh } from '../mesh';
 
-export type HeightFunction = (x: number, y: number) => number;
+export type HeightFunction = (x: number, y: number, t?: number) => number;
 
 export class Terrain extends Mesh {
 	target = WebGLRenderingContext.TRIANGLES;
 	offset = [-1, -1];
+	private time = performance.now();
 	private heightFunc: HeightFunction = () => 0.5;
 
 	constructor(heightFunc?: HeightFunction) {
@@ -15,7 +16,7 @@ export class Terrain extends Mesh {
 	}
 
 	height(x: number, z: number): number {
-		return this.heightFunc(x, z);
+		return this.heightFunc(x, z, this.time / 1000.0);
 	}
 
 	createQuad(x: number, z: number, offsetX: number, offsetY: number) {
@@ -31,8 +32,8 @@ export class Terrain extends Mesh {
 
 	build() {
 		const positions: number[] = [];
-		const w = 24;
-		const d = 24;
+		const w = 48;
+		const d = 48;
 		const y = 0;
 
 		const [ox, oz] = this.offset;
@@ -42,6 +43,7 @@ export class Terrain extends Mesh {
 			}
 		}
 		this.positions = new Float32Array(positions);
+		this.time = performance.now();
 	}
 
 	draw(gl: WebGLRenderingContext) {

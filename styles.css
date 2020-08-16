@@ -34,7 +34,12 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  transition: all 400ms;
+  margin-top: 30%;
+}
+main p, footer {
+  transition: all 400ms;
+  opacity: 1.0;
 }
 footer {
   margin: auto 0 0 0;
@@ -59,4 +64,11 @@ a {
 }
 a:hover {
   filter: brightness(1.5);
+}
+
+.grabbed main {
+  margin-top: 0;
+}
+.grabbed main p, .grabbed footer {
+  opacity: 0;
 }

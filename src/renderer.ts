@@ -25,14 +25,15 @@ export class WebGLRenderer {
 	program: Program;
 	pawns: Pawn[] = [];
 	scale = 1.0;
-	lineWidth = 4.0;
+	lineWidth = 2;
 	antiAlias = true;
 	camera = new Camera();
-	maxFps = 6000;
+	maxFps = 250;
 	lastFrameAt = 0;
 	isGrabbed = false;
 	heldKeys = new Set();
 	mouseMovement = [0.0, 0.0];
+	backgroundColor: Color = [0.1, 0.0, 0.17, 1.0];
 	private context: WebGLRenderingContext;
 
 	constructor() {
@@ -111,11 +112,11 @@ export class WebGLRenderer {
 	}
 
 	onKeyDown = (e: KeyboardEvent) => {
-		this.heldKeys.add(e.key);
+		this.heldKeys.add(e.key.toLowerCase());
 	}
 
 	onKeyUp = (e: KeyboardEvent) => {
-		this.heldKeys.delete(e.key);
+		this.heldKeys.delete(e.key.toLowerCase());
 	}
 
 	onMouseMove = (e: MouseEvent) => {
@@ -129,7 +130,7 @@ export class WebGLRenderer {
 	clear() {
 		const gl = this.gl;
 		gl.clearDepth(1.0);
-		gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		gl.clearColor(...this.backgroundColor);
 		gl.colorMask(true, true, true, false);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
@@ -145,6 +146,7 @@ export class WebGLRenderer {
 		const view = this.camera.view.inverse(); // FIXME need inverse
 		const viewProj = proj.multiply(view);
 		gl.uniformMatrix4fv(this.program.viewProjUniform, false, viewProj.toArray());
+		gl.uniform4fv(this.program.fogColorUniform, this.backgroundColor);
 
 		for (const pawn of this.pawns) {
 			const { mesh, model, material } = pawn;

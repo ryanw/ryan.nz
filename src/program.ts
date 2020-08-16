@@ -9,6 +9,7 @@ export class Program {
 	viewProjUniform: WebGLUniformLocation;
 	modelUniform: WebGLUniformLocation;
 	fillColorUniform: WebGLUniformLocation;
+	fogColorUniform: WebGLUniformLocation;
 
 	constructor(gl?: WebGLRenderingContext) {
 		if (gl) {
@@ -39,6 +40,7 @@ export class Program {
 		// Attribute/Uniform locations
 		this.viewProjUniform = gl.getUniformLocation(program, 'view_proj');
 		this.modelUniform = gl.getUniformLocation(program, 'model');
+		this.fogColorUniform = gl.getUniformLocation(program, 'fog_color');
 		this.fillColorUniform = gl.getUniformLocation(program, 'fill_color');
 		this.positionAttrib = gl.getAttribLocation(program, 'position');
 		this.normalAttrib = gl.getAttribLocation(program, 'normal');
