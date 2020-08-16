@@ -11,7 +11,7 @@ export class WebGLRenderer {
 	program: Program;
 	meshes: Mesh[] = [];
 	models: Matrix4[] = [];
-	scale: number = 0.25;
+	scale: number = 0.5;
 	camera: Camera = new Camera();
 	maxFps: number = 30;
 	lastFrameAt: number = 0;
@@ -63,13 +63,15 @@ export class WebGLRenderer {
 		gl.enable(gl.DEPTH_TEST);
 		gl.enable(gl.BLEND);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+		gl.lineWidth(2);
 		this.program = new Program(gl);
 	}
 
 	clear() {
 		const gl = this.gl;
 		gl.clearDepth(1.0);
-		gl.clearColor(0.03, 0.08, 0.0, 1.0);
+		//gl.clearColor(0.03, 0.08, 0.0, 1.0);
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		gl.colorMask(true, true, true, false);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
@@ -86,6 +88,7 @@ export class WebGLRenderer {
 
 	draw(dt: number) {
 		const gl = this.gl;
+		this.program.use(gl);
 		gl.viewport(0, 0, this.camera.width, this.camera.height);
 		this.clear();
 
@@ -95,11 +98,22 @@ export class WebGLRenderer {
 		const viewProj = proj.multiply(view);
 		gl.uniformMatrix4fv(this.program.viewProjUniform, false, viewProj.toArray());
 
-		this.program.use(gl);
 		for (let i = 0; i < this.meshes.length; i++) {
 			const mesh = this.meshes[i];
 			const model = this.models[i];
 			gl.uniformMatrix4fv(this.program.modelUniform, false, model.toArray());
+			if (mesh instanceof WireTerrain) {
+				if (mesh.target == WebGLRenderingContext.POINTS) {
+					gl.uniform4fv(this.program.fillColorUniform, [1.0, 0.3, 0.0, 1.0]);
+				}
+				else {
+					gl.uniform4fv(this.program.fillColorUniform, [0.1, 0.3, 1.0, 1.0]);
+				}
+			}
+			else {
+				gl.uniform4fv(this.program.fillColorUniform, [0.0, 0.0, 0.0, 1.0]);
+			}
+
 			this.program.bind(gl, mesh);
 
 			if (mesh instanceof Terrain) {

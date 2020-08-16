@@ -8,6 +8,7 @@ export class Program {
 	normalAttrib: number;
 	viewProjUniform: WebGLUniformLocation;
 	modelUniform: WebGLUniformLocation;
+	fillColorUniform: WebGLUniformLocation;
 
 	constructor(gl?: WebGLRenderingContext) {
 		if (gl) {
@@ -38,13 +39,9 @@ export class Program {
 		// Attribute/Uniform locations
 		this.viewProjUniform = gl.getUniformLocation(program, 'view_proj');
 		this.modelUniform = gl.getUniformLocation(program, 'model');
+		this.fillColorUniform = gl.getUniformLocation(program, 'fill_color');
 		this.positionAttrib = gl.getAttribLocation(program, 'position');
 		this.normalAttrib = gl.getAttribLocation(program, 'normal');
-
-		if (this.positionAttrib === -1 || this.normalAttrib === -1) {
-			console.error("Sad", this.positionAttrib, this.normalAttrib, vertSource);
-			throw `Failed to locate all shader attributes`;
-		}
 
 		this.prog = program;
 	}
@@ -60,8 +57,10 @@ export class Program {
 		gl.vertexAttribPointer(this.positionAttrib, 3, gl.FLOAT, false, 0, 0);
 
 		// Normal; 3x float
-		gl.bindBuffer(gl.ARRAY_BUFFER, mesh.normalBuffer);
-		gl.enableVertexAttribArray(this.normalAttrib);
-		gl.vertexAttribPointer(this.normalAttrib, 3, gl.FLOAT, false, 0, 0);
+		if (this.normalAttrib > -1) {
+			gl.bindBuffer(gl.ARRAY_BUFFER, mesh.normalBuffer);
+			gl.enableVertexAttribArray(this.normalAttrib);
+			gl.vertexAttribPointer(this.normalAttrib, 3, gl.FLOAT, false, 0, 0);
+		}
 	}
 }

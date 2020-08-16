@@ -2,113 +2,101 @@ import { Mesh } from '../mesh';
 import SimplexNoise from '../simplex-noise';
 
 export class Terrain extends Mesh {
-	offset = [0, 0];
+	target = WebGLRenderingContext.TRIANGLES;
+	offset = [-1, -1];
 
-	constructor() {
-		super();
-		this.build();
+	height(x: number, z: number): number {
+		return 0.5;
+	}
+
+	createQuad(x: number, z: number, offsetX: number, offsetY: number) {
+		const positions = [];
+		for (const point of QUAD_POINTS) {
+			const y = this.height(point[0] + x + offsetX, point[2] + z + offsetY);
+			positions.push(point[0] + x);
+			positions.push(point[1] + y);
+			positions.push(point[2] + z);
+		}
+		return positions;
 	}
 
 	build() {
 		const positions: number[] = [];
-		const w = 16;
-		const d = 16;
+		const w = 24;
+		const d = 24;
 		const y = 0;
 
-		function addVertex(x: number, y: number, z: number) {
-			positions.push(x);
-			positions.push(y);
-			positions.push(z);
-		}
-
-		function addQuad(x: number, z: number, offsetX: number, offsetY: number) {
-			for (const point of QUAD_POINTS) {
-				const vx = point[0] + x;
-				const vz = point[2] + z;
-				const vy = point[1] + noise(vx + offsetX, vz + offsetY);
-				addVertex(vx, vy, vz);
-			}
-		}
-
-		let [ox, oz] = this.offset;
-		const s = 0.1;
-		ox *= s;
-		oz *= s;
+		const [ox, oz] = this.offset;
 		for (let z = -d; z <= d; z++) {
 			for (let x = -w; x <= w; x++) {
-				addQuad(x, z, ox, oz);
+				positions.push(...this.createQuad(x, z, ox, oz));
 			}
 		}
 		this.positions = new Float32Array(positions);
 	}
 
 	draw(gl: WebGLRenderingContext) {
-		gl.drawArrays(gl.TRIANGLES, 0, this.vertexCount);
+		gl.drawArrays(this.target, 0, this.vertexCount);
 	}
 }
 
-export class WireTerrain extends Mesh {
-	offset = [0, 0];
+export class WireTerrain extends Terrain {
+	target = WebGLRenderingContext.LINES;
 
-	constructor() {
-		super();
-		this.build();
+	createQuad(x: number, z: number, offsetX: number, offsetY: number): number[] {
+		const positions = [];
+		for (const point of QUAD_LINES) {
+			const y = this.height(
+				point[0] + x + offsetX,
+				point[2] + z + offsetY,
+			);
+			positions.push(point[0] + x);
+			positions.push(point[1] + y);
+			positions.push(point[2] + z);
+		}
+		return positions;
 	}
+}
 
-	build() {
-		const positions: number[] = [];
-		const w = 16;
-		const d = 16;
-		const y = 0;
-
-		function addVertex(x: number, y: number, z: number) {
-			positions.push(x);
-			positions.push(y);
-			positions.push(z);
+export class WeirdTerrain extends WireTerrain {
+	height(x: number, z: number): number {
+		const r = 4.0;
+		const p = [0.0, 0.0];
+		const dx = p[0] - x | 0;
+		const dy = p[1] - z | 0;
+		const dist = Math.abs(Math.sqrt(dx*dx + dy*dy));
+		if (dist <= r) {
+			return Math.cos(dist / r) * r;
 		}
 
-		let [ox, oz] = this.offset;
-		const s = 0.1;
-		ox *= s;
-		oz *= s;
-		for (let z = -d; z <= d; z++) {
-			for (let x = -w; x <= w; x++) {
-				let vx, vy, vz;
-
-				// Top
-				vx = x - 0.5;
-				vz = z - 0.5;
-				vy = noise(vx + ox, vz + oz);
-				addVertex(vx, vy, vz);
-				vx = x + 0.5;
-				vz = z - 0.5;
-				vy = noise(vx + ox, vz + oz);
-				addVertex(vx, vy, vz);
-
-				// Left
-				vx = x;
-				vz = z - 0.5;
-				vy = noise(vx + ox, vz + oz);
-				addVertex(vx, vy, vz);
-				vx = x;
-				vz = z + 0.5;
-				vy = noise(vx + ox, vz + oz);
-				addVertex(vx, vy, vz);
-			}
-		}
-		this.positions = new Float32Array(positions);
-	}
-
-	draw(gl: WebGLRenderingContext) {
-		gl.drawArrays(gl.LINES, 0, this.vertexCount);
+		return 0.0;
 	}
 }
 
-const simplex = new SimplexNoise(0);
-function noise(x: number, y: number): number {
-	const s = 8.0;
-	return simplex.noise2D(x / s, y / s);
+
+export class PerlinTerrain extends Terrain {
+	noise = new SimplexNoise(666);
+
+	height(x: number, z: number): number {
+		const grid = 20.0;
+		const s = 2.0;
+		const val = this.noise.noise2D((x | 0) / grid * s, (z | 0) / grid * s);
+		return val * 2;
+	}
 }
+
+export class WirePerlinTerrain extends WireTerrain {
+	target = WebGLRenderingContext.LINES;
+	noise = new SimplexNoise(666);
+
+	height(x: number, z: number): number {
+		const grid = 20.0;
+		const s = 2.0;
+		const val = this.noise.noise2D((x | 0) / grid * s, (z | 0) / grid * s);
+		return val * 2;
+	}
+}
+
 
 
 const QUAD_POINTS = [
@@ -119,4 +107,12 @@ const QUAD_POINTS = [
 	[ 0.5, 0, -0.5],
 	[ 0.5, 0,  0.5],
 	[-0.5, 0,  0.5],
+];
+
+const QUAD_LINES = [
+	[-0.5, 0.0, -0.5],
+	[ 0.5, 0.0, -0.5],
+
+	[-0.5, 0.0, -0.5],
+	[-0.5, 0.0,  0.5],
 ];
