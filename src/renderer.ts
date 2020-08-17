@@ -32,7 +32,7 @@ export class WebGLRenderer {
 	lastFrameAt = 0;
 	heldKeys = new Set();
 	mouseMovement = [0.0, 0.0];
-	backgroundColor: Color = [0.1, 0.0, 0.17, 1.0];
+	backgroundColor: Color = [0.0, 0.03, 0.08, 1.0];
 	private context: WebGLRenderingContext;
 
 	constructor() {
@@ -81,7 +81,6 @@ export class WebGLRenderer {
 		gl.enable(gl.DEPTH_TEST);
 		gl.enable(gl.BLEND);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		gl.lineWidth(this.lineWidth);
 		this.program = new Program(gl);
 	}
 
@@ -151,14 +150,15 @@ export class WebGLRenderer {
 		const proj = this.camera.projection.clone();
 		const view = this.camera.view.inverse(); // FIXME need inverse
 		const viewProj = proj.multiply(view);
-		gl.uniformMatrix4fv(this.program.viewProjUniform, false, viewProj.toArray());
-		gl.uniform4fv(this.program.fogColorUniform, this.backgroundColor);
+		gl.uniformMatrix4fv(this.program.uniforms.viewProj, false, viewProj.toArray());
+		gl.uniform4fv(this.program.uniforms.fogColor, this.backgroundColor);
+		gl.uniform1f(this.program.uniforms.lineWidth, this.lineWidth);
 
 		for (const pawn of this.pawns) {
 			const { mesh, model, material } = pawn;
 
-			gl.uniformMatrix4fv(this.program.modelUniform, false, model.toArray());
-			gl.uniform4fv(this.program.fillColorUniform, material.color);
+			gl.uniformMatrix4fv(this.program.uniforms.model, false, model.toArray());
+			gl.uniform4fv(this.program.uniforms.fillColor, material.color);
 
 			this.program.bind(gl, mesh);
 

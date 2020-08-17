@@ -32,6 +32,7 @@ export class Terrain extends Mesh {
 
 	build() {
 		const positions: number[] = [];
+		const barycentrics: number[] = [];
 		const w = 48;
 		const d = 48;
 		const y = 0;
@@ -40,9 +41,27 @@ export class Terrain extends Mesh {
 		for (let z = -d; z <= d; z++) {
 			for (let x = -w; x <= w; x++) {
 				positions.push(...this.createQuad(x, z, ox, oz));
+
+				// Add barycentric coords for every triangle
+				for (let i = 0; i < QUAD_POINTS.length; i++) {
+					if (i % 3 === 0) {
+						barycentrics.push(1.0);
+						barycentrics.push(0.0);
+						barycentrics.push(0.0);
+					} else if (i % 3 === 1) {
+						barycentrics.push(1.0);
+						barycentrics.push(1.0);
+						barycentrics.push(0.0);
+					} else {
+						barycentrics.push(0.0);
+						barycentrics.push(0.0);
+						barycentrics.push(1.0);
+					}
+				}
 			}
 		}
 		this.positions = new Float32Array(positions);
+		this.barycentrics = new Float32Array(barycentrics);
 		this.time = performance.now();
 	}
 
@@ -90,8 +109,8 @@ const QUAD_POINTS = [
 	[-0.5, 0,  0.5],
 	[ 0.5, 0, -0.5],
 
-	[ 0.5, 0, -0.5],
 	[ 0.5, 0,  0.5],
+	[ 0.5, 0, -0.5],
 	[-0.5, 0,  0.5],
 ];
 

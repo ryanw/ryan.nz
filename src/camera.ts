@@ -30,7 +30,12 @@ export class Camera {
 
 	translate(x: number, y: number, z: number) {
 		const trans = Matrix4.translation(x, y, z);
+
+		// Ignore tilt
+		const oldX = this.rotation[0];
+		this.rotation[0] = 0.0;
 		const rot = this.rotationMatrix;
+		this.rotation[0] = oldX;
 		const invRot = rot.inverse();
 
 		let newPosition = trans.multiply(invRot).transformPoint3(this.position);

@@ -2,7 +2,7 @@ import { WebGLRenderer } from './renderer';
 import SimplexNoise from './simplex-noise';
 import { Terrain, WireTerrain, WeirdTerrain } from './meshes/terrain';
 import { Cube, WireCube } from './meshes/cube';
-import { Vector3, Matrix4 } from './geom';
+import { Point3, Vector3, Matrix4 } from './geom';
 import * as geom from './geom';
 import { Pawn } from './renderer';
 
@@ -14,48 +14,21 @@ async function main() {
 	scene.camera.position = [0.0, 0.0, 0.0];
 	scene.camera.rotation = [-0.22, 0.3, 0.0];
 
-	const noise = new SimplexNoise(0);
-	const noise2 = new SimplexNoise(0);
-	function simplexHeight(x: number, z: number, t: number = 0.0): number {
-		// Flatten near camera
-		const dx = scene.camera.position[0] - x;
-		const dz = scene.camera.position[2] - z;
-		const dist = Math.sqrt(dx * dx + dz * dz);
-
-		const grid = 15.0;
-		let val = noise.noise2D((x | 0) / grid, (z | 0) / grid);
-
-		val -= 0.4;
-		val = Math.max(0.0, val);
-		val *= 20;
-
-		const falloff = 10;
-		if (dist < falloff) {
-			val = val * (dist / falloff);
-			if (val < 0.0) {
-				val = 0;
-			}
-		}
-
-		if (val === 0.0) {
-			const g = grid * 0.5;
-			const tt = t * 0.2;
-			val = 0.1 + 0.333 * noise2.noise2D(tt + x / g, tt - z / g);
-		}
-		if (val < 0.0) {
-			val = 0;
-		}
-
-		return val;
-	}
+	const landscape = new WeirdLandscape();
 
 	// Add wobbly terrain
-	const wireframe = new Pawn(new WireTerrain(simplexHeight));
-	wireframe.material.color = [0.0, 0.8, 1.0, 1.0];
-	scene.addPawn(wireframe);
-	const surface = new Pawn(new Terrain(simplexHeight));
-	surface.material.color = [0.1, 0.01, 0.05, 1.0];
+	const surface = new Pawn(new Terrain(landscape.height.bind(landscape)));
+	surface.material.color = [0.0, 0.8, 1.0, 0.0];
 	scene.addPawn(surface);
+
+	const shapes: Pawn[] = [];
+	for (let i = 0; i < 1000; i++) {
+		const cube = new Pawn(new Cube());
+		cube.material.color = [1.0, 0.8, 0.0, 1.0];
+		scene.addPawn(cube);
+		shapes.push(cube);
+	}
+
 
 	document.addEventListener('keydown', (e) => {
 		if (e.key === " ") {
@@ -75,11 +48,48 @@ async function main() {
 	});
 
 	let velocity: Vector3 = [0.0, 0.0, 0.0];
-	let speed = 40.0;
-	let fastSpeed = 100.0;
+	let speed = 50.0;
+	let fastSpeed = 150.0;
 	let o = 0.0;
 	let dt = 0;
+	let rot = 0.0;
 	function update() {
+		rot += 2.0 * dt;
+		const grid = [20.0, 12.0, 20.0];
+		const gridPos: Vector3 = [
+			(scene.camera.position[0] / grid[0] | 0) * grid[0],
+			(scene.camera.position[1] / grid[1] | 0) * grid[1],
+			(scene.camera.position[2] / grid[2] | 0) * grid[2],
+		];
+
+
+		const r = [4, 3, 4];
+		let i = 0;
+		for (let z = -r[2]; z < r[2]; z++) {
+			for (let y = -r[1]; y < r[1]; y++) {
+				for (let x = -r[0]; x < r[0]; x++) {
+					if (i >= shapes.length) {
+						break;
+					}
+					const shape = shapes[i];
+					const shapePos: Point3 = [
+						(x * grid[0] | 0) + gridPos[0],
+						(y * grid[1] | 0) + gridPos[1],
+						(z * grid[2] | 0) + gridPos[2],
+					];
+					const offset = landscape.shapeOffset(shapePos);
+
+					shape.model = Matrix4.identity()
+						.multiply(Matrix4.translation(...shapePos))
+						.multiply(Matrix4.translation(...offset))
+						.multiply(Matrix4.scaling(0.5, 0.5, 0.5))
+						.multiply(Matrix4.rotation(-rot, rot, 0.0))
+
+					i++;
+				}
+			}
+		}
+
 		if (!scene.isGrabbed) {
 			velocity = [0.0, 0.0, -2.0];
 			return;
@@ -125,8 +135,7 @@ async function main() {
 
 	while (true) {
 		update();
-		const oldRot = scene.camera.rotation[0];
-		scene.camera.rotation[0] = 0.0;
+		landscape.position = [...scene.camera.position];
 		scene.camera.translate(velocity[0] * dt, velocity[1] * dt, velocity[2] * dt);
 		if (scene.camera.position[1] < -4.0) {
 			scene.camera.position[1] = -4.0;
@@ -134,7 +143,6 @@ async function main() {
 		if (scene.camera.position[1] > 10.0) {
 			scene.camera.position[1] = 10.0;
 		}
-		scene.camera.rotation[0] = oldRot;
 
 		const mouseSpeed = 40.0;
 		const [mX, mY] = scene.mouseMovement;
@@ -145,14 +153,67 @@ async function main() {
 		const terrainModel = Matrix4.translation(scene.camera.position[0] | 0, -6.0, scene.camera.position[2] | 0);
 		const terrainOffset = [scene.camera.position[0] | 0, scene.camera.position[2] | 0];
 
+		/*
 		wireframe.model = terrainModel;
-		surface.model = terrainModel.multiply(Matrix4.translation(0.0, -0.005, 0.0)).multiply(Matrix4.scaling(1.0, 0.995, 1.0));
 		(wireframe.mesh as Terrain).offset = terrainOffset;
+		*/
+
+		surface.model = terrainModel.multiply(Matrix4.translation(0.0, -0.005, 0.0)).multiply(Matrix4.scaling(1.0, 0.995, 1.0));
 		(surface.mesh as Terrain).offset = terrainOffset;
 
 		dt = await scene.redraw();
 	}
 
+}
+
+
+class WeirdLandscape {
+	position = [0.0, 0.0, 0.0];
+	hillNoise = new SimplexNoise(0);
+	seaNoise = new SimplexNoise(0);
+	shapeNoise = new SimplexNoise(0);
+
+	height(x: number, z: number, t: number = 0.0): number {
+		// Flatten near camera
+		const dx = this.position[0] - x;
+		const dz = this.position[2] - z;
+		const dist = Math.sqrt(dx * dx + dz * dz);
+
+		const grid = 15.0;
+		let val = this.hillNoise.noise2D((x | 0) / grid, (z | 0) / grid);
+
+		val -= 0.4;
+		val = Math.max(0.0, val);
+		val *= 20;
+
+		const falloff = 10;
+		if (dist < falloff) {
+			val = val * (dist / falloff);
+			if (val < 0.0) {
+				val = 0;
+			}
+		}
+
+		if (val === 0.0) {
+			const g = grid * 0.5;
+			const tt = t * 0.2;
+			val = 0.1 + 0.333 * this.seaNoise.noise2D(tt + x / g, tt - z / g);
+		}
+		if (val < 0.0) {
+			val = 0;
+		}
+
+		return val;
+	}
+
+	shapeOffset(position: Point3): Vector3 {
+		const scale = 40.0;
+		const x = scale * this.shapeNoise.noise3D(position[0], position[1], position[2]);
+		const y = 0.5 * scale * this.shapeNoise.noise3D(position[0], position[1], position[2] + 1000);
+		const z = scale * this.shapeNoise.noise3D(position[0], position[1], position[2] + 2000);
+
+		return [x, y, z];
+	}
 }
 
 

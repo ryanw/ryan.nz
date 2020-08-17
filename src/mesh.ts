@@ -7,6 +7,9 @@ export class Mesh {
 	positions: Float32Array = new Float32Array();
 	normalBuffer: WebGLBuffer;
 	normals: Float32Array = new Float32Array();
+	barycentricBuffer: WebGLBuffer;
+	barycentrics: Float32Array = new Float32Array();
+
 
 	get isAllocated(): boolean {
 		return Boolean(this.positionBuffer);
@@ -22,6 +25,7 @@ export class Mesh {
 		}
 		this.positionBuffer = gl.createBuffer();
 		this.normalBuffer = gl.createBuffer();
+		this.barycentricBuffer = gl.createBuffer();
 	}
 
 
@@ -33,6 +37,9 @@ export class Mesh {
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.DYNAMIC_DRAW);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.barycentricBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, this.barycentrics, gl.DYNAMIC_DRAW);
 	}
 
 	draw(gl: WebGLRenderingContext) {
