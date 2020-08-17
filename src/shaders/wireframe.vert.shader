@@ -6,7 +6,7 @@ attribute vec3 position;
 attribute vec3 normal;
 varying vec4 color;
 
-float fog_dist = 45.0;
+float fog_dist = 50.0;
 
 void main(void) {
 	vec3 light = vec3(0.8, 0.4, -0.5);
@@ -16,10 +16,10 @@ void main(void) {
 
 	float fog = max(0.0, min(1.0, gl_Position.z / fog_dist));
   vec4 surface = fill_color;
-  if (position.y > 0.5 && surface.b > 0.5) {
+  if (position.y > 0.6 && surface.b > 0.5) {
     surface = vec4(1.0, 0.0, 1.0, 1.0);
   }
-  else if (position.y > 0.0 && surface.b > 0.5) {
+  else if (position.y > 0.1 && surface.b > 0.5) {
     surface = vec4(0.0, 1.0, 0.5, 1.0);
   }
 	color = mix(surface, fog_color, fog);

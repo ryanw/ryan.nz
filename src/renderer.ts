@@ -24,13 +24,12 @@ export class WebGLRenderer {
 	canvas: HTMLCanvasElement;
 	program: Program;
 	pawns: Pawn[] = [];
-	scale = 1.0;
-	lineWidth = 2;
+	scale = 1.0 * window.devicePixelRatio;
+	lineWidth = 2 * window.devicePixelRatio;
 	antiAlias = true;
 	camera = new Camera();
 	maxFps = 250;
 	lastFrameAt = 0;
-	isGrabbed = false;
 	heldKeys = new Set();
 	mouseMovement = [0.0, 0.0];
 	backgroundColor: Color = [0.1, 0.0, 0.17, 1.0];
@@ -86,19 +85,22 @@ export class WebGLRenderer {
 		this.program = new Program(gl);
 	}
 
+	get isGrabbed() {
+		return document.pointerLockElement === this.canvas;
+	}
+
 	grab() {
-		this.isGrabbed = true;
 		this.canvas.requestPointerLock();
 		this.addEventListeners();
 	}
 
 	release() {
-		this.isGrabbed = false;
 		document.exitPointerLock();
 		this.removeEventListeners();
 	}
 
 	addEventListeners() {
+		document.addEventListener('pointerlockchange', this.onPointerLockChange);
 		window.addEventListener('keydown', this.onKeyDown);
 		window.addEventListener('keyup', this.onKeyUp);
 		window.addEventListener('mousemove', this.onMouseMove);
@@ -106,9 +108,16 @@ export class WebGLRenderer {
 
 	removeEventListeners() {
 		this.heldKeys.clear();
+		document.removeEventListener('pointerlockchange', this.onPointerLockChange);
 		window.removeEventListener('keydown', this.onKeyDown);
 		window.removeEventListener('keyup', this.onKeyUp);
 		window.removeEventListener('mousemove', this.onMouseMove);
+	}
+
+	onPointerLockChange = () => {
+		if (!this.isGrabbed) {
+			this.removeEventListeners();
+		}
 	}
 
 	onKeyDown = (e: KeyboardEvent) => {
@@ -120,11 +129,8 @@ export class WebGLRenderer {
 	}
 
 	onMouseMove = (e: MouseEvent) => {
-		// FIXME firefox is off by 2 pixels?!
-		const mX = e.movementX;
-		const mY = e.movementY;
-		this.mouseMovement[0] += mX;
-		this.mouseMovement[1] += mY;
+		this.mouseMovement[0] += e.movementX;
+		this.mouseMovement[1] += e.movementY;
 	}
 
 	clear() {

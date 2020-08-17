@@ -40,7 +40,10 @@ async function main() {
 		if (val === 0.0) {
 			const g = grid * 0.5;
 			const tt = t * 0.2;
-			val = 0.333 * noise2.noise2D(tt + x / g, tt - z / g);
+			val = 0.1 + 0.333 * noise2.noise2D(tt + x / g, tt - z / g);
+		}
+		if (val < 0.0) {
+			val = 0;
 		}
 
 		return val;
@@ -54,16 +57,20 @@ async function main() {
 	surface.material.color = [0.1, 0.01, 0.05, 1.0];
 	scene.addPawn(surface);
 
-	let locked = false;
 	document.addEventListener('keydown', (e) => {
 		if (e.key === " ") {
 			if (scene.isGrabbed) {
-				document.body.className = '';
 				scene.release();
 			} else {
-				document.body.className = 'grabbed';
 				scene.grab();
 			}
+		}
+	});
+	document.addEventListener('pointerlockchange', (e) => {
+		if (scene.isGrabbed) {
+			document.body.className = 'grabbed';
+		} else {
+			document.body.className = '';
 		}
 	});
 
@@ -139,7 +146,7 @@ async function main() {
 		const terrainOffset = [scene.camera.position[0] | 0, scene.camera.position[2] | 0];
 
 		wireframe.model = terrainModel;
-		surface.model = terrainModel.multiply(Matrix4.translation(0.0, -0.02, 0.0));
+		surface.model = terrainModel.multiply(Matrix4.translation(0.0, -0.005, 0.0)).multiply(Matrix4.scaling(1.0, 0.995, 1.0));
 		(wireframe.mesh as Terrain).offset = terrainOffset;
 		(surface.mesh as Terrain).offset = terrainOffset;
 
