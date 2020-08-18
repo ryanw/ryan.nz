@@ -6,6 +6,10 @@ import { Point3, Vector3, Matrix4 } from './geom';
 import * as geom from './geom';
 import { Pawn } from './renderer';
 
+function remap(value: number, min0: number, max0: number, min1: number, max1: number): number {
+	return min1 + (max1 - min1) * (value - min0) / (max0 - min0);
+}
+
 async function main() {
 	const scene = new WebGLRenderer();
 	scene.attach(document.body);
@@ -54,7 +58,7 @@ async function main() {
 	let dt = 0;
 	let rot = 0.0;
 	function update() {
-		rot += 2.0 * dt;
+		rot += 1.0 * dt;
 		const grid = [20.0, 12.0, 20.0];
 		const gridPos: Vector3 = [
 			(scene.camera.position[0] / grid[0] | 0) * grid[0],
@@ -78,12 +82,27 @@ async function main() {
 						(z * grid[2] | 0) + gridPos[2],
 					];
 					const offset = landscape.shapeOffset(shapePos);
+					shapePos[0] += offset[0];
+					shapePos[1] += offset[1];
+					shapePos[2] += offset[2];
+
+					const delta = [
+						shapePos[0] - scene.camera.position[0],
+						shapePos[1] - scene.camera.position[1],
+						shapePos[2] - scene.camera.position[2],
+					];
+
+					const dist = Math.sqrt(Math.pow(delta[0], 2) + Math.pow(delta[1], 2) + Math.pow(delta[2], 2));
+					const scale = Math.max(0.0, Math.min(1.0, remap(dist, 3.0, 10.0, 0.0, 1.0))) * remap(Math.sin(rot * 2), 0, Math.PI, 0.7, 1.5);
 
 					shape.model = Matrix4.identity()
 						.multiply(Matrix4.translation(...shapePos))
-						.multiply(Matrix4.translation(...offset))
-						.multiply(Matrix4.scaling(0.5, 0.5, 0.5))
-						.multiply(Matrix4.rotation(-rot, rot, 0.0))
+						.multiply(Matrix4.scaling(scale, scale, scale))
+						.multiply(Matrix4.rotation(
+							rot * offset[0] * 0.1,
+							rot * offset[1] * 0.1,
+							rot * offset[2] * 0.1,
+						))
 
 					i++;
 				}
