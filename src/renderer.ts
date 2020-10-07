@@ -21,22 +21,22 @@ export class Pawn {
 }
 
 export class WebGLRenderer {
-	canvas: HTMLCanvasElement;
+	canvas = document.createElement('canvas');
 	program: Program;
 	pawns: Pawn[] = [];
 	scale = 1.0 * window.devicePixelRatio;
 	lineWidth = 2 * window.devicePixelRatio;
 	antiAlias = true;
 	camera = new Camera();
-	maxFps = 250;
+	maxFps = 200;
 	lastFrameAt = 0;
 	heldKeys = new Set();
 	mouseMovement = [0.0, 0.0];
 	backgroundColor: Color = [0.0, 0.03, 0.08, 1.0];
+	frame = 0;
 	private context: WebGLRenderingContext;
 
 	constructor() {
-		this.canvas = document.createElement('canvas');
 		Object.assign(this.canvas.style, {
 			position: 'fixed',
 			zIndex: -1,
@@ -193,11 +193,14 @@ export class WebGLRenderer {
 				this.lastFrameAt = now;
 
 				this.draw(dt);
-
+				this.frame++;
 				const frametime = performance.now() - now;
+				if (this.frame % 60 === 0) {
+					console.log("Draw time: %o ms", (frametime * 100 | 0) / 100);
+				}
+
 				const delay = (1000 / this.maxFps) - frametime;
 				if (delay > 0.0) {
-					dt += delay / 1000.0;
 					setTimeout(() => resolve(dt), delay);
 				}
 				else {

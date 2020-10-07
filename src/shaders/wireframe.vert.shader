@@ -14,7 +14,7 @@ varying vec4 frag_color;
 varying vec3 frag_barycentric;
 varying float frag_line_width;
 
-float fog_dist = 45.0;
+float fog_dist = 70.0;
 
 void main(void) {
 	vec3 light = vec3(0.8, 0.4, -0.5);

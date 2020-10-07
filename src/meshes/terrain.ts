@@ -19,28 +19,33 @@ export class Terrain extends Mesh {
 		return this.heightFunc(x, z, this.time / 1000.0);
 	}
 
-	createQuad(x: number, z: number, offsetX: number, offsetY: number) {
-		const positions = [];
+	appendQuad(positions: number[], x: number, z: number, offsetX: number, offsetY: number) {
 		for (const point of QUAD_POINTS) {
 			const y = this.height(point[0] + x + offsetX, point[2] + z + offsetY);
 			positions.push(point[0] + x);
 			positions.push(point[1] + y);
 			positions.push(point[2] + z);
 		}
-		return positions;
+	}
+
+	upload(gl: WebGLRenderingContext) {
+		if (this.positions.length === 0) {
+			this.build();
+		}
+		super.upload(gl);
 	}
 
 	build() {
 		const positions: number[] = [];
 		const barycentrics: number[] = [];
-		const w = 48;
-		const d = 48;
+		const w = 32;
+		const d = 32;
 		const y = 0;
 
 		const [ox, oz] = this.offset;
 		for (let z = -d; z <= d; z++) {
 			for (let x = -w; x <= w; x++) {
-				positions.push(...this.createQuad(x, z, ox, oz));
+				this.appendQuad(positions, x, z, ox, oz);
 
 				// Add barycentric coords for every triangle
 				for (let i = 0; i < QUAD_POINTS.length; i++) {

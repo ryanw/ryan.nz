@@ -22,11 +22,17 @@ async function main() {
 
 	// Add wobbly terrain
 	const surface = new Pawn(new Terrain(landscape.height.bind(landscape)));
+	surface.model = Matrix4.translation(0.0, -4.0, 0.0).multiply(Matrix4.scaling(1.0, 0.995, 1.0));
 	surface.material.color = [0.0, 0.8, 1.0, 0.0];
 	scene.addPawn(surface);
 
+	const actor = new Pawn(new Cube());
+	actor.material.color = [1.0, 0.0, 0.0, 1.0];
+	scene.addPawn(actor);
+
+	// Some shapes to randomise
 	const shapes: Pawn[] = [];
-	for (let i = 0; i < 1000; i++) {
+	for (let i = 0; i < 500; i++) {
 		const cube = new Pawn(new Cube());
 		cube.material.color = [1.0, 0.8, 0.0, 1.0];
 		scene.addPawn(cube);
@@ -34,6 +40,7 @@ async function main() {
 	}
 
 
+	// Toggle control
 	document.addEventListener('keydown', (e) => {
 		if (e.key === " ") {
 			if (scene.isGrabbed) {
@@ -51,6 +58,8 @@ async function main() {
 		}
 	});
 
+	let actorModel = Matrix4.identity();
+	let actorPos = scene.camera.position.slice() as Vector3;
 	let velocity: Vector3 = [0.0, 0.0, 0.0];
 	let speed = 50.0;
 	let fastSpeed = 150.0;
@@ -58,19 +67,28 @@ async function main() {
 	let dt = 0;
 	let rot = 0.0;
 	function update() {
-		rot += 1.0 * dt;
-		const grid = [20.0, 12.0, 20.0];
+		actorModel = Matrix4.identity()
+			.multiply(scene.camera.rotationMatrix)
+			.multiply(Matrix4.translation(0.0, 0.0, -35.0))
+			.multiply(scene.camera.rotationMatrix.inverse());
+		// Move in front of the camera so we don't render too much behind the camera
+		actorPos = actorModel.transformPoint3(scene.camera.position);
+		//actor.model = Matrix4.translation(...actorPos).multiply(Matrix4.scaling(0.333, 0.333, 0.333));
+
+		rot += 0.25 * dt;
+		const grid = [20.0, 50.0, 20.0];
 		const gridPos: Vector3 = [
-			(scene.camera.position[0] / grid[0] | 0) * grid[0],
-			(scene.camera.position[1] / grid[1] | 0) * grid[1],
-			(scene.camera.position[2] / grid[2] | 0) * grid[2],
+			(actorPos[0] / grid[0] | 0) * grid[0],
+			(actorPos[1] / grid[1] | 0) * grid[1],
+			(actorPos[2] / grid[2] | 0) * grid[2],
 		];
+		landscape.offset = actorModel.inverse().transformPoint3([0.0, 0.0, 0.0]);
 
 
-		const r = [4, 3, 4];
+		const r = [3, 1, 3];
 		let i = 0;
 		for (let z = -r[2]; z < r[2]; z++) {
-			for (let y = -r[1]; y < r[1]; y++) {
+			for (let y = 1; y < r[1] * 2; y++) {
 				for (let x = -r[0]; x < r[0]; x++) {
 					if (i >= shapes.length) {
 						break;
@@ -83,7 +101,7 @@ async function main() {
 					];
 					const offset = landscape.shapeOffset(shapePos);
 					shapePos[0] += offset[0];
-					shapePos[1] += offset[1];
+					shapePos[1] += offset[1] - 50.0;
 					shapePos[2] += offset[2];
 
 					const delta = [
@@ -152,9 +170,12 @@ async function main() {
 		}) as Vector3;
 	}
 
+	const frameInterval = 60;
+	let startTime = performance.now();
+	let frameCount = 0;
 	while (true) {
 		update();
-		landscape.position = [...scene.camera.position];
+		landscape.position = [...actorPos];
 		scene.camera.translate(velocity[0] * dt, velocity[1] * dt, velocity[2] * dt);
 		if (scene.camera.position[1] < -4.0) {
 			scene.camera.position[1] = -4.0;
@@ -163,28 +184,28 @@ async function main() {
 			scene.camera.position[1] = 10.0;
 		}
 
-		const mouseSpeed = 40.0;
+		const mouseSpeed = 0.0005;
 		const [mX, mY] = scene.mouseMovement;
 		scene.mouseMovement = [0.0, 0.0];
-		scene.camera.rotation[1] -= Math.PI * dt * (mX / mouseSpeed);
-		scene.camera.rotation[0] -= Math.PI * dt * (mY / mouseSpeed);
+		scene.camera.rotation[1] -= Math.PI * (mX * mouseSpeed);
+		scene.camera.rotation[0] -= Math.PI * (mY * mouseSpeed);
 
-		const terrainModel = Matrix4.translation(scene.camera.position[0] | 0, -6.0, scene.camera.position[2] | 0);
-		const terrainOffset = [scene.camera.position[0] | 0, scene.camera.position[2] | 0];
-
-		/*
-		wireframe.model = terrainModel;
-		(wireframe.mesh as Terrain).offset = terrainOffset;
-		*/
+		const terrainModel = Matrix4.translation(actorPos[0] | 0, -6.0, actorPos[2] | 0);
+		const terrainOffset = [actorPos[0] | 0, actorPos[2] | 0];
 
 		surface.model = terrainModel.multiply(Matrix4.translation(0.0, -0.005, 0.0)).multiply(Matrix4.scaling(1.0, 0.995, 1.0));
 		(surface.mesh as Terrain).offset = terrainOffset;
 
 		dt = await scene.redraw();
+		if (frameCount % frameInterval === 0) {
+			const frameTime = (performance.now() - startTime) / frameInterval;
+			startTime = performance.now();
+			//console.log("frame time: %sms   %sfps", frameTime.toFixed(2), (1000 / frameTime).toFixed(2));
+		}
+		frameCount++;
 	}
 
 }
-
 
 class WeirdLandscape {
 	position = [0.0, 0.0, 0.0];
@@ -192,19 +213,25 @@ class WeirdLandscape {
 	seaNoise = new SimplexNoise(0);
 	shapeNoise = new SimplexNoise(0);
 
+	oceanLevel = 0.0;
+	offset: Vector3 = [0.0, 0.0, 0.0];
+
 	height(x: number, z: number, t: number = 0.0): number {
-		// Flatten near camera
-		const dx = this.position[0] - x;
-		const dz = this.position[2] - z;
+		// Distance from center
+		const dx = this.offset[0] + this.position[0] - x;
+		const dz = this.offset[2] + this.position[2] - z;
 		const dist = Math.sqrt(dx * dx + dz * dz);
 
-		const grid = 15.0;
-		let val = this.hillNoise.noise2D((x | 0) / grid, (z | 0) / grid);
+		// Create lumpy space
+		const grid = 17.0;
+		let val = 0.0;
+		val = -0.5 + this.hillNoise.noise2D((x | 0) / grid, (z | 0) / grid);
+		val *= 20.0;
+		if (val < 0.0) {
+			val = 0;
+		}
 
-		val -= 0.4;
-		val = Math.max(0.0, val);
-		val *= 20;
-
+		// Flatten near camera
 		const falloff = 10;
 		if (dist < falloff) {
 			val = val * (dist / falloff);
@@ -213,11 +240,14 @@ class WeirdLandscape {
 			}
 		}
 
+		// Add noise to the "ocean"
 		if (val === 0.0) {
 			const g = grid * 0.5;
 			const tt = t * 0.2;
 			val = 0.1 + 0.333 * this.seaNoise.noise2D(tt + x / g, tt - z / g);
 		}
+
+		// Clamp
 		if (val < 0.0) {
 			val = 0;
 		}
@@ -228,7 +258,7 @@ class WeirdLandscape {
 	shapeOffset(position: Point3): Vector3 {
 		const scale = 40.0;
 		const x = scale * this.shapeNoise.noise3D(position[0], position[1], position[2]);
-		const y = 0.5 * scale * this.shapeNoise.noise3D(position[0], position[1], position[2] + 1000);
+		const y = scale * this.shapeNoise.noise3D(position[0], position[1], position[2] + 1000);
 		const z = scale * this.shapeNoise.noise3D(position[0], position[1], position[2] + 2000);
 
 		return [x, y, z];
