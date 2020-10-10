@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "lint": "eslint -c eslint.json --fix 'src/**/*.ts' || true",
-    "server": "webpack-dev-server",
+    "server": "webpack serve",
     "build": "webpack",
     "test": "jest src"
   },
@@ -20,8 +20,8 @@
     "ts-jest": "^26.4.1",
     "ts-loader": "^8.0.2",
     "typescript": "^3.9.7",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^4.0.0",
     "webpack-dev-server": "^3.11.0"
   }
 }
