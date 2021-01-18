@@ -21,7 +21,7 @@ export class Cube extends Mesh {
 				barycentrics.push(1.0);
 			}
 		}
-		this.barycentrics = new Float32Array(barycentrics)
+		this.barycentrics = new Float32Array(barycentrics);
 	}
 }
 

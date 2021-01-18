@@ -42,7 +42,7 @@ async function main() {
 
 	// Toggle control
 	document.addEventListener('keydown', (e) => {
-		if (e.key === " ") {
+		if (e.key === ' ') {
 			if (scene.isGrabbed) {
 				scene.release();
 			} else {
@@ -61,9 +61,9 @@ async function main() {
 	let actorModel = Matrix4.identity();
 	let actorPos = scene.camera.position.slice() as Vector3;
 	let velocity: Vector3 = [0.0, 0.0, 0.0];
-	let speed = 50.0;
-	let fastSpeed = 150.0;
-	let o = 0.0;
+	const speed = 50.0;
+	const fastSpeed = 150.0;
+	const o = 0.0;
 	let dt = 0;
 	let rot = 0.0;
 	function update() {
@@ -120,7 +120,7 @@ async function main() {
 							rot * offset[0] * 0.1,
 							rot * offset[1] * 0.1,
 							rot * offset[2] * 0.1,
-						))
+						));
 
 					i++;
 				}
@@ -132,26 +132,26 @@ async function main() {
 			return;
 		}
 
-		let s = scene.heldKeys.has('shift') ? fastSpeed : speed;
-		if (scene.heldKeys.has("w")) {
+		const s = scene.heldKeys.has('shift') ? fastSpeed : speed;
+		if (scene.heldKeys.has('w')) {
 			velocity[2] += -s * dt;
 		}
-		else if (scene.heldKeys.has("w")) {
+		else if (scene.heldKeys.has('w')) {
 			velocity[2] += -s * dt;
 		}
-		if (scene.heldKeys.has("s")) {
+		if (scene.heldKeys.has('s')) {
 			velocity[2] += s * dt;
 		}
-		if (scene.heldKeys.has("a")) {
+		if (scene.heldKeys.has('a')) {
 			velocity[0] += -s * dt;
 		}
-		if (scene.heldKeys.has("d")) {
+		if (scene.heldKeys.has('d')) {
 			velocity[0] += s * dt;
 		}
-		if (scene.heldKeys.has("q")) {
+		if (scene.heldKeys.has('q')) {
 			velocity[1] += -s * dt;
 		}
-		if (scene.heldKeys.has("e")) {
+		if (scene.heldKeys.has('e')) {
 			velocity[1] += s * dt;
 		}
 

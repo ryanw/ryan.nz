@@ -3,11 +3,6 @@
   src: url("/PxPlus_IBM_CGA.ttf");
 }
 
-:root {
-  --bg: #050505;
-  --fg: #ce4;
-}
-
 * {
   box-sizing: border-box;
 }
@@ -18,8 +13,8 @@ html {
 }
 body {
   height: 100%;
-  color: var(--fg);
-  background: transparent;
+  color: #ce4;
+  background: #050505;
   font-family: "IBM CGA", "Fixedsys Excelsior", Fixedsys, monospace;
   font-smooth: never;
 

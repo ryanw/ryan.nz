@@ -45,8 +45,6 @@ export class WebGLRenderer {
 			top: 0,
 			bottom: 0,
 		});
-
-		this.initWebGL();
 	}
 
 	/**
@@ -66,10 +64,14 @@ export class WebGLRenderer {
 
 		const options = {
 			antialias: this.antiAlias,
-			failIfMajorPerformanceCaveat: true,
-			alpha: true,
 		};
-		return this.context = this.canvas.getContext('webgl', options) as WebGLRenderingContext;
+
+		this.context = this.canvas.getContext('webgl', options) as WebGLRenderingContext;
+		if (!this.context) {
+			console.error('Failed to create WebGL context');
+		}
+
+		return this.context;
 	}
 
 	/**
@@ -189,14 +191,14 @@ export class WebGLRenderer {
 		return new Promise((resolve) => {
 			window.requestAnimationFrame(() => {
 				const now = performance.now();
-				let dt = (now - this.lastFrameAt) / 1000.0;
+				const dt = (now - this.lastFrameAt) / 1000.0;
 				this.lastFrameAt = now;
 
 				this.draw(dt);
 				this.frame++;
 				const frametime = performance.now() - now;
 				if (this.frame % 60 === 0) {
-					console.log("Draw time: %o ms", (frametime * 100 | 0) / 100);
+					console.log('Draw time: %o ms', (frametime * 100 | 0) / 100);
 				}
 
 				const delay = (1000 / this.maxFps) - frametime;
@@ -233,5 +235,6 @@ export class WebGLRenderer {
 		el.appendChild(this.canvas);
 		window.addEventListener('resize', this.updateSize.bind(this));
 		this.updateSize();
+		this.initWebGL();
 	}
 }

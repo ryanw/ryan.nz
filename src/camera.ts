@@ -39,7 +39,7 @@ export class Camera {
 		const invRot = rot.inverse();
 
 		let newPosition = trans.multiply(invRot).transformPoint3(this.position);
-		newPosition = rot.transformPoint3(newPosition)
+		newPosition = rot.transformPoint3(newPosition);
 		this.position = newPosition;
 	}
 
