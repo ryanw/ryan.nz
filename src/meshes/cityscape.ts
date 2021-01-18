@@ -1,6 +1,6 @@
 import { Mesh } from '../mesh';
 
-export class Cube extends Mesh {
+export class Cityscape extends Mesh {
 	constructor() {
 		super();
 		this.positions = new Float32Array(CUBE_VERTICES);
@@ -22,17 +22,6 @@ export class Cube extends Mesh {
 			}
 		}
 		this.barycentrics = new Float32Array(barycentrics);
-	}
-}
-
-export class WireCube extends Mesh {
-	constructor() {
-		super();
-		this.positions = new Float32Array(WIRE_CUBE_VERTICES);
-	}
-
-	draw(gl: WebGLRenderingContext) {
-		gl.drawArrays(gl.LINES, 0, this.vertexCount);
 	}
 }
 
@@ -156,94 +145,4 @@ const CUBE_VERTICES = [
 	1.0,
 	-1.0,
 	1.0,
-];
-
-const WIRE_CUBE_VERTICES = [
-	// Front
-	1.0,
-	1.0,
-	1.0,
-	-1.0,
-	1.0,
-	1.0,
-
-	-1.0,
-	1.0,
-	1.0,
-	-1.0,
-	-1.0,
-	1.0,
-
-	-1.0,
-	-1.0,
-	1.0,
-	1.0,
-	-1.0,
-	1.0,
-
-	1.0,
-	-1.0,
-	1.0,
-	1.0,
-	1.0,
-	1.0,
-
-	// Back
-	1.0,
-	1.0,
-	-1.0,
-	-1.0,
-	1.0,
-	-1.0,
-
-	-1.0,
-	1.0,
-	-1.0,
-	-1.0,
-	-1.0,
-	-1.0,
-
-	-1.0,
-	-1.0,
-	-1.0,
-	1.0,
-	-1.0,
-	-1.0,
-
-	1.0,
-	-1.0,
-	-1.0,
-	1.0,
-	1.0,
-	-1.0,
-
-	// Left
-	-1.0,
-	1.0,
-	1.0,
-	-1.0,
-	1.0,
-	-1.0,
-
-	-1.0,
-	-1.0,
-	1.0,
-	-1.0,
-	-1.0,
-	-1.0,
-
-	// Right
-	1.0,
-	1.0,
-	1.0,
-	1.0,
-	1.0,
-	-1.0,
-
-	1.0,
-	-1.0,
-	1.0,
-	1.0,
-	-1.0,
-	-1.0,
 ];

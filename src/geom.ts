@@ -8,6 +8,7 @@ export type Vector2 = [number, number];
 export type Columns = [Vector4, Vector4, Vector4, Vector4];
 export type Rows = [Vector4, Vector4, Vector4, Vector4];
 
+// prettier-ignore
 export class Matrix4 {
 	private _data: Float32Array;
 
@@ -310,22 +311,12 @@ export class Matrix4 {
 }
 
 function scaleVector4(vec: Vector4, scale: number): Vector4 {
-	return [
-		vec[0] * scale,
-		vec[1] * scale,
-		vec[2] * scale,
-		vec[3] * scale,
-	];
-}
-function addVector4(vec: Vector4, other: Vector4): Vector4 {
-	return [
-		vec[0] + other[0],
-		vec[1] + other[1],
-		vec[2] + other[2],
-		vec[3] + other[3],
-	];
+	return [vec[0] * scale, vec[1] * scale, vec[2] * scale, vec[3] * scale];
 }
 
+function addVector4(vec: Vector4, other: Vector4): Vector4 {
+	return [vec[0] + other[0], vec[1] + other[1], vec[2] + other[2], vec[3] + other[3]];
+}
 
 export function cross(p0: Vector3, p1: Vector3): Vector3 {
 	const x = p0[1] * p1[2] - p0[2] * p1[1];
@@ -336,9 +327,5 @@ export function cross(p0: Vector3, p1: Vector3): Vector3 {
 
 export function normalize(v: Vector3): Vector3 {
 	const norm = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-	return [
-		v[0] / norm,
-		v[1] / norm,
-		v[2] / norm,
-	];
+	return [v[0] / norm, v[1] / norm, v[2] / norm];
 }

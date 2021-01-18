@@ -10,7 +10,6 @@ export class Mesh {
 	barycentricBuffer: WebGLBuffer;
 	barycentrics: Float32Array = new Float32Array();
 
-
 	get isAllocated(): boolean {
 		return Boolean(this.positionBuffer);
 	}
@@ -27,7 +26,6 @@ export class Mesh {
 		this.normalBuffer = gl.createBuffer();
 		this.barycentricBuffer = gl.createBuffer();
 	}
-
 
 	upload(gl: WebGLRenderingContext) {
 		this.calculateNormals();
@@ -50,32 +48,12 @@ export class Mesh {
 		const normals: number[] = [];
 
 		for (let i = 0; i < this.positions.length; i += 3 * 3) {
-			const p0: geom.Point3 = [
-				this.positions[i + 0],
-				this.positions[i + 1],
-				this.positions[i + 2],
-			];
-			const p1: geom.Point3 = [
-				this.positions[i + 3],
-				this.positions[i + 4],
-				this.positions[i + 5],
-			];
-			const p2: geom.Point3 = [
-				this.positions[i + 6],
-				this.positions[i + 7],
-				this.positions[i + 8],
-			];
+			const p0: geom.Point3 = [this.positions[i + 0], this.positions[i + 1], this.positions[i + 2]];
+			const p1: geom.Point3 = [this.positions[i + 3], this.positions[i + 4], this.positions[i + 5]];
+			const p2: geom.Point3 = [this.positions[i + 6], this.positions[i + 7], this.positions[i + 8]];
 
-			const v0: geom.Vector3 = [
-				p1[0] - p0[0],
-				p1[1] - p0[1],
-				p1[2] - p0[2],
-			];
-			const v1: geom.Vector3 = [
-				p2[0] - p0[0],
-				p2[1] - p0[1],
-				p2[2] - p0[2],
-			];
+			const v0: geom.Vector3 = [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]];
+			const v1: geom.Vector3 = [p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]];
 			const normal = geom.normalize(geom.cross(v0, v1));
 
 			for (let i = 3; i > 0; i--) {
@@ -87,4 +65,3 @@ export class Mesh {
 		this.normals = new Float32Array(normals);
 	}
 }
-

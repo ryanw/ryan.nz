@@ -1,24 +1,8 @@
-import { Matrix4 } from './geom';
-import { Mesh } from './mesh';
-import { Cube, WireCube } from './meshes/cube';
-import { Terrain, WireTerrain } from './meshes/terrain';
 import { Program } from './program';
 import { Camera } from './camera';
-
-export type Color = [number, number, number, number];
-export class Material {
-	color: Color;
-}
-
-export class Pawn {
-	mesh: Mesh;
-	model: Matrix4 = Matrix4.identity();
-	material: Material = new Material();
-
-	constructor(mesh: Mesh) {
-		this.mesh = mesh;
-	}
-}
+import { Pawn } from './pawn';
+import { Color } from './material';
+import { Matrix4 } from './geom';
 
 export class WebGLRenderer {
 	canvas = document.createElement('canvas');
@@ -119,20 +103,20 @@ export class WebGLRenderer {
 		if (!this.isGrabbed) {
 			this.removeEventListeners();
 		}
-	}
+	};
 
 	onKeyDown = (e: KeyboardEvent) => {
 		this.heldKeys.add(e.key.toLowerCase());
-	}
+	};
 
 	onKeyUp = (e: KeyboardEvent) => {
 		this.heldKeys.delete(e.key.toLowerCase());
-	}
+	};
 
 	onMouseMove = (e: MouseEvent) => {
 		this.mouseMovement[0] += e.movementX;
 		this.mouseMovement[1] += e.movementY;
-	}
+	};
 
 	clear() {
 		const gl = this.gl;
@@ -142,7 +126,7 @@ export class WebGLRenderer {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
-	draw(dt: number) {
+	draw(_dt: number) {
 		const gl = this.gl;
 		this.program.use(gl);
 		gl.viewport(0, 0, this.camera.width, this.camera.height);
@@ -150,25 +134,14 @@ export class WebGLRenderer {
 
 		// Uniforms
 		const proj = this.camera.projection.clone();
-		const view = this.camera.view.inverse(); // FIXME need inverse
+		const view = this.camera.view.inverse();
 		const viewProj = proj.multiply(view);
 		gl.uniformMatrix4fv(this.program.uniforms.viewProj, false, viewProj.toArray());
 		gl.uniform4fv(this.program.uniforms.fogColor, this.backgroundColor);
 		gl.uniform1f(this.program.uniforms.lineWidth, this.lineWidth);
 
 		for (const pawn of this.pawns) {
-			const { mesh, model, material } = pawn;
-
-			gl.uniformMatrix4fv(this.program.uniforms.model, false, model.toArray());
-			gl.uniform4fv(this.program.uniforms.fillColor, material.color);
-
-			this.program.bind(gl, mesh);
-
-			if (mesh instanceof Terrain) {
-				mesh.build();
-				mesh.upload(gl);
-			}
-			mesh.draw(gl);
+			this.drawPawn(pawn);
 		}
 
 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
@@ -176,10 +149,38 @@ export class WebGLRenderer {
 		gl.clear(gl.COLOR_BUFFER_BIT);
 	}
 
-	addPawn(pawn: Pawn): number {
+	drawPawn(pawn: Pawn, parentModel?: Matrix4) {
+		const { mesh, model, material, children } = pawn;
+		const pawnModel = parentModel ? parentModel.multiply(model) : model;
+
+		if (mesh) {
+			const gl = this.gl;
+			gl.uniformMatrix4fv(this.program.uniforms.model, false, pawnModel.toArray());
+			if (material?.color) {
+				gl.uniform4fv(this.program.uniforms.fillColor, material.color);
+			}
+			this.program.bind(gl, mesh);
+			mesh.draw(gl);
+		}
+
+		for (const child of children) {
+			this.drawPawn(child, pawnModel);
+		}
+	}
+
+	uploadPawn(pawn: Pawn) {
 		const gl = this.gl;
-		pawn.mesh.allocate(gl);
-		pawn.mesh.upload(gl);
+		if (pawn.mesh) {
+			pawn.mesh.allocate(gl);
+			pawn.mesh.upload(gl);
+		}
+		for (const child of pawn.children) {
+			this.uploadPawn(child);
+		}
+	}
+
+	addPawn(pawn: Pawn): number {
+		this.uploadPawn(pawn);
 		this.pawns.push(pawn);
 		return this.pawns.length - 1;
 	}
@@ -198,14 +199,13 @@ export class WebGLRenderer {
 				this.frame++;
 				const frametime = performance.now() - now;
 				if (this.frame % 60 === 0) {
-					console.log('Draw time: %o ms', (frametime * 100 | 0) / 100);
+					console.log('Draw time: %o ms', ((frametime * 100) | 0) / 100);
 				}
 
-				const delay = (1000 / this.maxFps) - frametime;
+				const delay = 1000 / this.maxFps - frametime;
 				if (delay > 0.0) {
 					setTimeout(() => resolve(dt), delay);
-				}
-				else {
+				} else {
 					resolve(dt);
 				}
 			});
@@ -216,12 +216,12 @@ export class WebGLRenderer {
 	 * Update the framebuffer of the canvas to match its container's size
 	 */
 	updateSize() {
-		const width = this.parentElement.clientWidth * this.scale | 0;
-		const height = this.parentElement.clientHeight * this.scale | 0;
+		const width = (this.parentElement.clientWidth * this.scale) | 0;
+		const height = (this.parentElement.clientHeight * this.scale) | 0;
 		this.camera.resize(width, height);
 
-		this.canvas.style.imageRendering = 'crisp-edges';  // Firefox
-		this.canvas.style.imageRendering = 'pixelated';    // Webkit
+		this.canvas.style.imageRendering = 'crisp-edges'; // Firefox
+		this.canvas.style.imageRendering = 'pixelated'; // Webkit
 		this.canvas.style.width = this.parentElement.clientWidth + 'px';
 		this.canvas.style.height = this.parentElement.clientHeight + 'px';
 		this.canvas.setAttribute('width', width.toString());

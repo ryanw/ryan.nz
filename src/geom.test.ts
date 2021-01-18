@@ -2,6 +2,7 @@ import { Matrix4, Point3, Vector3, Vector4 } from './geom';
 
 const DEGREE = Math.PI / 180;
 
+// prettier-ignore
 describe('Matrix4', () => {
 	it('creates an identity', () => {
 		const mat = Matrix4.identity();

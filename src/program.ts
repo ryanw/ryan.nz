@@ -30,7 +30,6 @@ export class Program {
 		// Enable `fwidth` in shader
 		gl.getExtension('OES_standard_derivatives');
 
-
 		const vert = gl.createShader(gl.VERTEX_SHADER);
 		gl.shaderSource(vert, vertSource);
 		gl.attachShader(program, vert);

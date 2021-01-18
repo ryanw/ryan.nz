@@ -6,7 +6,7 @@ export class Terrain extends Mesh {
 	target = WebGLRenderingContext.TRIANGLES;
 	offset = [-1, -1];
 	private time = performance.now();
-	private heightFunc: HeightFunction = () => 0.5;
+	private heightFunc: HeightFunction = () => 0.0;
 
 	constructor(heightFunc?: HeightFunction) {
 		super();
@@ -38,9 +38,8 @@ export class Terrain extends Mesh {
 	build() {
 		const positions: number[] = [];
 		const barycentrics: number[] = [];
-		const w = 32;
-		const d = 32;
-		const y = 0;
+		const w = 24;
+		const d = 48;
 
 		const [ox, oz] = this.offset;
 		for (let z = -d; z <= d; z++) {
@@ -81,10 +80,7 @@ export class WireTerrain extends Terrain {
 	createQuad(x: number, z: number, offsetX: number, offsetY: number): number[] {
 		const positions = [];
 		for (const point of QUAD_LINES) {
-			const y = this.height(
-				point[0] + x + offsetX,
-				point[2] + z + offsetY,
-			);
+			const y = this.height(point[0] + x + offsetX, point[2] + z + offsetY);
 			positions.push(point[0] + x);
 			positions.push(point[1] + y);
 			positions.push(point[2] + z);
@@ -97,9 +93,9 @@ export class WeirdTerrain extends WireTerrain {
 	height(x: number, z: number): number {
 		const r = 4.0;
 		const p = [0.0, 0.0];
-		const dx = p[0] - x | 0;
-		const dy = p[1] - z | 0;
-		const dist = Math.abs(Math.sqrt(dx*dx + dy*dy));
+		const dx = (p[0] - x) | 0;
+		const dy = (p[1] - z) | 0;
+		const dist = Math.abs(Math.sqrt(dx * dx + dy * dy));
 		if (dist <= r) {
 			return Math.cos(dist / r) * r;
 		}
@@ -108,21 +104,20 @@ export class WeirdTerrain extends WireTerrain {
 	}
 }
 
-
 const QUAD_POINTS = [
 	[-0.5, 0, -0.5],
-	[-0.5, 0,  0.5],
-	[ 0.5, 0, -0.5],
+	[-0.5, 0, 0.5],
+	[0.5, 0, -0.5],
 
-	[ 0.5, 0,  0.5],
-	[ 0.5, 0, -0.5],
-	[-0.5, 0,  0.5],
+	[0.5, 0, 0.5],
+	[0.5, 0, -0.5],
+	[-0.5, 0, 0.5],
 ];
 
 const QUAD_LINES = [
 	[-0.5, 0.0, -0.5],
-	[ 0.5, 0.0, -0.5],
+	[0.5, 0.0, -0.5],
 
 	[-0.5, 0.0, -0.5],
-	[-0.5, 0.0,  0.5],
+	[-0.5, 0.0, 0.5],
 ];
