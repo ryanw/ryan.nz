@@ -1,6 +1,6 @@
 import { Program } from './program';
-import { Camera } from './camera';
 import { Pawn } from './pawn';
+import { Camera } from './camera';
 import { Color } from './material';
 import { Matrix4 } from './geom';
 
@@ -11,7 +11,7 @@ export class WebGLRenderer {
 	scale = 1.0 * window.devicePixelRatio;
 	lineWidth = 2 * window.devicePixelRatio;
 	antiAlias = true;
-	camera = new Camera();
+	camera: Camera = new Camera();
 	maxFps = 200;
 	lastFrameAt = 0;
 	heldKeys = new Set();

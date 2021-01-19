@@ -69,16 +69,16 @@ export class Matrix4 {
 			0,    0,     0, 1,
 		]);
 		const roty = new Matrix4([
-			cosy, 0, siny, 0,
-			0, 1,    0, 0,
+			cosy,  0, siny, 0,
+			   0,  1,    0, 0,
 			-siny, 0, cosy, 0,
-			0, 0,    0, 1,
+			    0, 0,    0, 1,
 		]);
 		const rotz = new Matrix4([
 			cosz, -sinz, 0, 0,
 			sinz,  cosz, 0, 0,
-			0,     0, 1, 0,
-			0,     0, 0, 1,
+			   0,     0, 1, 0,
+			   0,     0, 0, 1,
 		]);
 
 		return rotx.multiply(roty.multiply(rotz));
@@ -307,6 +307,27 @@ export class Matrix4 {
 		}
 
 		return new Matrix4(inv);
+	}
+
+	extractTranslation(): Matrix4 {
+		const x = this._data[3];
+		const y = this._data[7];
+		const z = this._data[11];
+		return Matrix4.translation(x, y, z);
+	}
+
+	extractScaling(): Matrix4 {
+		const x = 0;
+		const y = 0;
+		const z = 0;
+		return Matrix4.scaling(x, y, z);
+	}
+
+	extractRotation(): Matrix4 {
+		const x = 0;
+		const y = 0;
+		const z = 0;
+		return Matrix4.rotation(x, y, z);
 	}
 }
 

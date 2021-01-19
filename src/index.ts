@@ -3,6 +3,7 @@ import { Terrain } from './meshes/terrain';
 import { Cube } from './meshes/cube';
 import { Matrix4 } from './geom';
 import { Pawn } from './pawn';
+import { Camera } from './camera';
 
 function createCityscape(count: number): Pawn[] {
 	const pawns: Pawn[] = [];
@@ -26,9 +27,11 @@ async function main() {
 	const scene = new WebGLRenderer();
 	scene.attach(document.body);
 
-	// Camera
-	scene.camera.position = [0.0, 0.0, 0.0];
-	scene.camera.rotation = [0.0, 0.0, 0.0];
+	// Add a camera
+	const camera = new Camera();
+	scene.addPawn(camera);
+	scene.camera = camera;
+	scene.updateSize();
 
 	// Add terrain
 	const surface = new Pawn(new Terrain(), {
@@ -51,9 +54,9 @@ async function main() {
 	});
 	scene.addPawn(city);
 
-	// TODO Add car
-
 	// TODO Add road
+
+	// TODO Add car
 
 	// TODO Add trees
 
@@ -80,8 +83,34 @@ async function main() {
 		}
 	});
 
+	scene.addEventListeners();
 	while (true) {
 		await scene.redraw();
+
+		if (scene.heldKeys.has('w')) {
+			camera.translate(0.0, 0.0, -1.0);
+		}
+
+		if (scene.heldKeys.has('s')) {
+			camera.translate(0.0, 0.0, 1.0);
+		}
+
+		if (scene.heldKeys.has('a')) {
+			camera.translate(-1.0, 0.0, 0.0);
+		}
+
+		if (scene.heldKeys.has('d')) {
+			camera.translate(1.0, 0.0, 0.0);
+		}
+
+		if (scene.heldKeys.has('q')) {
+			camera.translate(0.0, -1.0, 0.0);
+		}
+
+		if (scene.heldKeys.has('e')) {
+			camera.translate(0.0, 1.0, 0.0);
+		}
+
 	}
 }
 
