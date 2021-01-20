@@ -19,7 +19,9 @@ export class Pawn {
 		material.color = options.color || material.color;
 
 		this.material = material;
-		this.model = options.model || Matrix4.identity();
+		if (options.model) {
+			this.model = options.model;
+		}
 
 		if (meshOrChildren instanceof Mesh) {
 			this.mesh = meshOrChildren;

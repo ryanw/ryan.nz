@@ -110,6 +110,11 @@ export class Matrix4 {
 		return Array.from(this._data);
 	}
 
+	at(col: number, row: number): number {
+		const idx = row * 4 + col;
+		return this._data[idx];
+	}
+
 	column(axis: number): Vector4 {
 		const d = this._data;
 		return [
@@ -328,6 +333,27 @@ export class Matrix4 {
 		const y = 0;
 		const z = 0;
 		return Matrix4.rotation(x, y, z);
+	}
+
+	eulerAngles(): Vector3 {
+		const sy = Math.sqrt(this.at(0, 0) * this.at(0, 0) + this.at(1, 0) * this.at(1, 0));
+		const singular = sy < 1e-6;
+
+		let x = 0.0;
+		let y = 0.0;
+		let z = 0.0;
+
+		if (singular) {
+			x = Math.atan2(this.at(1, 2), this.at(1, 1));
+			y = Math.atan2(this.at(2, 0), sy);
+			z = 0;
+		} else {
+			x = Math.atan2(-this.at(2, 1), this.at(2, 2));
+			y = Math.atan2(this.at(2, 0), sy);
+			z = Math.atan2(-this.at(1, 0), this.at(0, 0));
+		}
+
+		return [x, y, z];
 	}
 }
 

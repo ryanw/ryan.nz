@@ -15,8 +15,10 @@ export class WebGLRenderer {
 	maxFps = 200;
 	lastFrameAt = 0;
 	heldKeys = new Set();
+	mousePosition = [0.0, 0.0];
 	mouseMovement = [0.0, 0.0];
-	backgroundColor: Color = [0.0, 0.03, 0.08, 1.0];
+	mouseButtons = new Set();
+	backgroundColor: Color = [126 / 255, 20 / 255, 214 / 255, 1.0];
 	frame = 0;
 	private context: WebGLRenderingContext;
 
@@ -89,6 +91,8 @@ export class WebGLRenderer {
 		window.addEventListener('keydown', this.onKeyDown);
 		window.addEventListener('keyup', this.onKeyUp);
 		window.addEventListener('mousemove', this.onMouseMove);
+		window.addEventListener('mouseup', this.onMouseUp);
+		window.addEventListener('mousedown', this.onMouseDown);
 	}
 
 	removeEventListeners() {
@@ -97,6 +101,8 @@ export class WebGLRenderer {
 		window.removeEventListener('keydown', this.onKeyDown);
 		window.removeEventListener('keyup', this.onKeyUp);
 		window.removeEventListener('mousemove', this.onMouseMove);
+		window.removeEventListener('mouseup', this.onMouseUp);
+		window.removeEventListener('mousedown', this.onMouseDown);
 	}
 
 	onPointerLockChange = () => {
@@ -113,10 +119,25 @@ export class WebGLRenderer {
 		this.heldKeys.delete(e.key.toLowerCase());
 	};
 
+	onMouseDown = (e: MouseEvent) => {
+		this.mouseButtons.add(e.button);
+	};
+
+	onMouseUp = (e: MouseEvent) => {
+		this.mouseButtons.delete(e.button);
+	};
+
 	onMouseMove = (e: MouseEvent) => {
+		this.mousePosition[0] = e.offsetX;
+		this.mousePosition[1] = e.offsetY;
 		this.mouseMovement[0] += e.movementX;
 		this.mouseMovement[1] += e.movementY;
 	};
+
+	resetMouseMovement() {
+		this.mouseMovement[0] = 0;
+		this.mouseMovement[1] = 0;
+	}
 
 	clear() {
 		const gl = this.gl;

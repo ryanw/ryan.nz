@@ -181,4 +181,14 @@ describe('Matrix4', () => {
 			expect(result[2]).toBeCloseTo(0.996);
 		});
 	});
+
+	describe('extractions', () => {
+		it('extracts Euler angles', () => {
+			const mat = Matrix4.rotation(0.12, 1.23, 2.34);
+			const [x, y, z] = mat.eulerAngles();
+			expect(x).toBeCloseTo(0.12);
+			expect(y).toBeCloseTo(1.23);
+			expect(z).toBeCloseTo(2.34);
+		});
+	});
 });
