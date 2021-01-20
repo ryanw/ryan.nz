@@ -18,7 +18,7 @@ export class WebGLRenderer {
 	mousePosition = [0.0, 0.0];
 	mouseMovement = [0.0, 0.0];
 	mouseButtons = new Set();
-	backgroundColor: Color = [126 / 255, 20 / 255, 214 / 255, 1.0];
+	backgroundColor: Color = [0.2, 0.05, 0.4, 1.0];
 	frame = 0;
 	private context: WebGLRenderingContext;
 

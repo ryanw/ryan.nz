@@ -23,5 +23,5 @@ void main(void) {
 		color = vec4(0.05, 0.0, 0.003, 1.0);
 	}
 
-	gl_FragColor = color;
+	gl_FragColor = mix(color, frag_fog_color, fog_depth);
 }

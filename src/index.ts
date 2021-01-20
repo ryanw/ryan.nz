@@ -44,7 +44,7 @@ function createCityscape(radius: number, count: number): Pawn[] {
 
 			const angle = Math.random()  * Math.PI * 2;
 			const dist = Math.random() * radius;
-			const height = 1.0 + Math.random() * 2 * ((radius - dist) / 5);
+			const height = 1.0 + Math.random() * 2 * ((radius - dist) / 10);
 			const x = dist * Math.cos(angle);
 			const y = height;
 			const z = dist * Math.sin(angle);
@@ -86,30 +86,45 @@ async function main() {
 	// Add terrain
 	const surface = new Pawn(new Terrain(), {
 		color: [0.0, 0.8, 1.0, 0.0],
-		model: Matrix4.translation(0.0, -4.0, -96.0).multiply(Matrix4.scaling(2.0, 1.0, 2.0)),
+		model: Matrix4.translation(0.0, -4.0, -320.0).multiply(Matrix4.scaling(7.5, 1.0, 20.0)),
 	});
 	scene.addPawn(surface);
 
 	// Test Cube
 	const cube = new Pawn(new Cube(), {
 		color: [1.0, 1.0, 0.0, 1.0],
-		model: Matrix4.translation(0.0, 0.0, 0.0),
+		model: Matrix4.translation(0.0, 0.0, 0.0).multiply(Matrix4.scaling(0.1, 0.1, 0.1)),
 	});
 	scene.addPawn(cube);
 
 	// Add cityscape
-	const city = new Pawn(createCityscape(50, 100), {
-		model: Matrix4.translation(0, -4.0, -150.0),
+	const city = new Pawn(createCityscape(100, 300), {
+		model: Matrix4.translation(0, -4.0, -400.0),
 	});
 	scene.addPawn(city);
 
-	// TODO Add road
+	// Add road
+	const road = new Pawn(new Cube(), {
+		color: [1.0, 0.0, 1.0, 1.0],
+		model: Matrix4.translation(0.0, -4.999, -200.0).multiply(Matrix4.scaling(5, 1, 200)),
+	});
+	scene.addPawn(road);
 
-	// TODO Add car
+	// Add car
+	const car = new Pawn(new Cube(), {
+		color: [1.0, 1.0, 0.0, 1.0],
+		model: Matrix4.translation(0.0, -3.5, -14.0).multiply(Matrix4.scaling(1.3, 0.5, 2.5)),
+	});
+	scene.addPawn(car);
 
 	// TODO Add trees
 
-	// TODO Add sun
+	// Add sun
+	const sun = new Pawn(new Cube(), {
+		color: [1.0, 1.0, 0.0, 1.0],
+		model: Matrix4.translation(0.0, 20.0, -500.0).multiply(Matrix4.scaling(50, 50, 50)),
+	});
+	scene.addPawn(sun);
 
 	// TODO Add mountains
 

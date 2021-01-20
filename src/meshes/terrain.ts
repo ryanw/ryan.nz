@@ -38,8 +38,8 @@ export class Terrain extends Mesh {
 	build() {
 		const positions: number[] = [];
 		const barycentrics: number[] = [];
-		const w = 24;
-		const d = 48;
+		const w = 64;
+		const d = 16;
 
 		const [ox, oz] = this.offset;
 		for (let z = -d; z <= d; z++) {
@@ -74,36 +74,6 @@ export class Terrain extends Mesh {
 	}
 }
 
-export class WireTerrain extends Terrain {
-	target = WebGLRenderingContext.LINES;
-
-	createQuad(x: number, z: number, offsetX: number, offsetY: number): number[] {
-		const positions = [];
-		for (const point of QUAD_LINES) {
-			const y = this.height(point[0] + x + offsetX, point[2] + z + offsetY);
-			positions.push(point[0] + x);
-			positions.push(point[1] + y);
-			positions.push(point[2] + z);
-		}
-		return positions;
-	}
-}
-
-export class WeirdTerrain extends WireTerrain {
-	height(x: number, z: number): number {
-		const r = 4.0;
-		const p = [0.0, 0.0];
-		const dx = (p[0] - x) | 0;
-		const dy = (p[1] - z) | 0;
-		const dist = Math.abs(Math.sqrt(dx * dx + dy * dy));
-		if (dist <= r) {
-			return Math.cos(dist / r) * r;
-		}
-
-		return 0.0;
-	}
-}
-
 const QUAD_POINTS = [
 	[-0.5, 0, -0.5],
 	[-0.5, 0, 0.5],
@@ -112,12 +82,4 @@ const QUAD_POINTS = [
 	[0.5, 0, 0.5],
 	[0.5, 0, -0.5],
 	[-0.5, 0, 0.5],
-];
-
-const QUAD_LINES = [
-	[-0.5, 0.0, -0.5],
-	[0.5, 0.0, -0.5],
-
-	[-0.5, 0.0, -0.5],
-	[-0.5, 0.0, 0.5],
 ];

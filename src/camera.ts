@@ -7,13 +7,13 @@ export class Camera extends Pawn {
 	near: number = 1.0;
 	far: number = 1000.0;
 	projection: Matrix4;
-	position: Point3 = [0.0, 0.0, 0.0];
-	rotation: Vector3 = [0.0, 0.0, 0.0];
+	position: Point3 = [0.0, 1.0, 0.0];
+	rotation: Vector3 = [-0.1, 0.0, 0.0];
 	scaling: Vector3 = [1.0, 1.0, 1.0];
 
-	constructor(width: number = 1024, height: number = 768) {
+	constructor() {
 		super();
-		this.resize(width, height);
+		this.resize(1024, 768);
 	}
 
 	get view(): Matrix4 {
