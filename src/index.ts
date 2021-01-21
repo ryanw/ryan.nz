@@ -1,6 +1,7 @@
 import { WebGLRenderer } from './renderer';
 import { Terrain } from './meshes/terrain';
 import { Cube } from './meshes/cube';
+import { Sun } from './meshes/sun';
 import { Road } from './meshes/road';
 import { Matrix4 } from './geom';
 import { Pawn } from './pawn';
@@ -8,6 +9,8 @@ import { Camera } from './camera';
 
 import roadVertexSource from './shaders/road.vert.glsl';
 import roadFragmentSource from './shaders/road.frag.glsl';
+import sunVertexSource from './shaders/sun.vert.glsl';
+import sunFragmentSource from './shaders/sun.frag.glsl';
 
 type Rect = [number, number, number, number];
 function rectOverlaps(rect0: Rect, rect1: Rect): boolean {
@@ -107,6 +110,7 @@ async function main() {
 	});
 	scene.addPawn(city);
 
+	// Add road
 	const roadShader = scene.createShader(
 		roadVertexSource,
 		roadFragmentSource, {
@@ -117,8 +121,6 @@ async function main() {
 			},
 		},
 	});
-
-	// Add road
 	const road = new Pawn(new Road(), {
 		color: [1.0, 0.0, 1.0, 1.0],
 		model: Matrix4.translation(0.0, -4.9, -200.0).multiply(Matrix4.scaling(5, 1, 200)),
@@ -135,9 +137,11 @@ async function main() {
 
 
 	// Add sun
-	const sun = new Pawn(new Cube(), {
+	const sunShader = scene.createShader(sunVertexSource, sunFragmentSource);
+	const sun = new Pawn(new Sun(), {
 		color: [1.0, 1.0, 0.0, 1.0],
-		model: Matrix4.translation(0.0, 20.0, -500.0).multiply(Matrix4.scaling(50, 50, 50)),
+		model: Matrix4.translation(0.0, 20.0, -500.0).multiply(Matrix4.scaling(60, 60, 60)),
+		shader: sunShader,
 	});
 	scene.addPawn(sun);
 
