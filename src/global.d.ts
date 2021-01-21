@@ -1,3 +1,3 @@
-declare module '*.shader' {
+declare module '*.glsl' {
 	export default string;
 }

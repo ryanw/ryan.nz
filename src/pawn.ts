@@ -1,17 +1,20 @@
 import { Matrix4, Point3, Vector3 } from './geom';
 import { Mesh } from './mesh';
 import { Material, Color } from './material';
+import { Shader } from './shader';
 
 export interface PawnOptions {
 	color?: Color;
 	material?: Material;
 	model?: Matrix4;
+	shader?: Shader;
 }
 
 export class Pawn {
 	mesh: Mesh;
 	model: Matrix4 = Matrix4.identity();
 	material: Material = new Material();
+	shader?: Shader;
 	children: Pawn[] = [];
 
 	constructor(meshOrChildren?: Mesh | Pawn[], options: PawnOptions = {}) {
@@ -19,8 +22,13 @@ export class Pawn {
 		material.color = options.color || material.color;
 
 		this.material = material;
+
 		if (options.model) {
 			this.model = options.model;
+		}
+
+		if (options.shader) {
+			this.shader = options.shader;
 		}
 
 		if (meshOrChildren instanceof Mesh) {

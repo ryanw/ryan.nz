@@ -23,7 +23,7 @@ module.exports = {
 			{ test: /\.ts$/, use: 'ts-loader' },
 
 			// Shader files
-			{ test: /\.shader$/, use: 'raw-loader' },
+			{ test: /\.glsl$/, use: 'raw-loader' },
 		],
 	},
 	resolve: {

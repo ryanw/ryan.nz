@@ -1,16 +1,14 @@
 import { Mesh } from './mesh';
-import { Terrain } from './meshes/terrain';
-import vertSource from './shaders/wireframe.vert.shader';
-import fragSource from './shaders/wireframe.frag.shader';
 
-export class Program {
-	prog: WebGLProgram;
+export class Shader {
+	program: WebGLProgram;
 	attributes = {
 		position: -1,
 		normal: -1,
 		barycentric: -1,
 	};
 	uniforms: {
+		time?: WebGLUniformLocation;
 		viewProj?: WebGLUniformLocation;
 		model?: WebGLUniformLocation;
 		fillColor?: WebGLUniformLocation;
@@ -18,13 +16,20 @@ export class Program {
 		lineWidth?: WebGLUniformLocation;
 	} = {};
 
-	constructor(gl?: WebGLRenderingContext) {
+	constructor(gl?: WebGLRenderingContext, vertSource?: string, fragSource?: string) {
 		if (gl) {
-			this.make(gl);
+			this.make(gl, vertSource, fragSource);
 		}
 	}
 
-	make(gl: WebGLRenderingContext) {
+	make(gl: WebGLRenderingContext, vertSource: string, fragSource: string) {
+		if (!vertSource) {
+			throw new Error("You must provide vertex shader source code");
+		}
+		if (!fragSource) {
+			throw new Error("You must provide fragment shader source code");
+		}
+
 		const program = gl.createProgram();
 
 		// Enable `fwidth` in shader
@@ -56,6 +61,7 @@ export class Program {
 		}
 
 		// Attribute/Uniform locations
+		this.uniforms.time = gl.getUniformLocation(program, 'time');
 		this.uniforms.viewProj = gl.getUniformLocation(program, 'view_proj');
 		this.uniforms.model = gl.getUniformLocation(program, 'model');
 		this.uniforms.fogColor = gl.getUniformLocation(program, 'fog_color');
@@ -68,11 +74,11 @@ export class Program {
 		gl.enable(gl.CULL_FACE);
 		gl.cullFace(gl.BACK);
 
-		this.prog = program;
+		this.program = program;
 	}
 
 	use(gl: WebGLRenderingContext) {
-		gl.useProgram(this.prog);
+		gl.useProgram(this.program);
 	}
 
 	bind(gl: WebGLRenderingContext, mesh: Mesh) {

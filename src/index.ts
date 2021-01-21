@@ -1,9 +1,13 @@
 import { WebGLRenderer } from './renderer';
 import { Terrain } from './meshes/terrain';
 import { Cube } from './meshes/cube';
+import { Road } from './meshes/road';
 import { Matrix4 } from './geom';
 import { Pawn } from './pawn';
 import { Camera } from './camera';
+
+import roadVertexSource from './shaders/road.vert.glsl';
+import roadFragmentSource from './shaders/road.frag.glsl';
 
 type Rect = [number, number, number, number];
 function rectOverlaps(rect0: Rect, rect1: Rect): boolean {
@@ -104,16 +108,17 @@ async function main() {
 	scene.addPawn(city);
 
 	// Add road
-	const road = new Pawn(new Cube(), {
+	const road = new Pawn(new Road(), {
 		color: [1.0, 0.0, 1.0, 1.0],
 		model: Matrix4.translation(0.0, -4.999, -200.0).multiply(Matrix4.scaling(5, 1, 200)),
+		shader: scene.createShader(roadVertexSource, roadFragmentSource),
 	});
 	scene.addPawn(road);
 
 	// Add car
 	const car = new Pawn(new Cube(), {
 		color: [1.0, 1.0, 0.0, 1.0],
-		model: Matrix4.translation(0.0, -3.5, -14.0).multiply(Matrix4.scaling(1.3, 0.5, 2.5)),
+		model: Matrix4.translation(0.0, -3.5, -14.0).multiply(Matrix4.scaling(1.2, 0.5, 2.5)),
 	});
 	scene.addPawn(car);
 

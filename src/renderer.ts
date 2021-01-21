@@ -1,12 +1,14 @@
-import { Program } from './program';
+import { Shader } from './shader';
 import { Pawn } from './pawn';
 import { Camera } from './camera';
 import { Color } from './material';
 import { Matrix4 } from './geom';
+import defaultVertSource from './shaders/wireframe.vert.glsl';
+import defaultFragSource from './shaders/wireframe.frag.glsl';
 
 export class WebGLRenderer {
 	canvas = document.createElement('canvas');
-	program: Program;
+	defaultShader: Shader;
 	pawns: Pawn[] = [];
 	scale = 1.0 * window.devicePixelRatio;
 	lineWidth = 2 * window.devicePixelRatio;
@@ -69,7 +71,7 @@ export class WebGLRenderer {
 		gl.enable(gl.DEPTH_TEST);
 		gl.enable(gl.BLEND);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-		this.program = new Program(gl);
+		this.defaultShader = this.createShader(defaultVertSource, defaultFragSource);
 	}
 
 	get isGrabbed() {
@@ -149,7 +151,6 @@ export class WebGLRenderer {
 
 	draw(_dt: number) {
 		const gl = this.gl;
-		this.program.use(gl);
 		gl.viewport(0, 0, this.camera.width, this.camera.height);
 		this.clear();
 
@@ -157,11 +158,14 @@ export class WebGLRenderer {
 		const proj = this.camera.projection.clone();
 		const view = this.camera.view.inverse();
 		const viewProj = proj.multiply(view);
-		gl.uniformMatrix4fv(this.program.uniforms.viewProj, false, viewProj.toArray());
-		gl.uniform4fv(this.program.uniforms.fogColor, this.backgroundColor);
-		gl.uniform1f(this.program.uniforms.lineWidth, this.lineWidth);
 
 		for (const pawn of this.pawns) {
+			const shader = pawn.shader || this.defaultShader;
+			shader.use(gl);
+			gl.uniformMatrix4fv(shader.uniforms.viewProj, false, viewProj.toArray());
+			gl.uniform4fv(shader.uniforms.fogColor, this.backgroundColor);
+			gl.uniform1f(shader.uniforms.lineWidth, this.lineWidth);
+			gl.uniform1f(shader.uniforms.time, performance.now());
 			this.drawPawn(pawn);
 		}
 
@@ -176,11 +180,12 @@ export class WebGLRenderer {
 
 		if (mesh) {
 			const gl = this.gl;
-			gl.uniformMatrix4fv(this.program.uniforms.model, false, pawnModel.toArray());
+			const shader = pawn.shader || this.defaultShader;
+			gl.uniformMatrix4fv(shader.uniforms.model, false, pawnModel.toArray());
 			if (material?.color) {
-				gl.uniform4fv(this.program.uniforms.fillColor, material.color);
+				gl.uniform4fv(shader.uniforms.fillColor, material.color);
 			}
-			this.program.bind(gl, mesh);
+			shader.bind(gl, mesh);
 			mesh.draw(gl);
 		}
 
@@ -204,6 +209,10 @@ export class WebGLRenderer {
 		this.uploadPawn(pawn);
 		this.pawns.push(pawn);
 		return this.pawns.length - 1;
+	}
+
+	createShader(vertSource: string, fragSource: string): Shader {
+		return new Shader(this.gl, vertSource, fragSource);
 	}
 
 	/**
