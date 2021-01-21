@@ -1,36 +1,69 @@
 import { Mesh } from './mesh';
 
+export interface ShaderOptions {
+	attributes?: { [key: string]: WebGLAttribute };
+}
+
+export interface WebGLAttribute {
+	location?: number;
+	size: number;
+	type: number;
+};
+
+function camelToSnake(camel: string): string {
+	return camel.replace(/([A-Z])/g, '_$1').toLowerCase();
+}
+
 export class Shader {
 	program: WebGLProgram;
-	attributes = {
-		position: -1,
-		normal: -1,
-		barycentric: -1,
+	attributes: { [key: string]: WebGLAttribute } = {
+		position: {
+			type: WebGLRenderingContext.FLOAT,
+			size: 3,
+			location: null,
+		},
+		normal: {
+			type: WebGLRenderingContext.FLOAT,
+			size: 3,
+			location: null,
+		},
+		barycentric: {
+			type: WebGLRenderingContext.FLOAT,
+			size: 3,
+			location: null,
+		},
 	};
-	uniforms: {
-		time?: WebGLUniformLocation;
-		viewProj?: WebGLUniformLocation;
-		model?: WebGLUniformLocation;
-		fillColor?: WebGLUniformLocation;
-		fogColor?: WebGLUniformLocation;
-		lineWidth?: WebGLUniformLocation;
-	} = {};
+	uniforms: { [key: string]: WebGLUniformLocation } = {
+		time: null,
+		viewProj: null,
+		model: null,
+		fillColor: null,
+		fogColor: null,
+		lineWidth: null,
+	};
 
-	constructor(gl?: WebGLRenderingContext, vertSource?: string, fragSource?: string) {
+	constructor(gl?: WebGLRenderingContext, vertSource?: string, fragSource?: string, options?: ShaderOptions) {
 		if (gl) {
-			this.make(gl, vertSource, fragSource);
+			this.make(gl, vertSource, fragSource, options);
 		}
 	}
 
-	make(gl: WebGLRenderingContext, vertSource: string, fragSource: string) {
+	make(gl: WebGLRenderingContext, vertSource: string, fragSource: string, options?: ShaderOptions) {
 		if (!vertSource) {
-			throw new Error("You must provide vertex shader source code");
+			throw "You must provide vertex shader source code";
 		}
 		if (!fragSource) {
-			throw new Error("You must provide fragment shader source code");
+			throw "You must provide fragment shader source code";
 		}
 
 		const program = gl.createProgram();
+
+		if (options?.attributes) {
+			this.attributes = {
+				...this.attributes,
+				...options.attributes,
+			};
+		}
 
 		// Enable `fwidth` in shader
 		gl.getExtension('OES_standard_derivatives');
@@ -61,15 +94,14 @@ export class Shader {
 		}
 
 		// Attribute/Uniform locations
-		this.uniforms.time = gl.getUniformLocation(program, 'time');
-		this.uniforms.viewProj = gl.getUniformLocation(program, 'view_proj');
-		this.uniforms.model = gl.getUniformLocation(program, 'model');
-		this.uniforms.fogColor = gl.getUniformLocation(program, 'fog_color');
-		this.uniforms.fillColor = gl.getUniformLocation(program, 'fill_color');
-		this.uniforms.lineWidth = gl.getUniformLocation(program, 'line_width');
-		this.attributes.position = gl.getAttribLocation(program, 'position');
-		this.attributes.normal = gl.getAttribLocation(program, 'normal');
-		this.attributes.barycentric = gl.getAttribLocation(program, 'barycentric');
+		for (const uniformName in this.uniforms) {
+			this.uniforms[uniformName] = gl.getUniformLocation(program, camelToSnake(uniformName));
+		}
+
+		for (const attributeName in this.attributes) {
+			this.attributes[attributeName].location = gl.getAttribLocation(program, camelToSnake(attributeName));
+			console.log("Located vertex attribute", attributeName, this.attributes[attributeName]);
+		}
 
 		gl.enable(gl.CULL_FACE);
 		gl.cullFace(gl.BACK);
@@ -82,25 +114,16 @@ export class Shader {
 	}
 
 	bind(gl: WebGLRenderingContext, mesh: Mesh) {
-		// Position; 3x float
-		if (this.attributes.position > -1) {
-			gl.bindBuffer(gl.ARRAY_BUFFER, mesh.positionBuffer);
-			gl.enableVertexAttribArray(this.attributes.position);
-			gl.vertexAttribPointer(this.attributes.position, 3, gl.FLOAT, false, 0, 0);
-		}
-
-		// Normal; 3x float
-		if (this.attributes.normal > -1) {
-			gl.bindBuffer(gl.ARRAY_BUFFER, mesh.normalBuffer);
-			gl.enableVertexAttribArray(this.attributes.normal);
-			gl.vertexAttribPointer(this.attributes.normal, 3, gl.FLOAT, false, 0, 0);
-		}
-
-		// Barycentric coords; 3x float
-		if (this.attributes.barycentric > -1) {
-			gl.bindBuffer(gl.ARRAY_BUFFER, mesh.barycentricBuffer);
-			gl.enableVertexAttribArray(this.attributes.barycentric);
-			gl.vertexAttribPointer(this.attributes.barycentric, 3, gl.FLOAT, false, 0, 0);
+		for (const attributeName in this.attributes) {
+			const attribute = this.attributes[attributeName];
+			if (attribute.location == null || attribute.location === -1) continue;
+			const buffer = mesh.buffers[attributeName];
+			if (!buffer) {
+				throw `Unable to find ${attributeName} buffer on mesh`;
+			}
+			gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+			gl.enableVertexAttribArray(attribute.location);
+			gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, 0, 0);
 		}
 	}
 }

@@ -107,22 +107,32 @@ async function main() {
 	});
 	scene.addPawn(city);
 
+	const roadShader = scene.createShader(
+		roadVertexSource,
+		roadFragmentSource, {
+		attributes: {
+			direction: {
+				size: 1,
+				type: WebGLRenderingContext.FLOAT,
+			},
+		},
+	});
+
 	// Add road
 	const road = new Pawn(new Road(), {
 		color: [1.0, 0.0, 1.0, 1.0],
-		model: Matrix4.translation(0.0, -4.999, -200.0).multiply(Matrix4.scaling(5, 1, 200)),
-		shader: scene.createShader(roadVertexSource, roadFragmentSource),
+		model: Matrix4.translation(0.0, -4.9, -200.0).multiply(Matrix4.scaling(5, 1, 200)),
+		shader: roadShader,
 	});
 	scene.addPawn(road);
 
 	// Add car
 	const car = new Pawn(new Cube(), {
 		color: [1.0, 1.0, 0.0, 1.0],
-		model: Matrix4.translation(0.0, -3.5, -14.0).multiply(Matrix4.scaling(1.2, 0.5, 2.5)),
+		model: Matrix4.translation(0.0, -3.4, -14.0).multiply(Matrix4.scaling(1.2, 0.5, 2.5)),
 	});
 	scene.addPawn(car);
 
-	// TODO Add trees
 
 	// Add sun
 	const sun = new Pawn(new Cube(), {
@@ -130,6 +140,8 @@ async function main() {
 		model: Matrix4.translation(0.0, 20.0, -500.0).multiply(Matrix4.scaling(50, 50, 50)),
 	});
 	scene.addPawn(sun);
+
+	// TODO Add trees
 
 	// TODO Add mountains
 

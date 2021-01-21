@@ -1,4 +1,4 @@
-import { Shader } from './shader';
+import { Shader, ShaderOptions } from './shader';
 import { Pawn } from './pawn';
 import { Camera } from './camera';
 import { Color } from './material';
@@ -162,6 +162,7 @@ export class WebGLRenderer {
 		for (const pawn of this.pawns) {
 			const shader = pawn.shader || this.defaultShader;
 			shader.use(gl);
+
 			gl.uniformMatrix4fv(shader.uniforms.viewProj, false, viewProj.toArray());
 			gl.uniform4fv(shader.uniforms.fogColor, this.backgroundColor);
 			gl.uniform1f(shader.uniforms.lineWidth, this.lineWidth);
@@ -211,8 +212,8 @@ export class WebGLRenderer {
 		return this.pawns.length - 1;
 	}
 
-	createShader(vertSource: string, fragSource: string): Shader {
-		return new Shader(this.gl, vertSource, fragSource);
+	createShader(vertSource: string, fragSource: string, options?: ShaderOptions): Shader {
+		return new Shader(this.gl, vertSource, fragSource, options);
 	}
 
 	/**
@@ -229,7 +230,7 @@ export class WebGLRenderer {
 				this.frame++;
 				const frametime = performance.now() - now;
 				if (this.frame % 60 === 0) {
-					console.log('Draw time: %o ms', ((frametime * 100) | 0) / 100);
+					//console.log('Draw time: %o ms', ((frametime * 100) | 0) / 100);
 				}
 
 				const delay = 1000 / this.maxFps - frametime;

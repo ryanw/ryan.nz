@@ -29,7 +29,7 @@ export class Terrain extends Mesh {
 	}
 
 	upload(gl: WebGLRenderingContext) {
-		if (this.positions.length === 0) {
+		if (this.data.positions.length === 0) {
 			this.build();
 		}
 		super.upload(gl);
@@ -64,8 +64,8 @@ export class Terrain extends Mesh {
 				}
 			}
 		}
-		this.positions = new Float32Array(positions);
-		this.barycentrics = new Float32Array(barycentrics);
+		this.data.positions = new Float32Array(positions);
+		this.data.barycentrics = new Float32Array(barycentrics);
 		this.time = performance.now();
 	}
 

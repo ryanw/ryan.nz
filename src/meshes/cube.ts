@@ -3,10 +3,10 @@ import { Mesh } from '../mesh';
 export class Cube extends Mesh {
 	constructor() {
 		super();
-		this.positions = new Float32Array(CUBE_VERTICES);
+		this.data.positions = new Float32Array(CUBE_VERTICES);
 
 		const barycentrics = [];
-		for (let i = 0; i < this.positions.length / 3; i++) {
+		for (let i = 0; i < this.data.positions.length / 3; i++) {
 			if (i % 3 === 0) {
 				barycentrics.push(1.0);
 				barycentrics.push(0.0);
@@ -21,7 +21,7 @@ export class Cube extends Mesh {
 				barycentrics.push(1.0);
 			}
 		}
-		this.barycentrics = new Float32Array(barycentrics);
+		this.data.barycentrics = new Float32Array(barycentrics);
 	}
 }
 
