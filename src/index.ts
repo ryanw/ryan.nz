@@ -11,6 +11,10 @@ import roadVertexSource from './shaders/road.vert.glsl';
 import roadFragmentSource from './shaders/road.frag.glsl';
 import sunVertexSource from './shaders/sun.vert.glsl';
 import sunFragmentSource from './shaders/sun.frag.glsl';
+import carVertexSource from './shaders/car.vert.glsl';
+import carFragmentSource from './shaders/car.frag.glsl';
+import terrainVertexSource from './shaders/terrain.vert.glsl';
+import terrainFragmentSource from './shaders/terrain.frag.glsl';
 
 type Rect = [number, number, number, number];
 function rectOverlaps(rect0: Rect, rect1: Rect): boolean {
@@ -42,8 +46,8 @@ function createCityscape(radius: number, count: number): Pawn[] {
 	let attempts = 0;
 	for (let i = 1; i <= count; i++) {
 		// Building shape
-		const width = 1.0 + Math.random() * 2;
-		const depth = 0.5 + Math.random() * 2;
+		const width = 3.0 + Math.random() * 3;
+		const depth = 3.5 + Math.random() * 3;
 
 		// Building position
 		pos: while(attempts < maxAttempts) {
@@ -51,10 +55,10 @@ function createCityscape(radius: number, count: number): Pawn[] {
 
 			const angle = Math.random()  * Math.PI * 2;
 			const dist = Math.random() * radius;
-			const height = 1.0 + Math.random() * 2 * ((radius - dist) / 10);
+			const height = 1.0 + Math.random() * 2 * ((radius - dist) / 15);
 			const x = dist * Math.cos(angle);
 			const y = height;
-			const z = dist * Math.sin(angle);
+			const z = 0.2 * dist * Math.sin(angle);
 			const newBuilding: Rect = [x - width, z - depth, width * 2, depth * 2];
 
 			// Test for collision with existing building
@@ -94,6 +98,7 @@ async function main() {
 	const surface = new Pawn(new Terrain(), {
 		color: [0.0, 0.8, 1.0, 0.0],
 		model: Matrix4.translation(0.0, -4.0, -320.0).multiply(Matrix4.scaling(7.5, 1.0, 20.0)),
+		shader: scene.createShader(terrainVertexSource, terrainFragmentSource),
 	});
 	scene.addPawn(surface);
 
@@ -105,8 +110,8 @@ async function main() {
 	scene.addPawn(cube);
 
 	// Add cityscape
-	const city = new Pawn(createCityscape(100, 300), {
-		model: Matrix4.translation(0, -4.0, -400.0),
+	const city = new Pawn(createCityscape(300, 300), {
+		model: Matrix4.translation(0, -10.0, -650.0),
 	});
 	scene.addPawn(city);
 
@@ -123,7 +128,7 @@ async function main() {
 	});
 	const road = new Pawn(new Road(), {
 		color: [1.0, 0.0, 1.0, 1.0],
-		model: Matrix4.translation(0.0, -4.9, -200.0).multiply(Matrix4.scaling(5, 1, 200)),
+		model: Matrix4.translation(0.0, -4.9, -300.0).multiply(Matrix4.scaling(5, 1, 400)),
 		shader: roadShader,
 	});
 	scene.addPawn(road);
@@ -132,16 +137,16 @@ async function main() {
 	const car = new Pawn(new Cube(), {
 		color: [1.0, 1.0, 0.0, 1.0],
 		model: Matrix4.translation(0.0, -3.4, -14.0).multiply(Matrix4.scaling(1.2, 0.5, 2.5)),
+		shader: scene.createShader(carVertexSource, carFragmentSource),
 	});
 	scene.addPawn(car);
 
 
 	// Add sun
-	const sunShader = scene.createShader(sunVertexSource, sunFragmentSource);
 	const sun = new Pawn(new Sun(), {
 		color: [1.0, 1.0, 0.0, 1.0],
-		model: Matrix4.translation(0.0, 20.0, -500.0).multiply(Matrix4.scaling(60, 60, 60)),
-		shader: sunShader,
+		model: Matrix4.translation(0.0, 50.0, -1000.0).multiply(Matrix4.scaling(150, 150, 150)),
+		shader: scene.createShader(sunVertexSource, sunFragmentSource),
 	});
 	scene.addPawn(sun);
 

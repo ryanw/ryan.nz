@@ -1,3 +1,4 @@
+uniform float time;
 uniform mat4 view_proj;
 uniform mat4 model;
 uniform vec4 fill_color;
@@ -14,14 +15,17 @@ varying vec4 frag_color;
 varying vec3 frag_barycentric;
 varying float frag_line_width;
 
-float fog_dist = 1000.0;
+float fog_dist = 700.0;
 
 void main(void) {
 	vec3 light = vec3(0.8, 0.4, -0.5);
 	mat4 mvp = model * view_proj;
 	float shade = dot(normalize(light), (model * normalize(vec4(position, 1.0))).xyz);
+	float road_offset = mod((time / 1000.0), 1.0);
+	vec3 offset_position = position;
+	offset_position.z += road_offset;
 
-	gl_Position = vec4(position, 1.0) * mvp;
+	gl_Position = vec4(offset_position, 1.0) * mvp;
 	gl_PointSize = 8.0;
 	fog_depth = max(0.0, min(1.0, gl_Position.z / fog_dist));
 	frag_fog_color = fog_color;
