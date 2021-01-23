@@ -9,6 +9,7 @@ export class Mesh {
 		normals: new Float32Array(),
 		barycentrics: new Float32Array(),
 	};
+	uniforms: { [key: string]: number | number[] } = {};
 
 	get isAllocated(): boolean {
 		return Boolean(this.buffers.position);

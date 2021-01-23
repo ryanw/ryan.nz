@@ -3,9 +3,10 @@ import { Terrain } from './meshes/terrain';
 import { Cube } from './meshes/cube';
 import { Sun } from './meshes/sun';
 import { Road } from './meshes/road';
-import { Matrix4 } from './geom';
 import { Pawn } from './pawn';
 import { Camera } from './camera';
+import { Point3, Vector3, Matrix4 } from './geom';
+import SimplexNoise from './simplex-noise';
 
 import roadVertexSource from './shaders/road.vert.glsl';
 import roadFragmentSource from './shaders/road.frag.glsl';
@@ -95,7 +96,9 @@ async function main() {
 	scene.updateSize();
 
 	// Add terrain
-	const surface = new Pawn(new Terrain(), {
+	const landscape = new WeirdLandscape();
+	const terrain = new Terrain(landscape.height.bind(landscape));
+	const surface = new Pawn(terrain, {
 		color: [0.0, 0.8, 1.0, 0.0],
 		model: Matrix4.translation(0.0, -4.0, -320.0).multiply(Matrix4.scaling(7.5, 1.0, 20.0)),
 		shader: scene.createShader(terrainVertexSource, terrainFragmentSource),
@@ -128,7 +131,7 @@ async function main() {
 	});
 	const road = new Pawn(new Road(), {
 		color: [1.0, 0.0, 1.0, 1.0],
-		model: Matrix4.translation(0.0, -4.9, -300.0).multiply(Matrix4.scaling(5, 1, 400)),
+		model: Matrix4.translation(0.0, -4.75, -300.0).multiply(Matrix4.scaling(5, 1, 400)),
 		shader: roadShader,
 	});
 	scene.addPawn(road);
@@ -174,10 +177,24 @@ async function main() {
 	});
 
 	scene.addEventListeners();
+	let roadOffset = 0.0;
+	let adjust = 0.0;
+	let before = 0.0;
 	while (true) {
+		roadOffset = performance.now() / 30.0;
+		road.mesh.uniforms.roadOffset = roadOffset;
+		terrain.uniforms.roadOffset = roadOffset;
+		terrain.offset[1] = (-roadOffset / 20.0) - 1.5;
+		const after = (terrain.offset[1] * 2) | 0;
+		if (before !== after) {
+			before = after;
+			terrain.build();
+			terrain.upload(scene.gl);
+		}
 		await scene.redraw();
+
 		
-		if (scene.mouseButtons.has(0)) {
+		if (scene.mouseButtons.has(0) || scene.isGrabbed) {
 			const mouseSpeed = 0.0005;
 			const [mX, mY] = scene.mouseMovement;
 
@@ -188,6 +205,14 @@ async function main() {
 		}
 		scene.resetMouseMovement();
 
+		if (scene.heldKeys.has('z')) {
+			adjust -= 0.1;
+			console.log("AA", adjust);
+		}
+		if (scene.heldKeys.has('x')) {
+			adjust += 0.1;
+			console.log("AA", adjust);
+		}
 		if (scene.heldKeys.has('w')) {
 			camera.translate(0.0, 0.0, -1.0);
 		}
@@ -213,5 +238,49 @@ async function main() {
 		}
 	}
 }
+
+class WeirdLandscape {
+	position = [0.0, 0.0, 0.0];
+	hillNoise = new SimplexNoise(0);
+	seaNoise = new SimplexNoise(0);
+	shapeNoise = new SimplexNoise(0);
+
+	oceanLevel = 0.0;
+	offset: Vector3 = [0.0, 0.0, 0.0];
+
+	height(x: number, z: number): number {
+		// Distance from road
+		const roadDist = Math.abs(x + 1) - 1.0;
+
+		// Create lumpy space
+		const grid = 10.0;
+		let val = 0.0;
+		val = Math.abs(this.hillNoise.noise2D((x | 0) / grid, (z | 0) / grid));
+		val *= 100.0;
+
+		// Flatten near road
+		const falloff = 30;
+		if (roadDist < falloff) {
+			if (roadDist < 0) {
+				val = 0;
+			}
+			else {
+				val = val * (roadDist / falloff);
+			}
+		}
+
+		return val;
+	}
+
+	shapeOffset(position: Point3): Vector3 {
+		const scale = 40.0;
+		const x = scale * this.shapeNoise.noise3D(position[0], position[1], position[2]);
+		const y = scale * this.shapeNoise.noise3D(position[0], position[1], position[2] + 1000);
+		const z = scale * this.shapeNoise.noise3D(position[0], position[1], position[2] + 2000);
+
+		return [x, y, z];
+	}
+}
+
 
 window.addEventListener('DOMContentLoaded', main);

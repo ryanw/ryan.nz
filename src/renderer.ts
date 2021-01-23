@@ -161,12 +161,13 @@ export class WebGLRenderer {
 
 		for (const pawn of this.pawns) {
 			const shader = pawn.shader || this.defaultShader;
+			const uniforms = shader.uniforms;
 			shader.use(gl);
 
-			gl.uniformMatrix4fv(shader.uniforms.viewProj, false, viewProj.toArray());
-			gl.uniform4fv(shader.uniforms.fogColor, this.backgroundColor);
-			gl.uniform1f(shader.uniforms.lineWidth, this.lineWidth);
-			gl.uniform1f(shader.uniforms.time, performance.now());
+			gl.uniformMatrix4fv(uniforms.viewProj.location, false, viewProj.toArray());
+			gl.uniform4fv(uniforms.fogColor.location, this.backgroundColor);
+			gl.uniform1f(uniforms.lineWidth.location, this.lineWidth);
+			gl.uniform1f(uniforms.time.location, performance.now());
 			this.drawPawn(pawn);
 		}
 
@@ -182,11 +183,32 @@ export class WebGLRenderer {
 		if (mesh) {
 			const gl = this.gl;
 			const shader = pawn.shader || this.defaultShader;
-			gl.uniformMatrix4fv(shader.uniforms.model, false, pawnModel.toArray());
-			if (material?.color) {
-				gl.uniform4fv(shader.uniforms.fillColor, material.color);
-			}
+			const uniforms = shader.uniforms;
 			shader.bind(gl, mesh);
+
+			gl.uniformMatrix4fv(uniforms.model.location, false, pawnModel.toArray());
+			if (material?.color) {
+				gl.uniform4fv(uniforms.fillColor.location, material.color);
+			}
+
+			for (const uniformName in mesh.uniforms) {
+				const uniform = shader.uniforms[uniformName];
+				if (!uniform) {
+					throw `Unable to find '${uniformName}' uniform in shader`;
+				}
+				const value = mesh.uniforms[uniformName];
+				switch (uniform.type) {
+					case WebGLRenderingContext.FLOAT:
+						if (typeof value !== 'number') {
+							throw `Uniform '${uniformName}' expected number but got: ${typeof value}`;
+						}
+						gl.uniform1f(uniform.location, value);
+						break;
+					// TODO other uniform types
+					default:
+						throw `Unsupported uniform type: ${uniform.type}`;
+				}
+			}
 			mesh.draw(gl);
 		}
 

@@ -8,6 +8,7 @@ export class Road extends Mesh {
 			1, 1, 1,
 			0, 0, 0,
 		]);
+		this.uniforms = { roadOffset: 0.0 };
 
 		const barycentrics = [];
 		for (let i = 0; i < this.data.positions.length / 3; i++) {

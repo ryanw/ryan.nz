@@ -2,6 +2,7 @@ import { Mesh } from './mesh';
 
 export interface ShaderOptions {
 	attributes?: { [key: string]: WebGLAttribute };
+	uniforms?: { [key: string]: WebGLUniform };
 }
 
 export interface WebGLAttribute {
@@ -10,13 +11,21 @@ export interface WebGLAttribute {
 	type: number;
 };
 
+export interface WebGLUniform {
+	location?: WebGLUniformLocation;
+	type: number;
+};
+
 function camelToSnake(camel: string): string {
 	return camel.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
+type WebGLUniformMap = { [key: string]: WebGLUniform };
+type WebGLAttributeMap = { [key: string]: WebGLAttribute };
+
 export class Shader {
 	program: WebGLProgram;
-	attributes: { [key: string]: WebGLAttribute } = {
+	attributes: WebGLAttributeMap = {
 		position: {
 			type: WebGLRenderingContext.FLOAT,
 			size: 3,
@@ -33,13 +42,35 @@ export class Shader {
 			location: null,
 		},
 	};
-	uniforms: { [key: string]: WebGLUniformLocation } = {
-		time: null,
-		viewProj: null,
-		model: null,
-		fillColor: null,
-		fogColor: null,
-		lineWidth: null,
+	uniforms: WebGLUniformMap = {
+		time: {
+			type: WebGLRenderingContext.FLOAT,
+			location: null,
+		},
+		roadOffset: {
+			type: WebGLRenderingContext.FLOAT,
+			location: null,
+		},
+		viewProj: {
+			type: WebGLRenderingContext.FLOAT_MAT4,
+			location: null,
+		},
+		model: {
+			type: WebGLRenderingContext.FLOAT_MAT4,
+			location: null,
+		},
+		fillColor: {
+			type: WebGLRenderingContext.FLOAT_VEC4,
+			location: null,
+		},
+		fogColor: {
+			type: WebGLRenderingContext.FLOAT_VEC4,
+			location: null,
+		},
+		lineWidth: {
+			type: WebGLRenderingContext.FLOAT,
+			location: null,
+		},
 	};
 
 	constructor(gl?: WebGLRenderingContext, vertSource?: string, fragSource?: string, options?: ShaderOptions) {
@@ -95,7 +126,7 @@ export class Shader {
 
 		// Attribute/Uniform locations
 		for (const uniformName in this.uniforms) {
-			this.uniforms[uniformName] = gl.getUniformLocation(program, camelToSnake(uniformName));
+			this.uniforms[uniformName].location = gl.getUniformLocation(program, camelToSnake(uniformName));
 		}
 
 		for (const attributeName in this.attributes) {
