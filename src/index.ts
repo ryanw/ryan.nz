@@ -86,6 +86,7 @@ function createCityscape(radius: number, count: number): Pawn[] {
 
 async function main() {
 	const scene = new WebGLRenderer();
+	const debugEnabled = !PRODUCTION || window.location.search.indexOf('debug') !== -1;
 	scene.attach(document.body);
 
 	// Add a camera
@@ -163,7 +164,7 @@ async function main() {
 	// TODO Add mountains
 
 	// Toggle control
-	if (!PRODUCTION) {
+	if (debugEnabled) {
 		document.addEventListener('keydown', (e) => {
 			if (e.key === ' ') {
 				if (scene.isGrabbed) {
@@ -195,7 +196,7 @@ async function main() {
 		terrain.build();
 		terrain.upload(scene.gl);
 
-		if ((!PRODUCTION && scene.mouseButtons.has(0)) || scene.isGrabbed) {
+		if ((debugEnabled && scene.mouseButtons.has(0)) || scene.isGrabbed) {
 			const mouseSpeed = 0.0005;
 			const [mX, mY] = scene.mouseMovement;
 
