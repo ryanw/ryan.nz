@@ -49,8 +49,8 @@ function createCityscape(radius: number, count: number): Pawn[] {
 	let attempts = 0;
 	for (let i = 1; i <= count; i++) {
 		// Building shape
-		const width = 3.0 + Math.random() * 3;
-		const depth = 3.5 + Math.random() * 3;
+		const width = 5.0 + Math.random() * 6;
+		const depth = 3.0 + Math.random() * 20;
 
 		// Building position
 		pos: while(attempts < maxAttempts) {
@@ -58,7 +58,7 @@ function createCityscape(radius: number, count: number): Pawn[] {
 
 			const angle = Math.random()  * Math.PI * 2;
 			const dist = Math.random() * radius;
-			const height = 1.0 + Math.random() * 2 * ((radius - dist) / 4);
+			const height = 5.0 + Math.random() * 2 * ((radius - dist) / 5);
 			const x = dist * Math.cos(angle);
 			const y = height;
 			const z = 0.5 * dist * Math.sin(angle);
@@ -115,8 +115,8 @@ async function main() {
 	scene.addPawn(cube);
 
 	// Add cityscape
-	const city = new Pawn(createCityscape(100, 100), {
-		model: Matrix4.translation(0, -10.0, -650.0),
+	const city = new Pawn(createCityscape(150, 50), {
+		model: Matrix4.translation(0, -5.0, -650.0),
 	});
 	scene.addPawn(city);
 
@@ -141,7 +141,7 @@ async function main() {
 	// Add car
 	const car = new Pawn(new Obj(deloreanObj), {
 		color: [1.0, 1.0, 0.0, 1.0],
-		model: Matrix4.translation(0.0, -3.4, -14.0).multiply(Matrix4.rotation(0, Math.PI, 0)).multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
+		model: Matrix4.translation(0.0, -3.4, -17.0).multiply(Matrix4.rotation(0, Math.PI, 0)).multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
 		shader: scene.createShader(carVertexSource, carFragmentSource),
 	});
 	scene.addPawn(car);
@@ -182,13 +182,14 @@ async function main() {
 	let roadOffset = 0.0;
 	let adjust = 0.0;
 	while (true) {
+		await scene.redraw();
+
 		roadOffset = performance.now() / 30.0;
 		road.mesh.uniforms.roadOffset = roadOffset;
 		terrain.uniforms.roadOffset = roadOffset;
 		terrain.offset[1] = (-roadOffset / 20.0) - 1.5;
 		terrain.build();
 		terrain.upload(scene.gl);
-		await scene.redraw();
 
 		
 		if (scene.mouseButtons.has(0) || scene.isGrabbed) {

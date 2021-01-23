@@ -131,7 +131,6 @@ export class Shader {
 
 		for (const attributeName in this.attributes) {
 			this.attributes[attributeName].location = gl.getAttribLocation(program, camelToSnake(attributeName));
-			console.log("Located vertex attribute", attributeName, this.attributes[attributeName]);
 		}
 
 		gl.enable(gl.CULL_FACE);
