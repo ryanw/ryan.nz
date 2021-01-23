@@ -1,5 +1,6 @@
 import { WebGLRenderer } from './renderer';
 import { Terrain } from './meshes/terrain';
+import { Obj } from './meshes/obj';
 import { Cube } from './meshes/cube';
 import { Sun } from './meshes/sun';
 import { Road } from './meshes/road';
@@ -8,6 +9,7 @@ import { Camera } from './camera';
 import { Point3, Vector3, Matrix4 } from './geom';
 import SimplexNoise from './simplex-noise';
 
+import deloreanObj from './delorean.obj';
 import roadVertexSource from './shaders/road.vert.glsl';
 import roadFragmentSource from './shaders/road.frag.glsl';
 import sunVertexSource from './shaders/sun.vert.glsl';
@@ -137,9 +139,9 @@ async function main() {
 	scene.addPawn(road);
 
 	// Add car
-	const car = new Pawn(new Cube(), {
+	const car = new Pawn(new Obj(deloreanObj), {
 		color: [1.0, 1.0, 0.0, 1.0],
-		model: Matrix4.translation(0.0, -3.4, -14.0).multiply(Matrix4.scaling(1.2, 0.5, 2.5)),
+		model: Matrix4.translation(0.0, -3.4, -14.0).multiply(Matrix4.rotation(0, Math.PI, 0)).multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
 		shader: scene.createShader(carVertexSource, carFragmentSource),
 	});
 	scene.addPawn(car);

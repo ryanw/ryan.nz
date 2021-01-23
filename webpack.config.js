@@ -24,6 +24,9 @@ module.exports = {
 
 			// Shader files
 			{ test: /\.glsl$/, use: 'raw-loader' },
+
+			// OBJ Mesh files
+			{ test: /\.obj$/, use: 'raw-loader' },
 		],
 	},
 	resolve: {
