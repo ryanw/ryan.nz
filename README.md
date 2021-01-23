@@ -13,3 +13,6 @@ https://www.dafont.com/lazer84.font
 
 Delorean model by flathead from:  
 https://sketchfab.com/3d-models/low-poly-delorean-a2f61121f758482188928bf04f610452
+
+Simplex Noise by Jonas Wagner from:  
+https://github.com/jwagner/simplex-noise.js
