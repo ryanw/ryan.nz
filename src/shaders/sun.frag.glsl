@@ -17,9 +17,25 @@ void main(void) {
 		if (frag_uv.z > 0.99) {
 			grad *= -1.0;
 		}
-		grad = map(grad, 0.0, 1.0, 0.3, 1.3);
-		vec3 color = mix(vec3(1.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), grad);
-		gl_FragColor = vec4(color, alpha);
+		// Some stripes
+		float stripe = (grad + 1.0) / 2.0;
+		if (
+				   (stripe > 0.01 && stripe < 0.09)
+				|| (stripe > 0.14 && stripe < 0.21)
+				|| (stripe > 0.26 && stripe < 0.32)
+				|| (stripe > 0.37 && stripe < 0.43)
+				|| (stripe > 0.48 && stripe < 0.53)
+				|| (stripe > 0.58 && stripe < 0.62)
+				|| (stripe > 0.67 && stripe < 0.70)
+				|| (stripe > 0.75 && stripe < 0.77)
+				|| (stripe > 0.82 && stripe < 0.83)
+			) {
+			gl_FragColor = vec4(0.0);
+		} else {
+			grad = map(grad, 0.0, 1.0, 0.3, 1.3);
+			vec3 color = mix(vec3(1.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), grad);
+			gl_FragColor = vec4(color, alpha);
+		}
 	} else {
 		gl_FragColor = vec4(0.0);
 	}

@@ -77,7 +77,7 @@ function createCityscape(radius: number, count: number): Pawn[] {
 
 			pawns.push(
 				new Pawn(new Cube(), {
-					color: [Math.random(), Math.random(), Math.random(), 1.0],
+					color: [0.0, 0.0, 0.0, 0.0],
 					model: Matrix4.translation(x, y, z).multiply(Matrix4.scaling(width, height, depth)),
 				})
 			);
