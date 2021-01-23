@@ -11,7 +11,7 @@ export class WebGLRenderer {
 	defaultShader: Shader;
 	pawns: Pawn[] = [];
 	scale = 1.0 * window.devicePixelRatio;
-	lineWidth = 2 * window.devicePixelRatio;
+	lineWidth = 3 * window.devicePixelRatio;
 	antiAlias = true;
 	camera: Camera = new Camera();
 	maxFps = 200;

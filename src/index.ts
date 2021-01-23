@@ -179,18 +179,13 @@ async function main() {
 	scene.addEventListeners();
 	let roadOffset = 0.0;
 	let adjust = 0.0;
-	let before = 0.0;
 	while (true) {
 		roadOffset = performance.now() / 30.0;
 		road.mesh.uniforms.roadOffset = roadOffset;
 		terrain.uniforms.roadOffset = roadOffset;
 		terrain.offset[1] = (-roadOffset / 20.0) - 1.5;
-		const after = (terrain.offset[1] * 2) | 0;
-		if (before !== after) {
-			before = after;
-			terrain.build();
-			terrain.upload(scene.gl);
-		}
+		terrain.build();
+		terrain.upload(scene.gl);
 		await scene.redraw();
 
 		

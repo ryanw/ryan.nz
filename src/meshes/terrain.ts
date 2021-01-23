@@ -38,7 +38,7 @@ export class Terrain extends Mesh {
 	build() {
 		const positions: number[] = [];
 		const barycentrics: number[] = [];
-		const w = 64;
+		const w = 32;
 		const d = 16;
 
 		const [ox, oz] = this.offset;

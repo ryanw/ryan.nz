@@ -17,6 +17,7 @@ varying vec3 frag_barycentric;
 varying float frag_line_width;
 
 float fog_dist = 700.0;
+float far_edge = 500.0;
 
 void main(void) {
 	vec3 light = vec3(0.8, 0.4, -0.5);
@@ -29,8 +30,19 @@ void main(void) {
 		0.0, 0.0, 0.0, 1.0
 	);
 
-	mat4 mvp = model * road_trans * view_proj;
-	gl_Position = vec4(position, 1.0) * mvp;
+	vec4 flat_pos = vec4(position, 1.0) * model * road_trans;
+	if (flat_pos.z < -far_edge) {
+		float grad = -(flat_pos.z + far_edge) / 200.0;
+		if (grad > 1.0) {
+			grad = 1.0;
+		}
+		if (grad < 0.0) {
+			grad = 0.0;
+		}
+		float base = (vec4(0.0, 0.0, 0.0, 1.0) * model).y;
+		flat_pos.y =  mix(flat_pos.y, base, grad);
+	}
+	gl_Position = flat_pos * view_proj;
 
 	fog_depth = max(0.0, min(1.0, gl_Position.z / fog_dist));
 	frag_fog_color = fog_color;
