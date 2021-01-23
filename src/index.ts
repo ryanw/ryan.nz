@@ -197,7 +197,7 @@ async function main() {
 		terrain.upload(scene.gl);
 
 		
-		if (scene.mouseButtons.has(0) || scene.isGrabbed) {
+		if (scene.isGrabbed) {
 			const mouseSpeed = 0.0005;
 			const [mX, mY] = scene.mouseMovement;
 
