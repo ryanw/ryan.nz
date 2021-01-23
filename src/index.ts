@@ -19,6 +19,8 @@ import carFragmentSource from './shaders/car.frag.glsl';
 import terrainVertexSource from './shaders/terrain.vert.glsl';
 import terrainFragmentSource from './shaders/terrain.frag.glsl';
 
+const DEBUG_ENABLED = !PRODUCTION || window.location.search.indexOf('debug') !== -1;
+
 type Rect = [number, number, number, number];
 function rectOverlaps(rect0: Rect, rect1: Rect): boolean {
 	const l0 = rect0[0];
@@ -86,7 +88,6 @@ function createCityscape(radius: number, count: number): Pawn[] {
 
 async function main() {
 	const scene = new WebGLRenderer();
-	const debugEnabled = !PRODUCTION || window.location.search.indexOf('debug') !== -1;
 	scene.attach(document.body);
 
 	// Add a camera
@@ -104,13 +105,6 @@ async function main() {
 		shader: scene.createShader(terrainVertexSource, terrainFragmentSource),
 	});
 	scene.addPawn(surface);
-
-	// Test Cube
-	const cube = new Pawn(new Cube(), {
-		color: [1.0, 1.0, 0.0, 1.0],
-		model: Matrix4.translation(0.0, 0.0, 0.0).multiply(Matrix4.scaling(0.1, 0.1, 0.1)),
-	});
-	scene.addPawn(cube);
 
 	// Add cityscape
 	const city = new Pawn(createCityscape(150, 50), {
@@ -135,12 +129,12 @@ async function main() {
 	scene.addPawn(road);
 
 	// Add car
-	const carOutline = new Pawn(new Obj(deloreanObj, { flipFaces: true, scale: 1.03 }), {
-		color: [0.0, 1.0, 1.0, 1.0],
-		shader: scene.createShader(carVertexSource, carFragmentSource),
-	});
 	const car = new Pawn(new Obj(deloreanObj), {
 		color: [0.0, 0.0, 0.0, 1.0],
+		shader: scene.createShader(carVertexSource, carFragmentSource),
+	});
+	const carOutline = new Pawn(new Obj(deloreanObj, { flipFaces: true, scale: 1.03 }), {
+		color: [0.0, 1.0, 1.0, 1.0],
 		shader: scene.createShader(carVertexSource, carFragmentSource),
 	});
 	scene.addPawn(
@@ -155,16 +149,19 @@ async function main() {
 	const sun = new Pawn(new Sun(), {
 		color: [1.0, 1.0, 0.0, 1.0],
 		model: Matrix4.translation(0.0, 50.0, -1000.0).multiply(Matrix4.scaling(150, 150, 150)),
-		shader: scene.createShader(sunVertexSource, sunFragmentSource),
+		shader: scene.createShader(sunVertexSource, sunFragmentSource, {
+			attributes: {
+				uvs: {
+					size: 3,
+					type: WebGLRenderingContext.FLOAT,
+				},
+			},
+		}),
 	});
 	scene.addPawn(sun);
 
-	// TODO Add trees
-
-	// TODO Add mountains
-
 	// Toggle control
-	if (debugEnabled) {
+	if (DEBUG_ENABLED) {
 		document.addEventListener('keydown', (e) => {
 			if (e.key === ' ') {
 				if (scene.isGrabbed) {
@@ -196,57 +193,53 @@ async function main() {
 		terrain.build();
 		terrain.upload(scene.gl);
 
-		if ((debugEnabled && scene.mouseButtons.has(0)) || scene.isGrabbed) {
-			const mouseSpeed = 0.0005;
-			const [mX, mY] = scene.mouseMovement;
+		if (DEBUG_ENABLED) {
+			if (scene.mouseButtons.has(0) || scene.isGrabbed) {
+				const mouseSpeed = 0.0005;
+				const [mX, mY] = scene.mouseMovement;
 
-			const x = mY * mouseSpeed;
-			const y = mX * mouseSpeed;
+				const x = mY * mouseSpeed;
+				const y = mX * mouseSpeed;
 
-			scene.camera.rotate(x, y);
-		}
-		scene.resetMouseMovement();
+				scene.camera.rotate(x, y);
+			}
+			scene.resetMouseMovement();
 
-		if (scene.heldKeys.has('w')) {
-			camera.translate(0.0, 0.0, -1.0);
-		}
+			if (scene.heldKeys.has('w')) {
+				camera.translate(0.0, 0.0, -1.0);
+			}
 
-		if (scene.heldKeys.has('s')) {
-			camera.translate(0.0, 0.0, 1.0);
-		}
+			if (scene.heldKeys.has('s')) {
+				camera.translate(0.0, 0.0, 1.0);
+			}
 
-		if (scene.heldKeys.has('a')) {
-			camera.translate(-1.0, 0.0, 0.0);
-		}
+			if (scene.heldKeys.has('a')) {
+				camera.translate(-1.0, 0.0, 0.0);
+			}
 
-		if (scene.heldKeys.has('d')) {
-			camera.translate(1.0, 0.0, 0.0);
-		}
+			if (scene.heldKeys.has('d')) {
+				camera.translate(1.0, 0.0, 0.0);
+			}
 
-		if (scene.heldKeys.has('q')) {
-			camera.translate(0.0, -1.0, 0.0);
-		}
+			if (scene.heldKeys.has('q')) {
+				camera.translate(0.0, -1.0, 0.0);
+			}
 
-		if (scene.heldKeys.has('e')) {
-			camera.translate(0.0, 1.0, 0.0);
+			if (scene.heldKeys.has('e')) {
+				camera.translate(0.0, 1.0, 0.0);
+			}
 		}
 	}
 }
 
 class WeirdLandscape {
-	position = [0.0, 0.0, 0.0];
 	hillNoise = new SimplexNoise(0);
-	seaNoise = new SimplexNoise(0);
-	shapeNoise = new SimplexNoise(0);
-
-	oceanLevel = 0.0;
-	offset: Vector3 = [0.0, 0.0, 0.0];
 
 	height(x: number, z: number): number {
 		// Distance from road
 		const roadDist = Math.abs(x + 1) - 1.0;
 
-		// Create lumpy space
+		// Create lumpy mountains
 		const grid = 10.0;
 		let val = 0.0;
 		val = Math.abs(this.hillNoise.noise2D((x | 0) / grid, (z | 0) / grid));
@@ -263,15 +256,6 @@ class WeirdLandscape {
 		}
 
 		return val;
-	}
-
-	shapeOffset(position: Point3): Vector3 {
-		const scale = 40.0;
-		const x = scale * this.shapeNoise.noise3D(position[0], position[1], position[2]);
-		const y = scale * this.shapeNoise.noise3D(position[0], position[1], position[2] + 1000);
-		const z = scale * this.shapeNoise.noise3D(position[0], position[1], position[2] + 2000);
-
-		return [x, y, z];
 	}
 }
 

@@ -146,7 +146,9 @@ export class Shader {
 	bind(gl: WebGLRenderingContext, mesh: Mesh) {
 		for (const attributeName in this.attributes) {
 			const attribute = this.attributes[attributeName];
-			if (attribute.location == null || attribute.location === -1) continue;
+			if (attribute.location == null || attribute.location === -1) {
+				continue;
+			}
 			const buffer = mesh.buffers[attributeName];
 			if (!buffer) {
 				throw `Unable to find ${attributeName} buffer on mesh`;

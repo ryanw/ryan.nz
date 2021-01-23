@@ -2,14 +2,12 @@ uniform float road_offset;
 uniform mat4 view_proj;
 uniform mat4 model;
 uniform vec4 fill_color;
-uniform vec4 fog_color;
 
 attribute vec3 position;
 attribute vec3 normal;
 attribute vec3 barycentric;
 attribute float direction;
 
-varying vec4 frag_fog_color;
 varying float fog_depth;
 varying vec4 frag_color;
 varying vec3 frag_barycentric;
@@ -33,9 +31,7 @@ void main(void) {
 	mat4 mvp = model * road_trans * view_proj;
 
 	gl_Position = vec4(position, 1.0) * mvp;
-	gl_PointSize = 8.0;
 	fog_depth = max(0.0, min(1.0, gl_Position.z / fog_dist));
-	frag_fog_color = fog_color;
 
 	vec4 surface = vec4(fill_color.xyz, 1.0);
 	frag_color = surface;

@@ -1,20 +1,15 @@
-uniform float time;
 uniform mat4 view_proj;
 uniform mat4 model;
 uniform vec4 fill_color;
-uniform vec4 fog_color;
-uniform float line_width;
 uniform float road_offset;
 
 attribute vec3 position;
 attribute vec3 normal;
 attribute vec3 barycentric;
 
-varying vec4 frag_fog_color;
 varying float fog_depth;
 varying vec4 frag_color;
 varying vec3 frag_barycentric;
-varying float frag_line_width;
 
 float fog_dist = 700.0;
 float far_edge = 500.0;
@@ -45,8 +40,6 @@ void main(void) {
 	gl_Position = flat_pos * view_proj;
 
 	fog_depth = max(0.0, min(1.0, gl_Position.z / fog_dist));
-	frag_fog_color = fog_color;
-	frag_line_width = line_width;
 
 	vec4 surface = vec4(fill_color.xyz, 1.0);
 	// Using the alpha as a "special" flag

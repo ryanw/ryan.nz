@@ -6,7 +6,7 @@ export class Sun extends Mesh {
 		this.data.positions = new Float32Array(VERTICES);
 
 		// prettier-ignore
-		const barycentrics = [
+		this.data.uvs = new Float32Array([
 			-1.0, 1.0, 0.0,
 			1.0, 1.0, 0.0,
 			-1.0, -1.0, 0.0,
@@ -14,8 +14,21 @@ export class Sun extends Mesh {
 			-1.0, 1.0, 1.0,
 			1.0, 1.0, 1.0,
 			-1.0, -1.0, 1.0,
-		];
-		this.data.barycentrics = new Float32Array(barycentrics);
+		]);
+	}
+
+	allocate(gl: WebGLRenderingContext) {
+		if (this.isAllocated) {
+			return;
+		}
+		super.allocate(gl);
+		this.buffers.uvs = gl.createBuffer();
+	}
+
+	upload(gl: WebGLRenderingContext) {
+		super.upload(gl);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.uvs);
+		gl.bufferData(gl.ARRAY_BUFFER, this.data.uvs, gl.DYNAMIC_DRAW);
 	}
 }
 
@@ -29,4 +42,4 @@ const VERTICES = [
 	-1.0, -1.0, 1.0,
 	1.0, -1.0, 1.0,
 	-1.0, 1.0, 1.0,
-]; 
+];

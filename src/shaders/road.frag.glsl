@@ -2,7 +2,8 @@
 precision mediump float;
 
 uniform float time;
-varying vec4 frag_fog_color;
+uniform vec4 fog_color;
+
 varying float fog_depth;
 varying vec4 frag_color;
 varying vec3 frag_barycentric;
@@ -34,6 +35,6 @@ void main(void) {
 	else {
 	}
 
-	gl_FragColor = mix(color, frag_fog_color, fog_depth);
+	gl_FragColor = mix(color, fog_color, fog_depth);
 }
 
