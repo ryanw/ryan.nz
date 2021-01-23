@@ -139,12 +139,17 @@ async function main() {
 	scene.addPawn(road);
 
 	// Add car
-	const car = new Pawn(new Obj(deloreanObj), {
-		color: [1.0, 1.0, 0.0, 1.0],
-		model: Matrix4.translation(0.0, -3.4, -17.0).multiply(Matrix4.rotation(0, Math.PI, 0)).multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
+	const carOutline = new Pawn(new Obj(deloreanObj, { flipFaces: true, scale: 1.03 }), {
+		color: [0.0, 1.0, 1.0, 1.0],
 		shader: scene.createShader(carVertexSource, carFragmentSource),
 	});
-	scene.addPawn(car);
+	const car = new Pawn(new Obj(deloreanObj), {
+		color: [0.0, 0.0, 0.0, 1.0],
+		shader: scene.createShader(carVertexSource, carFragmentSource),
+	});
+	scene.addPawn(new Pawn([car, carOutline], {
+		model: Matrix4.translation(0.0, -3.4, -17.0).multiply(Matrix4.rotation(0, Math.PI, 0)).multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
+	}));
 
 
 	// Add sun

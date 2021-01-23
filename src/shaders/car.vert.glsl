@@ -1,6 +1,7 @@
 uniform float time;
 uniform mat4 view_proj;
 uniform mat4 model;
+uniform vec4 fill_color;
 
 attribute vec3 position;
 attribute vec3 normal;
@@ -14,5 +15,5 @@ void main(void) {
 
 	gl_Position = vec4(offset_position, 1.0) * mvp;
 
-	frag_color = vec4(offset_position.xyz, 1.0);
+	frag_color = fill_color;
 }

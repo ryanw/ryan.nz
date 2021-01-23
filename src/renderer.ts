@@ -160,15 +160,7 @@ export class WebGLRenderer {
 		const viewProj = proj.multiply(view);
 
 		for (const pawn of this.pawns) {
-			const shader = pawn.shader || this.defaultShader;
-			const uniforms = shader.uniforms;
-			shader.use(gl);
-
-			gl.uniformMatrix4fv(uniforms.viewProj.location, false, viewProj.toArray());
-			gl.uniform4fv(uniforms.fogColor.location, this.backgroundColor);
-			gl.uniform1f(uniforms.lineWidth.location, this.lineWidth);
-			gl.uniform1f(uniforms.time.location, performance.now());
-			this.drawPawn(pawn);
+			this.drawPawn(pawn, viewProj);
 		}
 
 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
@@ -176,7 +168,7 @@ export class WebGLRenderer {
 		gl.clear(gl.COLOR_BUFFER_BIT);
 	}
 
-	drawPawn(pawn: Pawn, parentModel?: Matrix4) {
+	drawPawn(pawn: Pawn, projection?: Matrix4, parentModel?: Matrix4) {
 		const { mesh, model, material, children } = pawn;
 		const pawnModel = parentModel ? parentModel.multiply(model) : model;
 
@@ -184,8 +176,13 @@ export class WebGLRenderer {
 			const gl = this.gl;
 			const shader = pawn.shader || this.defaultShader;
 			const uniforms = shader.uniforms;
+			shader.use(gl);
 			shader.bind(gl, mesh);
 
+			gl.uniformMatrix4fv(uniforms.viewProj.location, false, projection.toArray());
+			gl.uniform4fv(uniforms.fogColor.location, this.backgroundColor);
+			gl.uniform1f(uniforms.lineWidth.location, this.lineWidth);
+			gl.uniform1f(uniforms.time.location, performance.now());
 			gl.uniformMatrix4fv(uniforms.model.location, false, pawnModel.toArray());
 			if (material?.color) {
 				gl.uniform4fv(uniforms.fillColor.location, material.color);
@@ -213,7 +210,7 @@ export class WebGLRenderer {
 		}
 
 		for (const child of children) {
-			this.drawPawn(child, pawnModel);
+			this.drawPawn(child, projection, pawnModel);
 		}
 	}
 
