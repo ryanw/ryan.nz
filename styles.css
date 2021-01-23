@@ -38,14 +38,13 @@ main {
 	color: #f0f;
 	font-family: "Lazer 84", Cursive, sans-serif;
 	letter-spacing: 0.5em;
-	/*
-	text-shadow: -1px -1px 3px #0ff,
-	-3px -3px 3px #0ff,
-	-5px -5px 3px #0ff,
-	-7px -7px 3px #0ff,
-	1px  1px 3px #0ff;
-	 */
 
+}
+@media (max-width: 768px) {
+	main {
+		font-size: 150%;
+		margin-top: 10vh;
+	}
 }
 main h1 {
 	padding: 0 1em;
@@ -54,7 +53,7 @@ main h1 {
 	background-clip: text;
 	-webkit-text-fill-color: transparent;
 	text-fill-color: transparent;
-	filter: drop-shadow(8px 8px 4px #f0f) drop-shadow(-8px -8px 2px #000);
+	filter: drop-shadow(2px 2px 2px #000) drop-shadow(8px 8px 4px #f0f) drop-shadow(-8px -8px 2px #000);
 }
 main p, footer {
 	transition: all 400ms;
