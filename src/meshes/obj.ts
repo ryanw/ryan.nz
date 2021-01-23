@@ -3,7 +3,6 @@ import { Point3, Vector3, Matrix4 } from '../geom';
 
 type Face = [number, number, number];
 
-
 export interface ObjOptions {
 	flipFaces?: boolean;
 	scale?: number;
@@ -20,7 +19,7 @@ export class Obj extends Mesh {
 		let { vertices } = parseObj(data);
 		if (options?.scale) {
 			const scaling = Matrix4.scaling(options.scale, options.scale, options.scale);
-			vertices = vertices.map(v => scaling.transformPoint3(v));
+			vertices = vertices.map((v) => scaling.transformPoint3(v));
 		}
 		if (options?.flipFaces) {
 			for (let i = 0; i < vertices.length; i += 3) {
@@ -33,7 +32,6 @@ export class Obj extends Mesh {
 		this.data.positions = new Float32Array((vertices as any).flat());
 	}
 }
-
 
 function parseObj(data: string): ObjFile {
 	const vertices: Point3[] = [];
@@ -69,9 +67,17 @@ function parseObj(data: string): ObjFile {
 }
 
 function parseObjVertex(line: string): Point3 {
-	return line.split(' ').filter(s => s).slice(1).map(parseFloat) as Point3;
+	return line
+		.split(' ')
+		.filter((s) => s)
+		.slice(1)
+		.map(parseFloat) as Point3;
 }
 
 function parseObjFace(line: string): Face {
-	return line.split(' ').filter(s => s).slice(1).map(f => parseInt(f.split('/')[0], 10) - 1) as Face
+	return line
+		.split(' ')
+		.filter((s) => s)
+		.slice(1)
+		.map((f) => parseInt(f.split('/')[0], 10) - 1) as Face;
 }

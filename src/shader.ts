@@ -9,12 +9,12 @@ export interface WebGLAttribute {
 	location?: number;
 	size: number;
 	type: number;
-};
+}
 
 export interface WebGLUniform {
 	location?: WebGLUniformLocation;
 	type: number;
-};
+}
 
 function camelToSnake(camel: string): string {
 	return camel.replace(/([A-Z])/g, '_$1').toLowerCase();
@@ -81,10 +81,10 @@ export class Shader {
 
 	make(gl: WebGLRenderingContext, vertSource: string, fragSource: string, options?: ShaderOptions) {
 		if (!vertSource) {
-			throw "You must provide vertex shader source code";
+			throw 'You must provide vertex shader source code';
 		}
 		if (!fragSource) {
-			throw "You must provide fragment shader source code";
+			throw 'You must provide fragment shader source code';
 		}
 
 		const program = gl.createProgram();

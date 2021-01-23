@@ -30,7 +30,6 @@ function rectOverlaps(rect0: Rect, rect1: Rect): boolean {
 	const r1 = l1 + rect1[2];
 	const b1 = t1 + rect1[3];
 
-
 	if (l0 > r1 || r0 < l1) {
 		return false;
 	}
@@ -53,10 +52,10 @@ function createCityscape(radius: number, count: number): Pawn[] {
 		const depth = 3.0 + Math.random() * 20;
 
 		// Building position
-		pos: while(attempts < maxAttempts) {
+		pos: while (attempts < maxAttempts) {
 			attempts += 1;
 
-			const angle = Math.random()  * Math.PI * 2;
+			const angle = Math.random() * Math.PI * 2;
 			const dist = Math.random() * radius;
 			const height = 5.0 + Math.random() * 2 * ((radius - dist) / 5);
 			const x = dist * Math.cos(angle);
@@ -66,12 +65,10 @@ function createCityscape(radius: number, count: number): Pawn[] {
 
 			// Test for collision with existing building
 			for (const building of buildings) {
-
 				if (rectOverlaps(building, newBuilding)) {
 					continue pos;
 				}
 			}
-
 
 			buildings.push(newBuilding);
 
@@ -121,9 +118,7 @@ async function main() {
 	scene.addPawn(city);
 
 	// Add road
-	const roadShader = scene.createShader(
-		roadVertexSource,
-		roadFragmentSource, {
+	const roadShader = scene.createShader(roadVertexSource, roadFragmentSource, {
 		attributes: {
 			direction: {
 				size: 1,
@@ -147,10 +142,13 @@ async function main() {
 		color: [0.0, 0.0, 0.0, 1.0],
 		shader: scene.createShader(carVertexSource, carFragmentSource),
 	});
-	scene.addPawn(new Pawn([car, carOutline], {
-		model: Matrix4.translation(0.0, -3.4, -17.0).multiply(Matrix4.rotation(0, Math.PI, 0)).multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
-	}));
-
+	scene.addPawn(
+		new Pawn([car, carOutline], {
+			model: Matrix4.translation(0.0, -3.4, -17.0)
+				.multiply(Matrix4.rotation(0, Math.PI, 0))
+				.multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
+		})
+	);
 
 	// Add sun
 	const sun = new Pawn(new Sun(), {
@@ -193,11 +191,10 @@ async function main() {
 		roadOffset = performance.now() / 30.0;
 		road.mesh.uniforms.roadOffset = roadOffset;
 		terrain.uniforms.roadOffset = roadOffset;
-		terrain.offset[1] = (-roadOffset / 20.0) - 1.5;
+		terrain.offset[1] = -roadOffset / 20.0 - 1.5;
 		terrain.build();
 		terrain.upload(scene.gl);
 
-		
 		if ((!PRODUCTION && scene.mouseButtons.has(0)) || scene.isGrabbed) {
 			const mouseSpeed = 0.0005;
 			const [mX, mY] = scene.mouseMovement;
@@ -259,8 +256,7 @@ class WeirdLandscape {
 		if (roadDist < falloff) {
 			if (roadDist < 0) {
 				val = 0;
-			}
-			else {
+			} else {
 				val = val * (roadDist / falloff);
 			}
 		}
@@ -277,6 +273,5 @@ class WeirdLandscape {
 		return [x, y, z];
 	}
 }
-
 
 window.addEventListener('DOMContentLoaded', main);

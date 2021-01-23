@@ -19,6 +19,7 @@ export class Sun extends Mesh {
 	}
 }
 
+// prettier-ignore
 const VERTICES = [
 	// Near
 	1.0, 1.0, 1.0,

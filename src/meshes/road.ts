@@ -4,10 +4,7 @@ export class Road extends Mesh {
 	constructor() {
 		super();
 		this.data.positions = new Float32Array(VERTICES);
-		this.data.direction = new Float32Array([
-			1, 1, 1,
-			0, 0, 0,
-		]);
+		this.data.direction = new Float32Array([1, 1, 1, 0, 0, 0]);
 		this.uniforms = { roadOffset: 0.0 };
 
 		const barycentrics = [];
@@ -54,4 +51,4 @@ const VERTICES = [
 	1.0, 1.0, 1.0,
 	-1.0, 1.0, -1.0,
 	-1.0, 1.0, 1.0,
-]; 
+];
