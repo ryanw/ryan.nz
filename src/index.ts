@@ -165,15 +165,17 @@ async function main() {
 	// TODO Add mountains
 
 	// Toggle control
-	document.addEventListener('keydown', (e) => {
-		if (e.key === ' ') {
-			if (scene.isGrabbed) {
-				scene.release();
-			} else {
-				scene.grab();
+	if (!PRODUCTION) {
+		document.addEventListener('keydown', (e) => {
+			if (e.key === ' ') {
+				if (scene.isGrabbed) {
+					scene.release();
+				} else {
+					scene.grab();
+				}
 			}
-		}
-	});
+		});
+	}
 
 	document.addEventListener('pointerlockchange', () => {
 		if (scene.isGrabbed) {
@@ -185,7 +187,6 @@ async function main() {
 
 	scene.addEventListeners();
 	let roadOffset = 0.0;
-	let adjust = 0.0;
 	while (true) {
 		await scene.redraw();
 
@@ -197,7 +198,7 @@ async function main() {
 		terrain.upload(scene.gl);
 
 		
-		if (scene.isGrabbed) {
+		if ((!PRODUCTION && scene.mouseButtons.has(0)) || scene.isGrabbed) {
 			const mouseSpeed = 0.0005;
 			const [mX, mY] = scene.mouseMovement;
 
@@ -208,14 +209,6 @@ async function main() {
 		}
 		scene.resetMouseMovement();
 
-		if (scene.heldKeys.has('z')) {
-			adjust -= 0.1;
-			console.log("AA", adjust);
-		}
-		if (scene.heldKeys.has('x')) {
-			adjust += 0.1;
-			console.log("AA", adjust);
-		}
 		if (scene.heldKeys.has('w')) {
 			camera.translate(0.0, 0.0, -1.0);
 		}

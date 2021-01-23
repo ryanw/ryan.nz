@@ -4,3 +4,5 @@ declare module '*.glsl' {
 declare module '*.obj' {
 	export default string;
 }
+
+declare var PRODUCTION: boolean;

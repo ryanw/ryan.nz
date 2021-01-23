@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 const production = (process.env.NODE_ENV === 'production');
 
@@ -32,4 +33,9 @@ module.exports = {
 	resolve: {
 		extensions: [ '.ts', '.js' ],
 	},
+	plugins: [
+		new webpack.DefinePlugin({
+			'PRODUCTION': JSON.stringify(production),
+		}),
+	],
 }
