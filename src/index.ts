@@ -56,10 +56,10 @@ function createCityscape(radius: number, count: number): Pawn[] {
 
 			const angle = Math.random()  * Math.PI * 2;
 			const dist = Math.random() * radius;
-			const height = 1.0 + Math.random() * 2 * ((radius - dist) / 15);
+			const height = 1.0 + Math.random() * 2 * ((radius - dist) / 4);
 			const x = dist * Math.cos(angle);
 			const y = height;
-			const z = 0.2 * dist * Math.sin(angle);
+			const z = 0.5 * dist * Math.sin(angle);
 			const newBuilding: Rect = [x - width, z - depth, width * 2, depth * 2];
 
 			// Test for collision with existing building
@@ -113,7 +113,7 @@ async function main() {
 	scene.addPawn(cube);
 
 	// Add cityscape
-	const city = new Pawn(createCityscape(300, 300), {
+	const city = new Pawn(createCityscape(100, 100), {
 		model: Matrix4.translation(0, -10.0, -650.0),
 	});
 	scene.addPawn(city);
