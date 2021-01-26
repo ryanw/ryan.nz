@@ -3,6 +3,8 @@ import { Mesh } from './mesh';
 import { Material, Color } from './material';
 import { Shader } from './shader';
 
+export type UniformValues = { [key: string]: number | number[] };
+
 export interface PawnOptions {
 	color?: Color;
 	material?: Material;
@@ -15,6 +17,7 @@ export class Pawn {
 	model: Matrix4 = Matrix4.identity();
 	material: Material = new Material();
 	shader?: Shader;
+	uniforms: UniformValues = {};
 	children: Pawn[] = [];
 
 	constructor(meshOrChildren?: Mesh | Pawn[], options: PawnOptions = {}) {

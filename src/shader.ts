@@ -20,10 +20,11 @@ function camelToSnake(camel: string): string {
 	return camel.replace(/([A-Z])/g, '_$1').toLowerCase();
 }
 
-type WebGLUniformMap = { [key: string]: WebGLUniform };
-type WebGLAttributeMap = { [key: string]: WebGLAttribute };
+export type WebGLUniformMap = { [key: string]: WebGLUniform };
+export type WebGLAttributeMap = { [key: string]: WebGLAttribute };
 
 export class Shader {
+	compiled = false;
 	program: WebGLProgram;
 	attributes: WebGLAttributeMap = {
 		position: {
@@ -44,10 +45,6 @@ export class Shader {
 	};
 	uniforms: WebGLUniformMap = {
 		time: {
-			type: WebGLRenderingContext.FLOAT,
-			location: null,
-		},
-		roadOffset: {
 			type: WebGLRenderingContext.FLOAT,
 			location: null,
 		},
@@ -79,7 +76,7 @@ export class Shader {
 		}
 	}
 
-	make(gl: WebGLRenderingContext, vertSource: string, fragSource: string, options?: ShaderOptions) {
+	make(gl: WebGLRenderingContext, vertSource?: string, fragSource?: string, options?: ShaderOptions) {
 		if (!vertSource) {
 			throw 'You must provide vertex shader source code';
 		}
@@ -93,6 +90,13 @@ export class Shader {
 			this.attributes = {
 				...this.attributes,
 				...options.attributes,
+			};
+		}
+
+		if (options?.uniforms) {
+			this.uniforms = {
+				...this.uniforms,
+				...options.uniforms,
 			};
 		}
 
@@ -137,6 +141,7 @@ export class Shader {
 		gl.cullFace(gl.BACK);
 
 		this.program = program;
+		this.compiled = true;
 	}
 
 	use(gl: WebGLRenderingContext) {

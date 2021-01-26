@@ -6,18 +6,14 @@ import { Sun } from './meshes/sun';
 import { Road } from './meshes/road';
 import { Pawn } from './pawn';
 import { Camera } from './camera';
-import { Point3, Vector3, Matrix4 } from './geom';
+import { Matrix4 } from './geom';
 import SimplexNoise from './simplex-noise';
 
 import deloreanObj from './delorean.obj';
-import roadVertexSource from './shaders/road.vert.glsl';
-import roadFragmentSource from './shaders/road.frag.glsl';
-import sunVertexSource from './shaders/sun.vert.glsl';
-import sunFragmentSource from './shaders/sun.frag.glsl';
-import carVertexSource from './shaders/car.vert.glsl';
-import carFragmentSource from './shaders/car.frag.glsl';
-import terrainVertexSource from './shaders/terrain.vert.glsl';
-import terrainFragmentSource from './shaders/terrain.frag.glsl';
+import { RoadShader } from './shaders/road';
+import { CarShader } from './shaders/car';
+import { SunShader } from './shaders/sun';
+import { TerrainShader } from './shaders/terrain';
 
 const DEBUG_ENABLED = !PRODUCTION || window.location.search.indexOf('debug') !== -1;
 
@@ -102,7 +98,7 @@ async function main() {
 	const surface = new Pawn(terrain, {
 		color: [0.0, 0.8, 1.0, 0.0],
 		model: Matrix4.translation(0.0, -4.0, -320.0).multiply(Matrix4.scaling(7.5, 1.0, 20.0)),
-		shader: scene.createShader(terrainVertexSource, terrainFragmentSource),
+		shader: new TerrainShader(),
 	});
 	scene.addPawn(surface);
 
@@ -113,29 +109,21 @@ async function main() {
 	scene.addPawn(city);
 
 	// Add road
-	const roadShader = scene.createShader(roadVertexSource, roadFragmentSource, {
-		attributes: {
-			direction: {
-				size: 1,
-				type: WebGLRenderingContext.FLOAT,
-			},
-		},
-	});
 	const road = new Pawn(new Road(), {
 		color: [1.0, 0.0, 1.0, 1.0],
 		model: Matrix4.translation(0.0, -4.75, -300.0).multiply(Matrix4.scaling(5, 1, 400)),
-		shader: roadShader,
+		shader: new RoadShader(),
 	});
 	scene.addPawn(road);
 
 	// Add car
 	const car = new Pawn(new Obj(deloreanObj), {
 		color: [0.0, 0.0, 0.0, 1.0],
-		shader: scene.createShader(carVertexSource, carFragmentSource),
+		shader: new CarShader(),
 	});
 	const carOutline = new Pawn(new Obj(deloreanObj, { flipFaces: true, scale: 1.03 }), {
 		color: [0.0, 1.0, 1.0, 1.0],
-		shader: scene.createShader(carVertexSource, carFragmentSource),
+		shader: car.shader,
 	});
 	scene.addPawn(
 		new Pawn([car, carOutline], {
@@ -149,14 +137,7 @@ async function main() {
 	const sun = new Pawn(new Sun(), {
 		color: [1.0, 1.0, 0.0, 1.0],
 		model: Matrix4.translation(0.0, 50.0, -1000.0).multiply(Matrix4.scaling(150, 150, 150)),
-		shader: scene.createShader(sunVertexSource, sunFragmentSource, {
-			attributes: {
-				uvs: {
-					size: 3,
-					type: WebGLRenderingContext.FLOAT,
-				},
-			},
-		}),
+		shader: new SunShader(),
 	});
 	scene.addPawn(sun);
 
@@ -166,8 +147,10 @@ async function main() {
 			if (e.key === ' ') {
 				if (scene.isGrabbed) {
 					scene.release();
+					document.body.className = '';
 				} else {
 					scene.grab();
+					document.body.className = 'grabbed';
 				}
 			}
 		});
@@ -187,14 +170,14 @@ async function main() {
 		await scene.redraw();
 
 		roadOffset = performance.now() / 30.0;
-		road.mesh.uniforms.roadOffset = roadOffset;
-		terrain.uniforms.roadOffset = roadOffset;
+		road.uniforms.roadOffset = roadOffset;
+		surface.uniforms.roadOffset = roadOffset;
 		terrain.offset[1] = -roadOffset / 20.0 - 1.5;
 		terrain.build();
 		terrain.upload(scene.gl);
 
 		if (DEBUG_ENABLED) {
-			if (scene.mouseButtons.has(0) || scene.isGrabbed) {
+			if (scene.mouseButtons.has(0) && scene.isGrabbed) {
 				const mouseSpeed = 0.0005;
 				const [mX, mY] = scene.mouseMovement;
 

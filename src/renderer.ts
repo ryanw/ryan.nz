@@ -22,6 +22,7 @@ export class WebGLRenderer {
 	mouseButtons = new Set();
 	backgroundColor: Color = [0.2, 0.05, 0.4, 1.0];
 	frame = 0;
+	isGrabbed = false;
 	private context: WebGLRenderingContext;
 
 	constructor() {
@@ -74,16 +75,16 @@ export class WebGLRenderer {
 		this.defaultShader = this.createShader(defaultVertSource, defaultFragSource);
 	}
 
-	get isGrabbed() {
-		return document.pointerLockElement === this.canvas;
-	}
-
-	grab() {
-		this.canvas.requestPointerLock();
+	grab(lock: boolean = false) {
+		if (lock) {
+			this.canvas.requestPointerLock();
+		}
+		this.isGrabbed = true;
 		this.addEventListeners();
 	}
 
 	release() {
+		this.isGrabbed = false;
 		document.exitPointerLock();
 		this.removeEventListeners();
 	}
@@ -172,6 +173,10 @@ export class WebGLRenderer {
 		const { mesh, model, material, children } = pawn;
 		const pawnModel = parentModel ? parentModel.multiply(model) : model;
 
+		if (pawn.shader && !pawn.shader.compiled) {
+			pawn.shader.make(this.gl);
+		}
+
 		if (mesh) {
 			const gl = this.gl;
 			const shader = pawn.shader || this.defaultShader;
@@ -188,12 +193,12 @@ export class WebGLRenderer {
 				gl.uniform4fv(uniforms.fillColor.location, material.color);
 			}
 
-			for (const uniformName in mesh.uniforms) {
+			for (const uniformName in pawn.uniforms) {
 				const uniform = shader.uniforms[uniformName];
 				if (!uniform) {
 					throw `Unable to find '${uniformName}' uniform in shader`;
 				}
-				const value = mesh.uniforms[uniformName];
+				const value = pawn.uniforms[uniformName];
 				switch (uniform.type) {
 					case WebGLRenderingContext.FLOAT:
 						if (typeof value !== 'number') {
