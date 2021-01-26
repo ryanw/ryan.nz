@@ -4,8 +4,8 @@
 }
 
 @font-face {
-	font-family: "Lazer 84";
-	src: url("/lazer84.ttf");
+	font-family: "Future Outrun";
+	src: url("/future-outrun.otf");
 }
 
 * {
@@ -31,29 +31,28 @@ main {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
+	align-items: flex-start;
 	transition: all 400ms;
-	margin-top: 20vh;
-	font-size: 300%;
+	font-size: 350%;
 	color: #f0f;
-	font-family: "Lazer 84", Cursive, sans-serif;
-	letter-spacing: 0.5em;
-
+	font-family: "Future Outrun", "Impact", "Arial Black", sans-serif;
+	overflow: hidden;
 }
 @media (max-width: 768px) {
 	main {
 		font-size: 150%;
-		margin-top: 10vh;
 	}
 }
 main h1 {
-	padding: 0 1em;
-	background: linear-gradient(180deg, rgba(2,55,121,1) 0%, rgba(72,134,219,1) 25%, rgba(248,221,254,1) 54%, rgba(49,19,119,1) 55%, rgba(236,78,189,1) 81%, rgba(251,221,247,1) 100%);
+	margin: 0.5em 0 0 0.5em;
+	letter-spacing: 0.12em;
+	transform: rotate(-20deg);
+	background: linear-gradient(180deg, rgba(2,55,121,1) 0%, rgba(72,134,219,1) 33%, rgba(248,221,254,1) 54%, rgba(49,19,119,1) 55%, rgba(236,78,189,1) 80%, rgba(251,221,247,1) 100%);
 	-webkit-background-clip: text;
 	background-clip: text;
 	-webkit-text-fill-color: transparent;
 	text-fill-color: transparent;
-	filter: drop-shadow(2px 2px 2px #000) drop-shadow(8px 8px 4px #f0f) drop-shadow(-8px -8px 2px #000);
+	filter: drop-shadow(2px 2px 2px #000) drop-shadow(6px 8px 4px #f0f) drop-shadow(-6px -8px 2px #000);
 }
 main p, footer {
 	transition: all 400ms;

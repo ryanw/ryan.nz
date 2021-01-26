@@ -8,8 +8,8 @@ This is the source for my website at https://ryan.nz
 
 
 ## Attributions
-Lazer 84 font by Sunrise Digital from:  
-https://www.dafont.com/lazer84.font
+Future Outrun font by Press Gang Studios from:  
+https://www.1001fonts.com/future-font.html
 
 Delorean model by flathead from:  
 https://sketchfab.com/3d-models/low-poly-delorean-a2f61121f758482188928bf04f610452
