@@ -166,8 +166,38 @@ async function main() {
 
 	scene.addEventListeners();
 	let roadOffset = 0.0;
+	let carPosition = [0.0, 20.0];
+	// 0 = back, PI = forward
 	while (true) {
 		await scene.redraw();
+
+		// Move the car relative to mouse
+		// Mouse relative to center
+		const mouseX = (scene.mousePosition[0] / scene.width) * 2 - 1;
+		const mouseY = (scene.mousePosition[1] / scene.height) * 2 - 1;
+
+		const carTarget = [mouseX * 6.0, mouseY * 30.0 - 20.0];
+		if (scene.mouseButtons.has(0)) {
+			// Warp speed, Mr Sulu
+			carTarget[1] = -200.0;
+		}
+		else if (scene.mouseButtons.has(1)) {
+			// Braking
+			carTarget[1] = 10.0;
+		}
+
+		const diff = [carTarget[0] - carPosition[0], carTarget[1] - carPosition[1]];
+		const distance = Math.sqrt(diff[0] * diff[0] + diff[1] * diff[1]);
+		const carAngle = Math.atan2(diff[0], diff[1]);
+		const carVelocity = distance / 200.0;
+
+		if (distance < 0.1) {
+			carPosition = [...carTarget];
+		} else if (carPosition[0] != carTarget[0] || carPosition[1] != carTarget[1]) {
+			carPosition[0] += Math.sin(carAngle) * carVelocity;
+			carPosition[1] += Math.cos(carAngle) * carVelocity;
+		}
+		car.uniforms.carPosition = carPosition;
 
 		roadOffset = performance.now() / 30.0;
 		road.uniforms.roadOffset = roadOffset;

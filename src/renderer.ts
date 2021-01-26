@@ -63,6 +63,14 @@ export class WebGLRenderer {
 		return this.context;
 	}
 
+	get width(): number {
+		return this.canvas.clientWidth;
+	}
+
+	get height(): number {
+		return this.canvas.clientHeight;
+	}
+
 	/**
 	 * Creates the WebGL buffers, compiles the shaders, etc.
 	 */
@@ -131,8 +139,8 @@ export class WebGLRenderer {
 	};
 
 	onMouseMove = (e: MouseEvent) => {
-		this.mousePosition[0] = e.offsetX;
-		this.mousePosition[1] = e.offsetY;
+		this.mousePosition[0] = e.clientX;
+		this.mousePosition[1] = e.clientY;
 		this.mouseMovement[0] += e.movementX;
 		this.mouseMovement[1] += e.movementY;
 	};
@@ -206,6 +214,19 @@ export class WebGLRenderer {
 						}
 						gl.uniform1f(uniform.location, value);
 						break;
+
+					case WebGLRenderingContext.FLOAT_VEC2:
+						if (
+							!Array.isArray(value) ||
+							value.length !== 2 ||
+							typeof value[0] !== 'number' ||
+							typeof value[1] !== 'number'
+						) {
+							throw `Uniform '${uniformName}' expected an array of 2 numbers but got something else`;
+						}
+						gl.uniform2fv(uniform.location, value);
+						break;
+
 					// TODO other uniform types
 					default:
 						throw `Unsupported uniform type: ${uniform.type}`;
