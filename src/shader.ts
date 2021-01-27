@@ -107,6 +107,7 @@ export class Shader {
 		gl.shaderSource(vert, vertSource);
 		gl.attachShader(program, vert);
 		gl.compileShader(vert);
+		// Did the vertex shader compile?
 		if (!gl.getShaderParameter(vert, gl.COMPILE_STATUS)) {
 			const info = gl.getShaderInfoLog(vert);
 			throw `Could not compile Vertex shader: ${info}`;
@@ -116,23 +117,26 @@ export class Shader {
 		gl.shaderSource(frag, fragSource);
 		gl.attachShader(program, frag);
 		gl.compileShader(frag);
-		gl.linkProgram(program);
+		// Did the fragment shader compile?
 		if (!gl.getShaderParameter(frag, gl.COMPILE_STATUS)) {
 			const info = gl.getShaderInfoLog(frag);
 			throw `Could not compile Fragment shader: ${info}`;
 		}
 
-		// Did it compile ok?
+		gl.linkProgram(program);
+		// Did the program link successfully?
 		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 			const info = gl.getProgramInfoLog(program);
-			throw `Could not compile WebGL program: ${info}`;
+			const shaderName = this.constructor.name;
+			throw `Could not link WebGL program (${shaderName}): ${info}`;
 		}
 
-		// Attribute/Uniform locations
+		// Uniform locations
 		for (const uniformName in this.uniforms) {
 			this.uniforms[uniformName].location = gl.getUniformLocation(program, camelToSnake(uniformName));
 		}
 
+		// Attribute locations
 		for (const attributeName in this.attributes) {
 			this.attributes[attributeName].location = gl.getAttribLocation(program, camelToSnake(attributeName));
 		}
