@@ -127,7 +127,7 @@ async function main() {
 	});
 	scene.addPawn(
 		new Pawn([car, carOutline], {
-			model: Matrix4.translation(0.0, -3.4, -17.0)
+			model: Matrix4.translation(0.0, -3.4, 0.0)
 				.multiply(Matrix4.rotation(0, Math.PI, 0))
 				.multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
 		})
@@ -166,24 +166,23 @@ async function main() {
 
 	scene.addEventListeners();
 	let roadOffset = 0.0;
-	let carPosition = [0.0, 20.0];
+	let carPosition = [0.0, 0.0];
 	// 0 = back, PI = forward
 	while (true) {
-		await scene.redraw();
 
 		// Move the car relative to mouse
 		// Mouse relative to center
 		const mouseX = (scene.mousePosition[0] / scene.width) * 2 - 1;
 		const mouseY = (scene.mousePosition[1] / scene.height) * 2 - 1;
 
-		const carTarget = [mouseX * 6.0, mouseY * 30.0 - 20.0];
+		const carTarget = [mouseX * 6.0, mouseY * 10.0 - 18.0];
 		if (scene.mouseButtons.has(0)) {
 			// Warp speed, Mr Sulu
-			carTarget[1] = -200.0;
+			carTarget[1] = -40.0;
 		}
 		else if (scene.mouseButtons.has(1)) {
 			// Braking
-			carTarget[1] = 10.0;
+			carTarget[1] = -5.0;
 		}
 
 		const diff = [carTarget[0] - carPosition[0], carTarget[1] - carPosition[1]];
@@ -242,6 +241,10 @@ async function main() {
 				camera.translate(0.0, 1.0, 0.0);
 			}
 		}
+
+
+
+		await scene.redraw();
 	}
 }
 
