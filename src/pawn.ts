@@ -10,6 +10,7 @@ export interface PawnOptions {
 	material?: Material;
 	model?: Matrix4;
 	shader?: Shader;
+	uniforms?: UniformValues;
 }
 
 export class Pawn {
@@ -32,6 +33,13 @@ export class Pawn {
 
 		if (options.shader) {
 			this.shader = options.shader;
+		}
+
+		if (options.uniforms) {
+			this.uniforms = {
+				...this.uniforms,
+				...options.uniforms,
+			};
 		}
 
 		if (meshOrChildren instanceof Mesh) {

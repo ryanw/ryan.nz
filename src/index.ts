@@ -1,7 +1,7 @@
 import { WebGLRenderer } from './renderer';
 import { Terrain } from './meshes/terrain';
 import { Obj } from './meshes/obj';
-import { Cube } from './meshes/cube';
+import { Building } from './meshes/building';
 import { Sun } from './meshes/sun';
 import { Road } from './meshes/road';
 import { Pawn } from './pawn';
@@ -14,6 +14,7 @@ import { RoadShader } from './shaders/road';
 import { CarShader } from './shaders/car';
 import { SunShader } from './shaders/sun';
 import { TerrainShader } from './shaders/terrain';
+import { BuildingShader } from './shaders/building';
 
 const DEBUG_ENABLED = !PRODUCTION || window.location.search.indexOf('debug') !== -1;
 
@@ -41,6 +42,7 @@ function rectOverlaps(rect0: Rect, rect1: Rect): boolean {
 function createCityscape(radius: number, count: number): Pawn[] {
 	const pawns: Pawn[] = [];
 	const buildings: Rect[] = [];
+	const buildingShader = new BuildingShader();
 
 	const maxAttempts = count * 10;
 	let attempts = 0;
@@ -71,9 +73,10 @@ function createCityscape(radius: number, count: number): Pawn[] {
 			buildings.push(newBuilding);
 
 			pawns.push(
-				new Pawn(new Cube(), {
-					color: [0.0, 0.0, 0.0, 0.0],
+				new Pawn(new Building(width / 5, height / 5, depth / 5), {
+					color: [1.0, 0.0, 0.0, 1.0],
 					model: Matrix4.translation(x, y, z).multiply(Matrix4.scaling(width, height, depth)),
+					shader: buildingShader,
 				})
 			);
 			break pos;
@@ -101,6 +104,7 @@ async function main() {
 		shader: new TerrainShader(),
 	});
 	scene.addPawn(surface);
+
 
 	// Add cityscape
 	const city = new Pawn(createCityscape(150, 50), {
@@ -241,8 +245,6 @@ async function main() {
 				camera.translate(0.0, 1.0, 0.0);
 			}
 		}
-
-
 
 		await scene.redraw();
 	}
