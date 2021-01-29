@@ -169,6 +169,10 @@ async function main() {
 	});
 
 	scene.addEventListeners();
+	// Start mouse in the center
+	scene.mousePosition[0] = scene.width / 2;
+	scene.mousePosition[1] = scene.height / 2;
+
 	let roadOffset = 0.0;
 	let carPosition = [0.0, 0.0];
 	// 0 = back, PI = forward
