@@ -1,8 +1,6 @@
-#extension GL_OES_standard_derivatives : enable
 precision mediump float;
 
 uniform vec4 fill_color;
-
 varying vec4 frag_color;
 
 void main(void) {

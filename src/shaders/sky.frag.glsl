@@ -1,5 +1,4 @@
-#extension GL_OES_standard_derivatives : enable
-precision mediump float;
+precision highp float;
 
 uniform float time;
 uniform float seed;
@@ -28,14 +27,7 @@ float star(vec2 uv, float flare) {
 	return m;
 }
 
-highp float rng(vec2 co) {
-    highp float a = 12.9898;
-    highp float b = 78.233;
-    highp float c = seed * 43758.5453;
-    highp float dt= dot(co.xy ,vec2(a,b));
-    highp float sn= mod(dt,3.14);
-    return fract(sin(sn) * c);
-}
+#pragma glslify: rand = require('./utils/rand', seed=seed)
 
 void main(void) {
 	vec4 color = vec4(vec3(1.0), 0.0);
@@ -49,7 +41,7 @@ void main(void) {
 			vec2 tile = vec2(x, y);
 
 			// Some 'random' numbers
-			float r0 = rng(id + tile);
+			float r0 = rand(id + tile);
 			float r1 = fract(r0 * 12.34);
 			float r2 = fract(r1 * 12.34);
 			float r3 = fract(r2 * 12.34);

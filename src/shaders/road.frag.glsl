@@ -1,4 +1,3 @@
-#extension GL_OES_standard_derivatives : enable
 precision mediump float;
 
 uniform float time;
@@ -17,7 +16,6 @@ vec4 line_color = vec4(1.0, 1.0, 0.2, 1.0);
 
 void main(void) {
 	vec4 color = tarmac_color;
-
 
 	// Sides
 	if (frag_barycentric.x < road_line_width * 4.0) {

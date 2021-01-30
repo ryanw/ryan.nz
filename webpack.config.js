@@ -24,7 +24,7 @@ module.exports = {
 			{ test: /\.ts$/, use: 'ts-loader' },
 
 			// Shader files
-			{ test: /\.glsl$/, use: 'raw-loader' },
+			{ test: /\.glsl$/, use: ['raw-loader', 'glslify-loader'] },
 
 			// OBJ Mesh files
 			{ test: /\.obj$/, use: 'raw-loader' },
