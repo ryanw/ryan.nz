@@ -1,5 +1,6 @@
 import { Mesh } from '../mesh';
 
+// prettier-ignore
 const FACE_UV = [
 	1.0, 1.0,
 	0.0, 1.0,

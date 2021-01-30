@@ -68,6 +68,14 @@ export class Shader {
 			type: WebGLRenderingContext.FLOAT,
 			location: null,
 		},
+		resolution: {
+			type: WebGLRenderingContext.FLOAT_VEC2,
+			location: null,
+		},
+		seed: {
+			type: WebGLRenderingContext.FLOAT,
+			location: null,
+		},
 	};
 
 	constructor(gl?: WebGLRenderingContext, vertSource?: string, fragSource?: string, options?: ShaderOptions) {

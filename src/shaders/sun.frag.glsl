@@ -29,7 +29,7 @@ void main(void) {
 				|| (stripe > 0.75 && stripe < 0.77)
 				|| (stripe > 0.82 && stripe < 0.83)
 			) {
-			gl_FragColor = vec4(0.0);
+			gl_FragColor = vec4(0.2, 0.05, 0.4, 1.0);
 		} else {
 			grad = map(grad, 0.0, 1.0, 0.3, 1.3);
 			vec3 color = mix(sun_bottom, sun_top, grad);

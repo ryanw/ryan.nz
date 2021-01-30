@@ -2,6 +2,7 @@ import { WebGLRenderer } from './renderer';
 import { Terrain } from './meshes/terrain';
 import { Obj } from './meshes/obj';
 import { Building } from './meshes/building';
+import { Quad } from './meshes/quad';
 import { Sun } from './meshes/sun';
 import { Road } from './meshes/road';
 import { Pawn } from './pawn';
@@ -12,6 +13,7 @@ import SimplexNoise from './simplex-noise';
 import deloreanObj from './delorean.obj';
 import { RoadShader } from './shaders/road';
 import { CarShader } from './shaders/car';
+import { SkyShader } from './shaders/sky';
 import { SunShader } from './shaders/sun';
 import { TerrainShader } from './shaders/terrain';
 import { BuildingShader } from './shaders/building';
@@ -95,6 +97,10 @@ async function main() {
 	scene.camera = camera;
 	scene.updateSize();
 
+	// Sky
+	const sky = new Pawn(new Quad(), { shader: new SkyShader() });
+	scene.addPawn(sky);
+
 	// Add terrain
 	const landscape = new WeirdLandscape();
 	const terrain = new Terrain(landscape.height.bind(landscape));
@@ -104,7 +110,6 @@ async function main() {
 		shader: new TerrainShader(),
 	});
 	scene.addPawn(surface);
-
 
 	// Add cityscape
 	const city = new Pawn(createCityscape(150, 50), {
@@ -140,7 +145,7 @@ async function main() {
 	// Add sun
 	const sun = new Pawn(new Sun(), {
 		color: [1.0, 1.0, 0.0, 1.0],
-		model: Matrix4.translation(0.0, 50.0, -1000.0).multiply(Matrix4.scaling(150, 150, 150)),
+		model: Matrix4.translation(0.0, 50.0, -1000.0).multiply(Matrix4.scaling(175, 175, 175)),
 		shader: new SunShader(),
 	});
 	scene.addPawn(sun);

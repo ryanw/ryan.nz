@@ -23,6 +23,7 @@ export class WebGLRenderer {
 	backgroundColor: Color = [0.2, 0.05, 0.4, 1.0];
 	frame = 0;
 	isGrabbed = false;
+	seed = Math.random();
 	private context: WebGLRenderingContext;
 
 	constructor() {
@@ -196,6 +197,8 @@ export class WebGLRenderer {
 			gl.uniform4fv(uniforms.fogColor.location, this.backgroundColor);
 			gl.uniform1f(uniforms.lineWidth.location, this.lineWidth);
 			gl.uniform1f(uniforms.time.location, performance.now());
+			gl.uniform2fv(uniforms.resolution.location, [this.camera.width, this.camera.height]);
+			gl.uniform1f(uniforms.seed.location, this.seed);
 			gl.uniformMatrix4fv(uniforms.model.location, false, pawnModel.toArray());
 			if (material?.color) {
 				gl.uniform4fv(uniforms.fillColor.location, material.color);
