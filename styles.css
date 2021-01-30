@@ -44,7 +44,8 @@ main {
 	}
 }
 main h1 {
-	margin: 0.5em 0 0 0.5em;
+	margin: 0.5em 0 0 0.2em;
+	padding-left: 0.2em;
 	letter-spacing: 0.12em;
 	transform: rotate(-20deg);
 	background: linear-gradient(180deg, rgba(2,55,121,1) 0%, rgba(72,134,219,1) 33%, rgba(248,221,254,1) 54%, rgba(49,19,119,1) 55%, rgba(236,78,189,1) 80%, rgba(251,221,247,1) 100%);
