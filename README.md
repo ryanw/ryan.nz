@@ -4,7 +4,7 @@ This is the source for my website at https://ryan.nz
 
 ## Screenshot
 
-![Screenshot of Ryan.nz](https://user-images.githubusercontent.com/3372/106352576-2f2a5d00-6349-11eb-9ec4-4604a79dc1c6.png)
+![Screenshot of Ryan.nz](https://user-images.githubusercontent.com/3372/106409951-a7f2fb80-64a6-11eb-8c35-1e489ef39839.png)
 
 
 ## Attributions

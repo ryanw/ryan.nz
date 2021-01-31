@@ -30,8 +30,6 @@ export class Mesh {
 	}
 
 	upload(gl: WebGLRenderingContext) {
-		this.calculateNormals();
-
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.position);
 		gl.bufferData(gl.ARRAY_BUFFER, this.data.positions, gl.DYNAMIC_DRAW);
 

@@ -79,19 +79,26 @@ export class FancyMesh<T extends Vertex> {
 
 	get data(): Float32Array {
 		// Fill data with T; data is sorted by the property name
-		let data: number[] = [];
+		// Preallocate the typed array as it's much faster than `Array.concat`
+		const data = new Float32Array(this.vertexCount * this.stride);
+
+		let i = 0;
 		for (const geom of this.geometries) {
 			for (const vertex of geom.vertices) {
 				for (const attr of Object.keys(vertex).sort()) {
+					let val = vertex[attr];
 					if (attr === 'position') {
-						data = data.concat(geom.transform.transformPoint3(vertex[attr]));
-					} else {
-						data = data.concat(vertex[attr]);
+						val = geom.transform.transformPoint3(val as Point3);
+					}
+					for (const num of val) {
+						data[i] = num;
+						i++;
 					}
 				}
 			}
 		}
-		return new Float32Array(data);
+
+		return data;
 	}
 
 	attributeOffset(name: string): number {

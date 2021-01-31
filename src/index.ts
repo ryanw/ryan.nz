@@ -5,16 +5,20 @@ import { Building } from './meshes/building';
 import { Quad } from './meshes/quad';
 import { Sun } from './meshes/sun';
 import { Road } from './meshes/road';
+import { Tree } from './meshes/tree';
 import { Pawn } from './pawn';
 import { Camera } from './camera';
 import { Matrix4 } from './geom';
 import SimplexNoise from './simplex-noise';
+import { FancyMesh, Vertex, Geometry } from './fancy_mesh';
 
 import deloreanObj from './delorean.obj';
 import { RoadShader } from './shaders/road';
 import { CarShader } from './shaders/car';
 import { SkyShader } from './shaders/sky';
 import { SunShader } from './shaders/sun';
+import { TreeShader } from './shaders/tree';
+import { SimpleShader } from './shaders/simple';
 import { TerrainShader } from './shaders/terrain';
 import { BuildingShader } from './shaders/building';
 
@@ -150,6 +154,26 @@ async function main() {
 	});
 	scene.addPawn(sun);
 
+	// Trees
+	const treeMesh = new Tree();
+	const trees: Pawn[] = [];
+	for (let i = 0; i < 15; i++) {
+		const tree = new Pawn(treeMesh, {
+			model: Matrix4.translation(8.0, -3.0, i * -40.0),
+			shader: new TreeShader(),
+		});
+		scene.addPawn(tree);
+		trees.push(tree);
+	}
+	for (let i = 0; i < 15; i++) {
+		const tree = new Pawn(treeMesh, {
+			model: Matrix4.translation(-8.0, -3.0, -10 + i * -40.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
+			shader: new TreeShader(),
+		});
+		scene.addPawn(tree);
+		trees.push(tree);
+	}
+
 	// Toggle control
 	if (DEBUG_ENABLED) {
 		document.addEventListener('keydown', (e) => {
@@ -214,6 +238,9 @@ async function main() {
 		roadOffset = performance.now() / 30.0;
 		road.uniforms.roadOffset = roadOffset;
 		surface.uniforms.roadOffset = roadOffset;
+		for (const tree of trees) {
+			tree.uniforms.roadOffset = roadOffset;
+		}
 		terrain.offset[1] = -roadOffset / 20.0 - 1.5;
 		terrain.build();
 		terrain.upload(scene.gl);
