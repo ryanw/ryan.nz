@@ -5,7 +5,7 @@ export class Camera extends Pawn {
 	width: number;
 	height: number;
 	near: number = 1.0;
-	far: number = 1000.0;
+	far: number = 2000.0;
 	projection: Matrix4;
 	position: Point3 = [0.0, 1.0, 0.0];
 	rotation: Vector3 = [-0.1, 0.0, 0.0];

@@ -1,5 +1,6 @@
 import { Matrix4, Point3, Vector3 } from './geom';
 import { Mesh } from './mesh';
+import { FancyMesh, Vertex } from './fancy_mesh';
 import { Material, Color } from './material';
 import { Shader } from './shader';
 
@@ -14,14 +15,14 @@ export interface PawnOptions {
 }
 
 export class Pawn {
-	mesh: Mesh;
+	mesh: Mesh | FancyMesh<Vertex>;
 	model: Matrix4 = Matrix4.identity();
 	material: Material = new Material();
 	shader?: Shader;
 	uniforms: UniformValues = {};
 	children: Pawn[] = [];
 
-	constructor(meshOrChildren?: Mesh | Pawn[], options: PawnOptions = {}) {
+	constructor(meshOrChildren?: Mesh | FancyMesh<Vertex> | Pawn[], options: PawnOptions = {}) {
 		const material = options.material || new Material();
 		material.color = options.color || material.color;
 
@@ -42,10 +43,11 @@ export class Pawn {
 			};
 		}
 
-		if (meshOrChildren instanceof Mesh) {
-			this.mesh = meshOrChildren;
-		} else if (meshOrChildren instanceof Array) {
+		if (meshOrChildren instanceof Array) {
 			this.children = meshOrChildren;
+		}
+		else if (meshOrChildren instanceof Mesh || meshOrChildren instanceof FancyMesh) {
+			this.mesh = meshOrChildren;
 		}
 	}
 

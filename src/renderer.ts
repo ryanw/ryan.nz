@@ -3,6 +3,8 @@ import { Pawn } from './pawn';
 import { Camera } from './camera';
 import { Color } from './material';
 import { Matrix4 } from './geom';
+import { Vertex } from './fancy_mesh';
+import { Mesh } from './mesh';
 import defaultVertSource from './shaders/wireframe.vert.glsl';
 import defaultFragSource from './shaders/wireframe.frag.glsl';
 
@@ -246,7 +248,9 @@ export class WebGLRenderer {
 	uploadPawn(pawn: Pawn) {
 		const gl = this.gl;
 		if (pawn.mesh) {
-			pawn.mesh.allocate(gl);
+			if (pawn.mesh instanceof Mesh) {
+				pawn.mesh.allocate(gl);
+			}
 			pawn.mesh.upload(gl);
 		}
 		for (const child of pawn.children) {

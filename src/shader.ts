@@ -1,4 +1,5 @@
 import { Mesh } from './mesh';
+import { FancyMesh, Vertex } from './fancy_mesh';
 
 export interface ShaderOptions {
 	attributes?: { [key: string]: WebGLAttribute };
@@ -40,6 +41,11 @@ export class Shader {
 		barycentric: {
 			type: WebGLRenderingContext.FLOAT,
 			size: 3,
+			location: null,
+		},
+		color: {
+			type: WebGLRenderingContext.FLOAT,
+			size: 4,
 			location: null,
 		},
 	};
@@ -160,19 +166,31 @@ export class Shader {
 		gl.useProgram(this.program);
 	}
 
-	bind(gl: WebGLRenderingContext, mesh: Mesh) {
+	bind<T extends Vertex>(gl: WebGLRenderingContext, mesh: Mesh | FancyMesh<T>) {
+		if (mesh instanceof FancyMesh) {
+			gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
+		}
+
 		for (const attributeName in this.attributes) {
 			const attribute = this.attributes[attributeName];
 			if (attribute.location == null || attribute.location === -1) {
 				continue;
 			}
-			const buffer = mesh.buffers[attributeName];
-			if (!buffer) {
-				throw `Unable to find ${attributeName} buffer on mesh`;
+			if (mesh instanceof Mesh) {
+				const buffer = mesh.buffers[attributeName];
+				if (!buffer) {
+					throw `Unable to find ${attributeName} buffer on mesh`;
+				}
+				gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+				gl.enableVertexAttribArray(attribute.location);
+				gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, 0, 0);
 			}
-			gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-			gl.enableVertexAttribArray(attribute.location);
-			gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, 0, 0);
+			else if (mesh instanceof FancyMesh && mesh.hasAttribute(attributeName)) {
+				const stride = mesh.stride;
+				const offset = mesh.attributeOffset(attributeName);
+				gl.enableVertexAttribArray(attribute.location);
+				gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, stride, offset);
+			}
 		}
 	}
 }
