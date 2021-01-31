@@ -27,7 +27,7 @@ float star(vec2 uv, float flare) {
 	return m;
 }
 
-#pragma glslify: rand = require('./utils/rand', seed=seed)
+#pragma glslify: rand = require('./utils/rand')
 
 void main(void) {
 	vec4 color = vec4(vec3(1.0), 0.0);
@@ -41,7 +41,7 @@ void main(void) {
 			vec2 tile = vec2(x, y);
 
 			// Some 'random' numbers
-			float r0 = rand(id + tile);
+			float r0 = rand(id + tile, seed);
 			float r1 = fract(r0 * 12.34);
 			float r2 = fract(r1 * 12.34);
 			float r3 = fract(r2 * 12.34);

@@ -1,4 +1,4 @@
-float rand(vec2 co) {
+float rand(vec2 co, float seed) {
 	float a = 12.9898;
 	float b = 78.233;
 	float c = seed * 43758.5453;
