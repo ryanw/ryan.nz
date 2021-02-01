@@ -1,3 +1,4 @@
+import SimplexNoise from 'simplex-noise';
 import { WebGLRenderer } from './renderer';
 import { Terrain } from './meshes/terrain';
 import { Obj } from './meshes/obj';
@@ -9,7 +10,6 @@ import { Tree } from './meshes/tree';
 import { Pawn } from './pawn';
 import { Camera } from './camera';
 import { Matrix4 } from './geom';
-import SimplexNoise from './simplex-noise';
 import { FancyMesh, Vertex, Geometry } from './fancy_mesh';
 
 import deloreanObj from './delorean.obj';
@@ -287,7 +287,7 @@ async function main() {
 }
 
 class WeirdLandscape {
-	hillNoise = new SimplexNoise(0);
+	hillNoise = new SimplexNoise();
 
 	height(x: number, z: number): number {
 		// Distance from road
