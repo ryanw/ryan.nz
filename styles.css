@@ -44,6 +44,7 @@ main {
 	}
 }
 main h1 {
+	user-select: none;
 	margin: 0.5em 0 0 0.2em;
 	padding-left: 0.2em;
 	letter-spacing: 0.12em;
