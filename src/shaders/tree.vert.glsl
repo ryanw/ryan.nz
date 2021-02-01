@@ -20,7 +20,7 @@ void main(void) {
 	mat4 road_trans = mat4(
 		1.0, 0.0, 0.0, 0.0,
 		0.0, 1.0, 0.0, 0.0,
-		0.0, 0.0, 1.0, mod(road_offset, 40.0),
+		0.0, 0.0, 1.0, mod(road_offset, 80.0),
 		0.0, 0.0, 0.0, 1.0
 	);
 	mat4 mvp = model * road_trans * view_proj;

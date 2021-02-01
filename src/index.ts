@@ -157,17 +157,17 @@ async function main() {
 	// Trees
 	const treeMesh = new Tree();
 	const trees: Pawn[] = [];
-	for (let i = 0; i < 15; i++) {
+	for (let i = 0; i < 9; i++) {
 		const tree = new Pawn(treeMesh, {
-			model: Matrix4.translation(8.0, -3.0, i * -40.0),
+			model: Matrix4.translation(8.0, -3.0, i * -80.0),
 			shader: new TreeShader(),
 		});
 		scene.addPawn(tree);
 		trees.push(tree);
 	}
-	for (let i = 0; i < 15; i++) {
+	for (let i = 0; i < 9; i++) {
 		const tree = new Pawn(treeMesh, {
-			model: Matrix4.translation(-8.0, -3.0, -10 + i * -40.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
+			model: Matrix4.translation(-8.0, -3.0, -40 + i * -80.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
 			shader: new TreeShader(),
 		});
 		scene.addPawn(tree);
