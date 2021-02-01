@@ -38,7 +38,7 @@ main {
 	font-family: "Future Outrun", "Impact", "Arial Black", sans-serif;
 	overflow: hidden;
 }
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 480px) {
 	main {
 		font-size: 150%;
 	}
