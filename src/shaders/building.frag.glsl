@@ -27,18 +27,18 @@ void main(void) {
 	float win_y = floor(frag_uv.y * window_count.y);
 
 	vec2 win_coord = vec2(win_x, win_y);
-	if (frag_uv != vec2(0.0) && step_x > window_space.x && step_y > window_space.y && rand(win_coord, seed) > 0.6) {
-		gl_FragColor = WINDOW_COLOR;
+	float d = edgeDistance(frag_barycentric);
+	if (d < 1.0) {
+		color = EDGE_COLOR * frag_uv.y;
+		color.a = 1.0;
+		gl_FragColor = mix(color, fog_color, fog_depth);
+	}
+	else if (frag_uv != vec2(0.0) && step_x > window_space.x && step_y > window_space.y && rand(win_coord, seed) > 0.6) {
+		color = WINDOW_COLOR;
+		gl_FragColor = color;
 	}
 	else {
-		float d = edgeDistance(frag_barycentric);
-		if (d < 1.0) {
-			color = EDGE_COLOR * frag_uv.y;
-			color.a = 1.0;
-		}
-		else {
-			color = BUILDING_COLOR;
-		}
+		color = BUILDING_COLOR;
 		gl_FragColor = mix(color, fog_color, fog_depth);
 	}
 }
