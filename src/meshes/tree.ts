@@ -97,7 +97,6 @@ export class Tree extends Mesh<TreeVertex> {
 
 		// Leaves
 		const leafColor: Color = [0.0, 1.0, 0.0, 1.0];
-		const leafColor2: Color = [1.0, 0.0, 0.0, 1.0];
 		const leaf: TreeVertex[] = [
 			// Tip
 			{ position: [-5.0, -1.0, -1.0], barycentric: [1.0, 0.0, 0.0], color: leafColor },

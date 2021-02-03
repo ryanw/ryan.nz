@@ -220,6 +220,13 @@ export class WebGLRenderer {
 						gl.uniform1f(uniform.location, value);
 						break;
 
+					case WebGLRenderingContext.INT:
+						if (typeof value !== 'number') {
+							throw `Uniform '${uniformName}' expected number but got: ${typeof value}`;
+						}
+						gl.uniform1i(uniform.location, value);
+						break;
+
 					case WebGLRenderingContext.FLOAT_VEC2:
 						if (
 							!Array.isArray(value) ||
