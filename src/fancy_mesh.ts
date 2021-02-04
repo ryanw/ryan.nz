@@ -10,7 +10,7 @@ export interface GeometryOptions {
 }
 
 export class Geometry<T extends Vertex> {
-	vertices: T[];
+	vertices: T[] = [];
 	transform: Matrix4 = Matrix4.identity();
 
 	constructor(vertices?: T[], options?: GeometryOptions) {
@@ -63,7 +63,7 @@ export class FancyMesh<T extends Vertex> {
 		return count;
 	}
 
-	get stride(): number {
+	get vertexSize(): number {
 		for (const geom of this.geometries) {
 			const vertex = geom.vertices[0];
 			if (!vertex) continue;
@@ -72,15 +72,19 @@ export class FancyMesh<T extends Vertex> {
 			for (const attr of Object.values(vertex)) {
 				size += attr.length;
 			}
-			return size * 4;
+			return size;
 		}
 		return 0;
+	}
+
+	get stride(): number {
+		return this.vertexSize * 4;
 	}
 
 	get data(): Float32Array {
 		// Fill data with T; data is sorted by the property name
 		// Preallocate the typed array as it's much faster than `Array.concat`
-		const data = new Float32Array(this.vertexCount * this.stride);
+		const data = new Float32Array(this.vertexCount * this.vertexSize);
 
 		let i = 0;
 		for (const geom of this.geometries) {

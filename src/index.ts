@@ -10,7 +10,7 @@ import { Tree } from './meshes/tree';
 import { Pawn } from './pawn';
 import { Camera } from './camera';
 import { Matrix4 } from './geom';
-import { FancyMesh, Vertex, Geometry } from './fancy_mesh';
+import { Texture } from './texture';
 
 import deloreanObj from './delorean.obj';
 import { RoadShader } from './shaders/road';
@@ -18,7 +18,6 @@ import { CarShader } from './shaders/car';
 import { SkyShader } from './shaders/sky';
 import { SunShader } from './shaders/sun';
 import { TreeShader } from './shaders/tree';
-import { SimpleShader } from './shaders/simple';
 import { TerrainShader } from './shaders/terrain';
 import { BuildingShader } from './shaders/building';
 
@@ -106,11 +105,15 @@ async function main() {
 	scene.addPawn(sky);
 
 	// Add terrain
-	const landscape = new WeirdLandscape();
-	const terrain = new Terrain(landscape.height.bind(landscape));
+	const mapSize = 64;
+	const heightMap = new Texture(scene.gl);
+	const pixels = new Uint8ClampedArray(mapSize * mapSize * 4);
+	const image = new ImageData(pixels, mapSize);
+	const hillNoise = new SimplexNoise();
+	const terrain = new Terrain();
 	const surface = new Pawn(terrain, {
 		color: [0.0, 0.8, 1.0, 0.0],
-		model: Matrix4.translation(0.0, -4.0, -320.0).multiply(Matrix4.scaling(7.5, 1.0, 20.0)),
+		model: Matrix4.translation(0.0, -4.0, -320.0).multiply(Matrix4.scaling(9.9, 1.0, 20.0)),
 		shader: new TerrainShader(),
 	});
 	scene.addPawn(surface);
@@ -173,6 +176,7 @@ async function main() {
 		scene.addPawn(tree);
 		trees.push(tree);
 	}
+
 
 	// Toggle control
 	if (DEBUG_ENABLED) {
@@ -238,12 +242,26 @@ async function main() {
 		roadOffset = performance.now() / 30.0;
 		road.uniforms.roadOffset = roadOffset;
 		surface.uniforms.roadOffset = roadOffset;
+		surface.uniforms.uHeightMap = heightMap.bind();
 		for (const tree of trees) {
 			tree.uniforms.roadOffset = roadOffset;
 		}
-		terrain.offset[1] = -roadOffset / 20.0 - 1.5;
-		terrain.build();
-		terrain.upload(scene.gl);
+
+		for (let y = 0; y < mapSize; y++) {
+			for (let x = 0; x < mapSize; x++) {
+				const i = (x + y * mapSize) * 4;
+
+				const scale = 10.0;
+				const mapOffset = Math.floor(roadOffset / 20) * 2;
+				let h = hillNoise.noise2D(x / scale, (mapOffset - y) / scale) * 0.5 + 0.5;
+				// Flatten near road
+				if (x == 31 || x == 32) h = 0.0;
+				h = h * Math.min(1.0, Math.abs(x + 0.5 - mapSize / 2) / mapSize * 10.0);
+				pixels[i + 3] = 255 * h | 0; // A
+			}
+		}
+		heightMap.loadPixels(image);
+
 
 		if (DEBUG_ENABLED) {
 			if (scene.mouseButtons.has(0) && scene.isGrabbed) {
@@ -257,59 +275,33 @@ async function main() {
 			}
 			scene.resetMouseMovement();
 
+			const speed = 0.5;
 			if (scene.heldKeys.has('w')) {
-				camera.translate(0.0, 0.0, -1.0);
+				camera.translate(0.0, 0.0, -speed);
 			}
 
 			if (scene.heldKeys.has('s')) {
-				camera.translate(0.0, 0.0, 1.0);
+				camera.translate(0.0, 0.0, speed);
 			}
 
 			if (scene.heldKeys.has('a')) {
-				camera.translate(-1.0, 0.0, 0.0);
+				camera.translate(-speed, 0.0, 0.0);
 			}
 
 			if (scene.heldKeys.has('d')) {
-				camera.translate(1.0, 0.0, 0.0);
+				camera.translate(speed, 0.0, 0.0);
 			}
 
 			if (scene.heldKeys.has('q')) {
-				camera.translate(0.0, -1.0, 0.0);
+				camera.translate(0.0, -speed, 0.0);
 			}
 
 			if (scene.heldKeys.has('e')) {
-				camera.translate(0.0, 1.0, 0.0);
+				camera.translate(0.0, speed, 0.0);
 			}
 		}
 
 		await scene.redraw();
-	}
-}
-
-class WeirdLandscape {
-	hillNoise = new SimplexNoise();
-
-	height(x: number, z: number): number {
-		// Distance from road
-		const roadDist = Math.abs(x + 1) - 1.0;
-
-		// Create lumpy mountains
-		const grid = 10.0;
-		let val = 0.0;
-		val = Math.abs(this.hillNoise.noise2D((x | 0) / grid, (z | 0) / grid));
-		val *= 100.0;
-
-		// Flatten near road
-		const falloff = 30;
-		if (roadDist < falloff) {
-			if (roadDist < 0) {
-				val = 0;
-			} else {
-				val = val * (roadDist / falloff);
-			}
-		}
-
-		return val;
 	}
 }
 

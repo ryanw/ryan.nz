@@ -9,6 +9,9 @@ export class TerrainShader extends Shader {
 				roadOffset: {
 					type: WebGLRenderingContext.FLOAT,
 				},
+				uHeightMap: {
+					type: WebGLRenderingContext.INT,
+				},
 			},
 		});
 	}

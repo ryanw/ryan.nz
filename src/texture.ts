@@ -7,11 +7,12 @@ export class Texture {
 	srcFormat = WebGLRenderingContext.RGBA;
 	srcType = WebGLRenderingContext.UNSIGNED_BYTE;
 
-	constructor(gl: WebGLRenderingContext, imageOrURL?: HTMLImageElement | string) {
+	constructor(gl: WebGLRenderingContext, imageOrURL?: HTMLImageElement | TexImageSource | string) {
 		this.gl = gl;
 		this.raw = gl.createTexture();
-		const defaultPixel = new ImageData(new Uint8ClampedArray([0, 0, 0, 0]), 1, 1);
-		this.loadPixels(defaultPixel);
+
+		const defaultImage = new ImageData(new Uint8ClampedArray([255, 0, 255, 255]), 1, 1);
+		this.loadPixels(defaultImage);
 
 		if (imageOrURL) {
 			if (typeof imageOrURL === 'string') {
@@ -19,8 +20,10 @@ export class Texture {
 				const image = new Image();
 				image.src = imageOrURL;
 				this.loadImage(image);
-			} else {
+			} else if (imageOrURL instanceof HTMLImageElement) {
 				this.loadImage(imageOrURL);
+			} else {
+				this.loadPixels(imageOrURL);
 			}
 		}
 	}
