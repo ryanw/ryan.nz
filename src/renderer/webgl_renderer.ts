@@ -1,17 +1,22 @@
-import { Shader, ShaderOptions } from './shader';
-import { Pawn } from './pawn';
-import { Camera } from './camera';
-import { Color } from './material';
-import { Matrix4 } from './geom';
-import { Vertex } from './fancy_mesh';
-import { Mesh } from './mesh';
-import defaultVertSource from './shaders/wireframe.vert.glsl';
-import defaultFragSource from './shaders/wireframe.frag.glsl';
+import { Renderer } from './renderer';
+import { Shader, ShaderOptions } from '../shader';
+import { Vertex } from './vertex';
+import { Pawn } from '../pawn';
+import { Camera } from '../camera';
+import { Color } from '../material';
+import { Matrix4 } from '../geom';
+import { FancyMesh as Mesh } from '../fancy_mesh';
+import { Mesh as LegacyMesh } from '../mesh';
+import { Scene } from '../scene';
+import { Texture } from '../texture';
+import { WebGLMesh } from './webgl_mesh';
+import { WebGLTexture } from './webgl_texture';
+import defaultVertSource from '../shaders/wireframe.vert.glsl';
+import defaultFragSource from '../shaders/wireframe.frag.glsl';
 
-export class WebGLRenderer {
+export class WebGLRenderer extends Renderer {
 	canvas = document.createElement('canvas');
 	defaultShader: Shader;
-	pawns: Pawn[] = [];
 	scale = 1.0 * window.devicePixelRatio;
 	lineWidth = 2 * window.devicePixelRatio;
 	antiAlias = true;
@@ -27,8 +32,11 @@ export class WebGLRenderer {
 	isGrabbed = false;
 	seed = Math.random();
 	private context: WebGLRenderingContext;
+	private textures: Map<Texture, WebGLTexture> = new Map();
+	private meshes: Map<Mesh<Vertex>, WebGLMesh<Vertex>> = new Map();
 
 	constructor() {
+		super();
 		Object.assign(this.canvas.style, {
 			position: 'fixed',
 			zIndex: -1,
@@ -161,25 +169,6 @@ export class WebGLRenderer {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
-	draw(_dt: number) {
-		const gl = this.gl;
-		gl.viewport(0, 0, this.camera.width, this.camera.height);
-		this.clear();
-
-		// Uniforms
-		const proj = this.camera.projection.clone();
-		const view = this.camera.view.inverse();
-		const viewProj = proj.multiply(view);
-
-		for (const pawn of this.pawns) {
-			this.drawPawn(pawn, viewProj);
-		}
-
-		gl.clearColor(1.0, 1.0, 1.0, 1.0);
-		gl.colorMask(false, false, false, true);
-		gl.clear(gl.COLOR_BUFFER_BIT);
-	}
-
 	drawPawn(pawn: Pawn, projection?: Matrix4, parentModel?: Matrix4) {
 		const { mesh, model, material, children } = pawn;
 		const pawnModel = parentModel ? parentModel.multiply(model) : model;
@@ -193,7 +182,17 @@ export class WebGLRenderer {
 			const shader = pawn.shader || this.defaultShader;
 			const uniforms = shader.uniforms;
 			shader.use(gl);
-			shader.bind(gl, mesh);
+			// FIXME remove this
+			if (mesh instanceof LegacyMesh) {
+				shader.bind(gl, mesh);
+			}
+			else {
+				const glMesh = this.meshes.get(mesh);
+				if (!glMesh) {
+					throw `Unable to find WebGLMesh`;
+				}
+				shader.bind(gl, glMesh);
+			}
 
 			gl.uniformMatrix4fv(uniforms.viewProj.location, false, projection.toArray());
 			gl.uniform4fv(uniforms.fogColor.location, this.backgroundColor);
@@ -244,7 +243,17 @@ export class WebGLRenderer {
 						throw `Unsupported uniform type: ${uniform.type}`;
 				}
 			}
-			mesh.draw(gl);
+			// FIXME remove this
+			if (mesh instanceof LegacyMesh) {
+				mesh.draw(gl);
+			}
+			else {
+				const glMesh = this.meshes.get(mesh);
+				if (!glMesh) {
+					throw `Unable to find WebGLMesh`;
+				}
+				glMesh.draw();
+			}
 		}
 
 		for (const child of children) {
@@ -252,23 +261,29 @@ export class WebGLRenderer {
 		}
 	}
 
-	uploadPawn(pawn: Pawn) {
+	uploadMesh(mesh: Mesh<Vertex> | LegacyMesh) {
 		const gl = this.gl;
-		if (pawn.mesh) {
-			if (pawn.mesh instanceof Mesh) {
-				pawn.mesh.allocate(gl);
-			}
-			pawn.mesh.upload(gl);
+		// FIXME remove this
+		if (mesh instanceof LegacyMesh) {
+			mesh.allocate(gl);
+			mesh.upload(gl);
+			return;
 		}
-		for (const child of pawn.children) {
-			this.uploadPawn(child);
+
+		// Link a Mesh with its WebGLMesh
+		let glMesh = this.meshes.get(mesh);
+		if (!glMesh) {
+			console.log("Creating WebGLMesh", mesh);
+			glMesh = new WebGLMesh(gl);
+			this.meshes.set(mesh, glMesh);
 		}
+		glMesh.upload(mesh);
 	}
 
-	addPawn(pawn: Pawn): number {
-		this.uploadPawn(pawn);
-		this.pawns.push(pawn);
-		return this.pawns.length - 1;
+	removeMesh(mesh: Mesh<Vertex>) {
+		const glMesh = this.meshes.get(mesh);
+		if (!glMesh) return;
+		throw `not yet implemented`;
 	}
 
 	createShader(vertSource: string, fragSource: string, options?: ShaderOptions): Shader {
@@ -278,14 +293,25 @@ export class WebGLRenderer {
 	/**
 	 * Wait for next animation frame and redraw everything
 	 */
-	async redraw(): Promise<number> {
+	async drawScene(scene: Scene): Promise<number> {
 		return new Promise((resolve) => {
 			window.requestAnimationFrame(() => {
 				const now = performance.now();
 				const dt = (now - this.lastFrameAt) / 1000.0;
 				this.lastFrameAt = now;
 
-				this.draw(dt);
+				this.gl.viewport(0, 0, this.camera.width, this.camera.height);
+				this.clear();
+
+				// Uniforms
+				const proj = this.camera.projection.clone();
+				const view = this.camera.view.inverse();
+				const viewProj = proj.multiply(view);
+
+				for (const pawn of scene.pawns) {
+					this.drawPawn(pawn, viewProj);
+				}
+
 				this.frame++;
 				const frametime = performance.now() - now;
 				if (this.frame % 60 === 0) {

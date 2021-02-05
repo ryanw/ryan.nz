@@ -1,5 +1,6 @@
 import { FancyMesh as Mesh, Geometry } from '../fancy_mesh';
 import { Point3 } from '../geom';
+import { Texture } from '../texture';
 
 export type HeightFunction = (x: number, y: number, t?: number) => number;
 

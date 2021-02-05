@@ -1,5 +1,5 @@
 import SimplexNoise from 'simplex-noise';
-import { WebGLRenderer } from './renderer';
+import { WebGLRenderer } from './renderer/webgl_renderer';
 import { Terrain } from './meshes/terrain';
 import { Obj } from './meshes/obj';
 import { Building } from './meshes/building';
@@ -11,6 +11,7 @@ import { Pawn } from './pawn';
 import { Camera } from './camera';
 import { Matrix4 } from './geom';
 import { Texture } from './texture';
+import { Scene } from './scene';
 
 import deloreanObj from './delorean.obj';
 import { RoadShader } from './shaders/road';
@@ -91,14 +92,16 @@ function createCityscape(radius: number, count: number): Pawn[] {
 }
 
 async function main() {
-	const scene = new WebGLRenderer();
-	scene.attach(document.body);
+	const renderer = new WebGLRenderer();
+	renderer.attach(document.body);
+
+	const scene = new Scene(renderer);
 
 	// Add a camera
 	const camera = new Camera();
 	scene.addPawn(camera);
-	scene.camera = camera;
-	scene.updateSize();
+	renderer.camera = camera;
+	renderer.updateSize();
 
 	// Sky
 	const sky = new Pawn(new Quad(), { shader: new SkyShader() });
@@ -106,7 +109,7 @@ async function main() {
 
 	// Add terrain
 	const mapSize = 64;
-	const heightMap = new Texture(scene.gl);
+	const heightMap = new Texture(renderer.gl);
 	const pixels = new Uint8ClampedArray(mapSize * mapSize * 4);
 	const image = new ImageData(pixels, mapSize);
 	const hillNoise = new SimplexNoise();
@@ -177,16 +180,18 @@ async function main() {
 		trees.push(tree);
 	}
 
+	surface.uniforms.uHeightMap = heightMap.bind();
+
 
 	// Toggle control
 	if (DEBUG_ENABLED) {
 		document.addEventListener('keydown', (e) => {
 			if (e.key === ' ') {
-				if (scene.isGrabbed) {
-					scene.release();
+				if (renderer.isGrabbed) {
+					renderer.release();
 					document.body.className = '';
 				} else {
-					scene.grab();
+					renderer.grab();
 					document.body.className = 'grabbed';
 				}
 			}
@@ -194,17 +199,17 @@ async function main() {
 	}
 
 	document.addEventListener('pointerlockchange', () => {
-		if (scene.isGrabbed) {
+		if (renderer.isGrabbed) {
 			document.body.className = 'grabbed';
 		} else {
 			document.body.className = '';
 		}
 	});
 
-	scene.addEventListeners();
+	renderer.addEventListeners();
 	// Start mouse in the center
-	scene.mousePosition[0] = scene.width / 2;
-	scene.mousePosition[1] = scene.height / 2;
+	renderer.mousePosition[0] = renderer.width / 2;
+	renderer.mousePosition[1] = renderer.height / 2;
 
 	let roadOffset = 0.0;
 	let carPosition = [0.0, 0.0];
@@ -213,15 +218,15 @@ async function main() {
 
 		// Move the car relative to mouse
 		// Mouse relative to center
-		const mouseX = (scene.mousePosition[0] / scene.width) * 2 - 1;
-		const mouseY = (scene.mousePosition[1] / scene.height) * 2 - 1;
+		const mouseX = (renderer.mousePosition[0] / renderer.width) * 2 - 1;
+		const mouseY = (renderer.mousePosition[1] / renderer.height) * 2 - 1;
 
 		const carTarget = [mouseX * 6.0, mouseY * 10.0 - 18.0];
-		if (scene.mouseButtons.has(0)) {
+		if (renderer.mouseButtons.has(0)) {
 			// Warp speed, Mr Sulu
 			carTarget[1] = -40.0;
 		}
-		else if (scene.mouseButtons.has(1)) {
+		else if (renderer.mouseButtons.has(1)) {
 			// Braking
 			carTarget[1] = -5.0;
 		}
@@ -262,46 +267,45 @@ async function main() {
 		}
 		heightMap.loadPixels(image);
 
-
 		if (DEBUG_ENABLED) {
-			if (scene.mouseButtons.has(0) && scene.isGrabbed) {
+			if (renderer.mouseButtons.has(0) && renderer.isGrabbed) {
 				const mouseSpeed = 0.0005;
-				const [mX, mY] = scene.mouseMovement;
+				const [mX, mY] = renderer.mouseMovement;
 
 				const x = mY * mouseSpeed;
 				const y = mX * mouseSpeed;
 
-				scene.camera.rotate(x, y);
+				renderer.camera.rotate(x, y);
 			}
-			scene.resetMouseMovement();
+			renderer.resetMouseMovement();
 
 			const speed = 0.5;
-			if (scene.heldKeys.has('w')) {
+			if (renderer.heldKeys.has('w')) {
 				camera.translate(0.0, 0.0, -speed);
 			}
 
-			if (scene.heldKeys.has('s')) {
+			if (renderer.heldKeys.has('s')) {
 				camera.translate(0.0, 0.0, speed);
 			}
 
-			if (scene.heldKeys.has('a')) {
+			if (renderer.heldKeys.has('a')) {
 				camera.translate(-speed, 0.0, 0.0);
 			}
 
-			if (scene.heldKeys.has('d')) {
+			if (renderer.heldKeys.has('d')) {
 				camera.translate(speed, 0.0, 0.0);
 			}
 
-			if (scene.heldKeys.has('q')) {
+			if (renderer.heldKeys.has('q')) {
 				camera.translate(0.0, -speed, 0.0);
 			}
 
-			if (scene.heldKeys.has('e')) {
+			if (renderer.heldKeys.has('e')) {
 				camera.translate(0.0, speed, 0.0);
 			}
 		}
 
-		await scene.redraw();
+		await scene.draw();
 	}
 }
 

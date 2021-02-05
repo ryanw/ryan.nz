@@ -1,5 +1,6 @@
 import { Mesh } from './mesh';
-import { FancyMesh, Vertex } from './fancy_mesh';
+import { Vertex } from './renderer/vertex';
+import { WebGLMesh } from './renderer/webgl_mesh';
 
 export interface ShaderOptions {
 	attributes?: { [key: string]: WebGLAttribute };
@@ -166,10 +167,30 @@ export class Shader {
 		gl.useProgram(this.program);
 	}
 
-	bind<T extends Vertex>(gl: WebGLRenderingContext, mesh: Mesh | FancyMesh<T>) {
-		if (mesh instanceof FancyMesh) {
-			gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
+	bind<T extends Vertex>(gl: WebGLRenderingContext, mesh: WebGLMesh<T> | Mesh) {
+		if (mesh instanceof Mesh) {
+			return this.legacyBind(gl, mesh);
 		}
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
+		for (const attributeName in this.attributes) {
+			const attribute = this.attributes[attributeName];
+			if (attribute.location == null || attribute.location === -1) {
+				continue;
+			}
+
+			const stride = mesh.stride;
+			const offset = mesh.offsets.get(attributeName);
+			if (offset == null) {
+				throw `Unable to find offset for ${attributeName}`;
+			}
+			gl.enableVertexAttribArray(attribute.location);
+			gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, stride, offset);
+		}
+	}
+
+	legacyBind(gl: WebGLRenderingContext, mesh: Mesh) {
+		console.warn("Called `bind` with deprecated mesh");
 
 		for (const attributeName in this.attributes) {
 			const attribute = this.attributes[attributeName];
@@ -184,12 +205,6 @@ export class Shader {
 				gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 				gl.enableVertexAttribArray(attribute.location);
 				gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, 0, 0);
-			}
-			else if (mesh instanceof FancyMesh && mesh.hasAttribute(attributeName)) {
-				const stride = mesh.stride;
-				const offset = mesh.attributeOffset(attributeName);
-				gl.enableVertexAttribArray(attribute.location);
-				gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, stride, offset);
 			}
 		}
 	}
