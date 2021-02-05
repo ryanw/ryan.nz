@@ -21,12 +21,12 @@ export class Texture {
 		return new Promise((resolve, reject) => {
 			const image = new Image();
 			image.src = url;
-				image.addEventListener('load', () => {
-					resolve(new Texture(image));
-				});
-				image.addEventListener('error', (e) => {
-					reject(e);
-				});
+			image.addEventListener('load', () => {
+				resolve(new Texture(image));
+			});
+			image.addEventListener('error', (e) => {
+				reject(e);
+			});
 		});
 	}
 
