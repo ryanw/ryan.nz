@@ -4,7 +4,6 @@ import { Terrain } from './meshes/terrain';
 import { Obj } from './meshes/obj';
 import { Building } from './meshes/building';
 import { Quad } from './meshes/quad';
-import { Sun } from './meshes/sun';
 import { Road } from './meshes/road';
 import { Tree } from './meshes/tree';
 import { Pawn } from './pawn';
@@ -153,7 +152,7 @@ async function main() {
 	);
 
 	// Add sun
-	const sun = new Pawn(new Sun(), {
+	const sun = new Pawn(new Quad(), {
 		color: [1.0, 1.0, 0.0, 1.0],
 		model: Matrix4.translation(0.0, 50.0, -1000.0).multiply(Matrix4.scaling(175, 175, 175)),
 		shader: new SunShader(),
@@ -181,7 +180,6 @@ async function main() {
 	}
 
 	surface.uniforms.uHeightMap = heightMap.bind();
-
 
 	// Toggle control
 	if (DEBUG_ENABLED) {
@@ -215,7 +213,6 @@ async function main() {
 	let carPosition = [0.0, 0.0];
 	// 0 = back, PI = forward
 	while (true) {
-
 		// Move the car relative to mouse
 		// Mouse relative to center
 		const mouseX = (renderer.mousePosition[0] / renderer.width) * 2 - 1;
@@ -225,8 +222,7 @@ async function main() {
 		if (renderer.mouseButtons.has(0)) {
 			// Warp speed, Mr Sulu
 			carTarget[1] = -40.0;
-		}
-		else if (renderer.mouseButtons.has(1)) {
+		} else if (renderer.mouseButtons.has(1)) {
 			// Braking
 			carTarget[1] = -5.0;
 		}
@@ -261,8 +257,8 @@ async function main() {
 				let h = hillNoise.noise2D(x / scale, (mapOffset - y) / scale) * 0.5 + 0.5;
 				// Flatten near road
 				if (x == 31 || x == 32) h = 0.0;
-				h = h * Math.min(1.0, Math.abs(x + 0.5 - mapSize / 2) / mapSize * 10.0);
-				pixels[i + 3] = 255 * h | 0; // A
+				h = h * Math.min(1.0, (Math.abs(x + 0.5 - mapSize / 2) / mapSize) * 10.0);
+				pixels[i + 3] = (255 * h) | 0; // A
 			}
 		}
 		heightMap.loadPixels(image);

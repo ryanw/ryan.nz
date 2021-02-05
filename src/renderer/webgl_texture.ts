@@ -1,2 +1,1 @@
-export class WebGLTexture {
-}
+export class WebGLTexture {}

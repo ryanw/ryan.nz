@@ -9,7 +9,7 @@ export class SimpleShader extends Shader {
 				color: {
 					type: WebGLRenderingContext.FLOAT,
 					size: 4,
-				}
+				},
 			},
 		});
 	}

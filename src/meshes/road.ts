@@ -1,53 +1,22 @@
 import { Mesh } from '../mesh';
+import { Point3 } from '../geom';
 
-export class Road extends Mesh {
+export type RoadVertex = {
+	position: Point3;
+	barycentric: Point3;
+	direction: number;
+};
+
+export class Road extends Mesh<RoadVertex> {
 	constructor() {
-		super();
-		this.data.positions = new Float32Array(VERTICES);
-		this.data.direction = new Float32Array([1, 1, 1, 0, 0, 0]);
+		super([
+			{ position: [-1.0, 1.0, -1.0], barycentric: [1.0, 0.0, 0.0], direction: 1 },
+			{ position: [1.0, 1.0, 1.0], barycentric: [0.0, 1.0, 0.0], direction: 1 },
+			{ position: [1.0, 1.0, -1.0], barycentric: [0.0, 0.0, 1.0], direction: 1 },
 
-		const barycentrics = [];
-		for (let i = 0; i < this.data.positions.length / 3; i++) {
-			if (i % 3 === 0) {
-				barycentrics.push(1.0);
-				barycentrics.push(0.0);
-				barycentrics.push(0.0);
-			} else if (i % 3 === 1) {
-				barycentrics.push(0.0);
-				barycentrics.push(1.0);
-				barycentrics.push(0.0);
-			} else {
-				barycentrics.push(0.0);
-				barycentrics.push(0.0);
-				barycentrics.push(1.0);
-			}
-		}
-		this.data.barycentrics = new Float32Array(barycentrics);
-	}
-
-	allocate(gl: WebGLRenderingContext) {
-		if (this.isAllocated) {
-			return;
-		}
-		super.allocate(gl);
-		this.buffers.direction = gl.createBuffer();
-	}
-
-	upload(gl: WebGLRenderingContext) {
-		super.upload(gl);
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.direction);
-		gl.bufferData(gl.ARRAY_BUFFER, this.data.direction, gl.DYNAMIC_DRAW);
+			{ position: [1.0, 1.0, 1.0], barycentric: [1.0, 0.0, 0.0], direction: 0 },
+			{ position: [-1.0, 1.0, -1.0], barycentric: [0.0, 1.0, 0.0], direction: 0 },
+			{ position: [-1.0, 1.0, 1.0], barycentric: [0.0, 0.0, 1.0], direction: 0 },
+		]);
 	}
 }
-
-// prettier-ignore
-const VERTICES = [
-	// Top
-	-1.0, 1.0, -1.0,
-	1.0, 1.0, 1.0,
-	1.0, 1.0, -1.0,
-
-	1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0,
-	-1.0, 1.0, 1.0,
-];

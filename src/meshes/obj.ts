@@ -3,6 +3,10 @@ import { Point3, Vector3, Matrix4 } from '../geom';
 
 type Face = [number, number, number];
 
+export type ObjVertex = {
+	position: Point3;
+};
+
 export interface ObjOptions {
 	flipFaces?: boolean;
 	scale?: number;
@@ -13,9 +17,8 @@ export interface ObjFile {
 	normals: Vector3[];
 }
 
-export class Obj extends Mesh {
+export class Obj extends Mesh<ObjVertex> {
 	constructor(data: string, options?: ObjOptions) {
-		super();
 		let { vertices } = parseObj(data);
 		if (options?.scale) {
 			const scaling = Matrix4.scaling(options.scale, options.scale, options.scale);
@@ -29,7 +32,8 @@ export class Obj extends Mesh {
 				vertices[i + 2] = v0;
 			}
 		}
-		this.data.positions = new Float32Array((vertices as any).flat());
+
+		super(vertices.map((v) => ({ position: v })));
 	}
 }
 

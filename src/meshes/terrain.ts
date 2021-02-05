@@ -1,13 +1,12 @@
-import { FancyMesh as Mesh, Geometry } from '../fancy_mesh';
+import { Mesh, Geometry } from '../mesh';
 import { Point3 } from '../geom';
-import { Texture } from '../texture';
 
 export type HeightFunction = (x: number, y: number, t?: number) => number;
 
 export type Vertex = {
 	position: Point3;
 	barycentric: Point3;
-}
+};
 
 export class Terrain extends Mesh<Vertex> {
 	width = 32;
@@ -41,9 +40,9 @@ export class Terrain extends Mesh<Vertex> {
 
 const QUAD_POINTS = [
 	[-0.5, 0.0, -0.5],
-	[-0.5, 0.0,  0.5],
-	[ 0.5, 0.0, -0.5],
-	[ 0.5, 0.0,  0.5],
-	[ 0.5, 0.0, -0.5],
-	[-0.5, 0.0,  0.5],
+	[-0.5, 0.0, 0.5],
+	[0.5, 0.0, -0.5],
+	[0.5, 0.0, 0.5],
+	[0.5, 0.0, -0.5],
+	[-0.5, 0.0, 0.5],
 ];

@@ -1,4 +1,3 @@
-import { Mesh } from './mesh';
 import { Vertex } from './renderer/vertex';
 import { WebGLMesh } from './renderer/webgl_mesh';
 
@@ -167,11 +166,7 @@ export class Shader {
 		gl.useProgram(this.program);
 	}
 
-	bind<T extends Vertex>(gl: WebGLRenderingContext, mesh: WebGLMesh<T> | Mesh) {
-		if (mesh instanceof Mesh) {
-			return this.legacyBind(gl, mesh);
-		}
-
+	bind<T extends Vertex>(gl: WebGLRenderingContext, mesh: WebGLMesh<T>) {
 		gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
 		for (const attributeName in this.attributes) {
 			const attribute = this.attributes[attributeName];
@@ -186,26 +181,6 @@ export class Shader {
 			}
 			gl.enableVertexAttribArray(attribute.location);
 			gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, stride, offset);
-		}
-	}
-
-	legacyBind(gl: WebGLRenderingContext, mesh: Mesh) {
-		console.warn("Called `bind` with deprecated mesh");
-
-		for (const attributeName in this.attributes) {
-			const attribute = this.attributes[attributeName];
-			if (attribute.location == null || attribute.location === -1) {
-				continue;
-			}
-			if (mesh instanceof Mesh) {
-				const buffer = mesh.buffers[attributeName];
-				if (!buffer) {
-					throw `Unable to find ${attributeName} buffer on mesh`;
-				}
-				gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-				gl.enableVertexAttribArray(attribute.location);
-				gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, 0, 0);
-			}
 		}
 	}
 }

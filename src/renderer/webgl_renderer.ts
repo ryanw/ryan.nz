@@ -5,8 +5,7 @@ import { Pawn } from '../pawn';
 import { Camera } from '../camera';
 import { Color } from '../material';
 import { Matrix4 } from '../geom';
-import { FancyMesh as Mesh } from '../fancy_mesh';
-import { Mesh as LegacyMesh } from '../mesh';
+import { Mesh } from '../mesh';
 import { Scene } from '../scene';
 import { Texture } from '../texture';
 import { WebGLMesh } from './webgl_mesh';
@@ -182,17 +181,12 @@ export class WebGLRenderer extends Renderer {
 			const shader = pawn.shader || this.defaultShader;
 			const uniforms = shader.uniforms;
 			shader.use(gl);
-			// FIXME remove this
-			if (mesh instanceof LegacyMesh) {
-				shader.bind(gl, mesh);
+
+			const glMesh = this.meshes.get(mesh);
+			if (!glMesh) {
+				throw 'Unable to find WebGLMesh';
 			}
-			else {
-				const glMesh = this.meshes.get(mesh);
-				if (!glMesh) {
-					throw `Unable to find WebGLMesh`;
-				}
-				shader.bind(gl, glMesh);
-			}
+			shader.bind(gl, glMesh);
 
 			gl.uniformMatrix4fv(uniforms.viewProj.location, false, projection.toArray());
 			gl.uniform4fv(uniforms.fogColor.location, this.backgroundColor);
@@ -243,17 +237,8 @@ export class WebGLRenderer extends Renderer {
 						throw `Unsupported uniform type: ${uniform.type}`;
 				}
 			}
-			// FIXME remove this
-			if (mesh instanceof LegacyMesh) {
-				mesh.draw(gl);
-			}
-			else {
-				const glMesh = this.meshes.get(mesh);
-				if (!glMesh) {
-					throw `Unable to find WebGLMesh`;
-				}
-				glMesh.draw();
-			}
+
+			glMesh.draw();
 		}
 
 		for (const child of children) {
@@ -261,19 +246,12 @@ export class WebGLRenderer extends Renderer {
 		}
 	}
 
-	uploadMesh(mesh: Mesh<Vertex> | LegacyMesh) {
+	uploadMesh(mesh: Mesh<Vertex>) {
 		const gl = this.gl;
-		// FIXME remove this
-		if (mesh instanceof LegacyMesh) {
-			mesh.allocate(gl);
-			mesh.upload(gl);
-			return;
-		}
 
 		// Link a Mesh with its WebGLMesh
 		let glMesh = this.meshes.get(mesh);
 		if (!glMesh) {
-			console.log("Creating WebGLMesh", mesh);
 			glMesh = new WebGLMesh(gl);
 			this.meshes.set(mesh, glMesh);
 		}
@@ -283,7 +261,7 @@ export class WebGLRenderer extends Renderer {
 	removeMesh(mesh: Mesh<Vertex>) {
 		const glMesh = this.meshes.get(mesh);
 		if (!glMesh) return;
-		throw `not yet implemented`;
+		throw 'not yet implemented';
 	}
 
 	createShader(vertSource: string, fragSource: string, options?: ShaderOptions): Shader {

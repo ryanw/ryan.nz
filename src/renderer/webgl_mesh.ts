@@ -1,5 +1,5 @@
 import { Vertex } from './vertex';
-import { FancyMesh as Mesh } from '../fancy_mesh';
+import { Mesh } from '../mesh';
 
 const FLOAT32_SIZE: number = 4;
 
@@ -33,7 +33,11 @@ export class WebGLMesh<T extends Vertex> {
 		for (const name of attributeNames) {
 			const attr = vertices[0][name];
 			this.offsets.set(name, vertexSize * FLOAT32_SIZE);
-			vertexSize += attr.length;
+			if (Array.isArray(attr)) {
+				vertexSize += attr.length;
+			} else {
+				vertexSize += 1;
+			}
 		}
 		this.stride = vertexSize * FLOAT32_SIZE;
 
@@ -42,20 +46,29 @@ export class WebGLMesh<T extends Vertex> {
 		const data = new Float32Array(vertices.length * vertexSize);
 		for (const vertex of vertices) {
 			for (const attr of attributeNames) {
-				for (const num of vertex[attr]) {
-					data[i] = num;
+				const value = vertex[attr];
+				if (Array.isArray(value)) {
+					for (const num of value) {
+						data[i] = num;
+						i++;
+					}
+				} else {
+					data[i] = value;
 					i++;
 				}
 			}
 		}
 
 		// Upload data to the GPU
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+		this.bind();
 		gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+	}
+
+	bind() {
+		this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
 	}
 
 	draw() {
 		this.gl.drawArrays(this.gl.TRIANGLES, 0, this.length);
 	}
 }
-

@@ -9,7 +9,7 @@ export class SpriteShader extends Shader {
 				uv: {
 					type: WebGLRenderingContext.FLOAT,
 					size: 2,
-				}
+				},
 			},
 			uniforms: {
 				uSampler: {

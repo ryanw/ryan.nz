@@ -1,4 +1,4 @@
-declare var PRODUCTION: boolean;
+declare let PRODUCTION: boolean;
 
 declare module '*.glsl' {
 	export default string;

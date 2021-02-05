@@ -1,4 +1,53 @@
 import { Mesh } from '../mesh';
+import { Point3, Point2 } from '../geom';
+
+export type BuildingVertex = {
+	position: Point3;
+	uv: Point2;
+	barycentric: Point3;
+	scale: Point2;
+};
+
+export class Building extends Mesh<BuildingVertex> {
+	constructor(width: number = 1, height: number = 1, depth: number = 1) {
+		const data: BuildingVertex[] = new Array(6 * 6);
+		for (let i = 0; i < data.length; i++) {
+			// prettier-ignore
+			const position: Point3 = [
+				FACE_VERTICES[i * 3 + 0],
+				FACE_VERTICES[i * 3 + 1],
+				FACE_VERTICES[i * 3 + 2],
+			];
+			// prettier-ignore
+			const uv: Point2 = [
+				FACE_UV[(i * 2 + 0) % FACE_UV.length],
+				FACE_UV[(i * 2 + 1) % FACE_UV.length],
+			];
+			// prettier-ignore
+			const barycentric: Point3 = [
+				FACE_BARY[(i * 3 + 0) % FACE_BARY.length],
+				FACE_BARY[(i * 3 + 1) % FACE_BARY.length],
+				FACE_BARY[(i * 3 + 2) % FACE_BARY.length],
+			];
+
+			let scale: Point2 = [0, 0];
+			switch (Math.floor(i / 6)) {
+				case 0: // Far
+				case 1: // Near
+					scale = [width, height];
+					break;
+				case 2: // Left
+				case 3: // Right
+					scale = [depth, height];
+					break;
+			}
+
+			data[i] = { position, uv, barycentric, scale };
+		}
+
+		super(data);
+	}
+}
 
 // prettier-ignore
 const FACE_UV = [
@@ -11,103 +60,15 @@ const FACE_UV = [
 	0.0, 1.0,
 ];
 
-function createScale(width: number, height: number): number[] {
-	return [
-			width, height,
-			width, height,
-			width, height,
-			width, height,
-			width, height,
-			width, height,
-	];
-}
-
-export class Building extends Mesh {
-	constructor(width: number = 1, height: number = 1, depth: number = 1) {
-		super();
-		this.data.positions = new Float32Array(CUBE_VERTICES);
-
-		// Every face has the same UVs
-		this.data.uvs = new Float32Array([
-			// Far
-			...FACE_UV,
-
-			// Near
-			...FACE_UV,
-
-			// Left
-			...FACE_UV,
-
-			// Right
-			...FACE_UV,
-
-			// Top
-			...FACE_UV,
-
-			// Bottom
-			...FACE_UV,
-		]);
-
-		this.data.scales = new Float32Array([
-			// Near
-			...createScale(width, height),
-
-			// Far
-			...createScale(width, height),
-
-			// Left
-			...createScale(depth, height),
-
-			// Right
-			...createScale(depth, height),
-
-			// Top
-			...createScale(0, 0),
-
-			// Bottom
-			...createScale(0, 0),
-		]);
-
-		const barycentrics = [];
-		for (let i = 0; i < this.data.positions.length / 3; i++) {
-			if (i % 3 === 0) {
-				barycentrics.push(1.0);
-				barycentrics.push(0.0);
-				barycentrics.push(0.0);
-			} else if (i % 3 === 1) {
-				barycentrics.push(0.0);
-				barycentrics.push(1.0);
-				barycentrics.push(0.0);
-			} else {
-				barycentrics.push(1.0);
-				barycentrics.push(0.0);
-				barycentrics.push(1.0);
-			}
-		}
-		this.data.barycentrics = new Float32Array(barycentrics);
-	}
-
-	allocate(gl: WebGLRenderingContext) {
-		if (this.isAllocated) {
-			return;
-		}
-		super.allocate(gl);
-		this.buffers.uv = gl.createBuffer();
-		this.buffers.scale = gl.createBuffer();
-	}
-
-	upload(gl: WebGLRenderingContext) {
-		super.upload(gl);
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.uv);
-		gl.bufferData(gl.ARRAY_BUFFER, this.data.uvs, gl.DYNAMIC_DRAW);
-
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.scale);
-		gl.bufferData(gl.ARRAY_BUFFER, this.data.scales, gl.DYNAMIC_DRAW);
-	}
-}
+// prettier-ignore
+const FACE_BARY = [
+	1.0, 0.0, 0.0,
+	0.0, 1.0, 0.0,
+	1.0, 0.0, 1.0,
+];
 
 // prettier-ignore
-const CUBE_VERTICES = [
+const FACE_VERTICES = [
 	// Far
 	-1.0, 1.0, -1.0,
 	1.0, 1.0, -1.0,
