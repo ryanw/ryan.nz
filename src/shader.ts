@@ -147,12 +147,14 @@ export class Shader {
 
 		// Uniform locations
 		for (const uniformName in this.uniforms) {
-			this.uniforms[uniformName].location = gl.getUniformLocation(program, camelToSnake(uniformName));
+			// FIXME remove snake case
+			this.uniforms[uniformName].location = gl.getUniformLocation(program, uniformName) || gl.getUniformLocation(program, camelToSnake(uniformName));
 		}
 
 		// Attribute locations
 		for (const attributeName in this.attributes) {
-			this.attributes[attributeName].location = gl.getAttribLocation(program, camelToSnake(attributeName));
+			// FIXME remove snake case
+			this.attributes[attributeName].location = gl.getAttribLocation(program, attributeName) || gl.getAttribLocation(program, camelToSnake(attributeName));
 		}
 
 		gl.enable(gl.CULL_FACE);

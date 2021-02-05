@@ -1,66 +1,58 @@
 export class Texture {
-	private raw: WebGLTexture;
-	private gl: WebGLRenderingContext;
+	pixels: ImageData | HTMLImageElement;
 
-	level = 0;
-	internalFormat = WebGLRenderingContext.RGBA;
-	srcFormat = WebGLRenderingContext.RGBA;
-	srcType = WebGLRenderingContext.UNSIGNED_BYTE;
-
-	constructor(gl: WebGLRenderingContext, imageOrURL?: HTMLImageElement | TexImageSource | string) {
-		this.gl = gl;
-		this.raw = gl.createTexture();
-
-		const defaultImage = new ImageData(new Uint8ClampedArray([255, 0, 255, 255]), 1, 1);
-		this.loadPixels(defaultImage);
+	constructor(imageOrURL?: HTMLImageElement | ImageData | string) {
+		this.putPixels(new ImageData(new Uint8ClampedArray([255, 0, 255, 255]), 1, 1));
 
 		if (imageOrURL) {
 			if (typeof imageOrURL === 'string') {
 				const image = new Image();
 				image.src = imageOrURL;
-				this.loadImage(image);
+				this.putImage(image);
 			} else if (imageOrURL instanceof HTMLImageElement) {
-				this.loadImage(imageOrURL);
+				this.putImage(imageOrURL);
 			} else {
-				this.loadPixels(imageOrURL);
+				this.putPixels(imageOrURL);
 			}
 		}
 	}
 
-	loadImage(image: HTMLImageElement) {
+	static async fromUrl(url: string): Promise<Texture> {
+		return new Promise((resolve, reject) => {
+			const image = new Image();
+			image.src = url;
+				image.addEventListener('load', () => {
+					resolve(new Texture(image));
+				});
+				image.addEventListener('error', (e) => {
+					reject(e);
+				});
+		});
+	}
+
+	putImage(image: HTMLImageElement) {
 		if (image.complete) {
-			this.loadPixels(image);
+			this.putPixels(image);
 		} else {
-			// Image hasn't loaded yet; wait for it
+			// Image hasn't puted yet; wait for it
 			image.addEventListener('load', () => {
-				this.loadImage(image);
+				this.putImage(image);
 			});
 		}
 	}
 
-	loadPixels(pixels: TexImageSource) {
+	putPixels(pixels: ImageData | HTMLImageElement) {
 		if (pixels instanceof HTMLImageElement && !pixels.complete) {
 			throw 'Attempted to use incomplete image as texture';
 		}
 
-		const gl = this.gl;
-		gl.bindTexture(gl.TEXTURE_2D, this.raw);
-		gl.texImage2D(gl.TEXTURE_2D, this.level, this.internalFormat, this.srcFormat, this.srcType, pixels);
-
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		this.pixels = pixels;
 	}
 
-	bind(index: number = 0): number {
-		const gl = this.gl;
-		const textureName = `TEXTURE${index}` as keyof WebGLRenderingContext;
-		if (!(textureName in gl)) {
-			throw `Invalid texture index: ${index}`;
+	get data(): Uint8ClampedArray {
+		if (this.pixels instanceof ImageData) {
+			return this.pixels.data;
 		}
-		const textureId = gl[textureName] as number;
-		gl.activeTexture(textureId);
-		gl.bindTexture(gl.TEXTURE_2D, this.raw);
-		return index;
+		throw `Can't get data of an HTMLImageElement`;
 	}
 }

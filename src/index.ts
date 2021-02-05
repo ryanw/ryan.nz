@@ -108,10 +108,12 @@ async function main() {
 
 	// Add terrain
 	const mapSize = 64;
-	const heightMap = new Texture(renderer.gl);
+	const heightMap = new Texture();
 	const pixels = new Uint8ClampedArray(mapSize * mapSize * 4);
-	const image = new ImageData(pixels, mapSize);
+	heightMap.putPixels(new ImageData(pixels, mapSize));
 	const hillNoise = new SimplexNoise();
+	scene.addTexture(heightMap);
+
 	const terrain = new Terrain();
 	const surface = new Pawn(terrain, {
 		color: [0.0, 0.8, 1.0, 0.0],
@@ -179,8 +181,6 @@ async function main() {
 		trees.push(tree);
 	}
 
-	surface.uniforms.uHeightMap = heightMap.bind();
-
 	// Toggle control
 	if (DEBUG_ENABLED) {
 		document.addEventListener('keydown', (e) => {
@@ -243,7 +243,6 @@ async function main() {
 		roadOffset = performance.now() / 30.0;
 		road.uniforms.roadOffset = roadOffset;
 		surface.uniforms.roadOffset = roadOffset;
-		surface.uniforms.uHeightMap = heightMap.bind();
 		for (const tree of trees) {
 			tree.uniforms.roadOffset = roadOffset;
 		}
@@ -258,10 +257,9 @@ async function main() {
 				// Flatten near road
 				if (x == 31 || x == 32) h = 0.0;
 				h = h * Math.min(1.0, (Math.abs(x + 0.5 - mapSize / 2) / mapSize) * 10.0);
-				pixels[i + 3] = (255 * h) | 0; // A
+				heightMap.data[i + 3] = (255 * h) | 0; // A
 			}
 		}
-		heightMap.loadPixels(image);
 
 		if (DEBUG_ENABLED) {
 			if (renderer.mouseButtons.has(0) && renderer.isGrabbed) {
@@ -301,6 +299,8 @@ async function main() {
 			}
 		}
 
+		surface.uniforms.uHeightMap = scene.bindTexture(heightMap);
+		scene.updateTexture(heightMap);
 		await scene.draw();
 	}
 }

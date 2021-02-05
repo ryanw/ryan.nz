@@ -9,7 +9,7 @@ import { Mesh } from '../mesh';
 import { Scene } from '../scene';
 import { Texture } from '../texture';
 import { WebGLMesh } from './webgl_mesh';
-import { WebGLTexture } from './webgl_texture';
+import { WebGLRendererTexture } from './webgl_texture';
 import defaultVertSource from '../shaders/wireframe.vert.glsl';
 import defaultFragSource from '../shaders/wireframe.frag.glsl';
 
@@ -31,7 +31,7 @@ export class WebGLRenderer extends Renderer {
 	isGrabbed = false;
 	seed = Math.random();
 	private context: WebGLRenderingContext;
-	private textures: Map<Texture, WebGLTexture> = new Map();
+	private textures: Map<Texture, WebGLRendererTexture> = new Map();
 	private meshes: Map<Mesh<Vertex>, WebGLMesh<Vertex>> = new Map();
 
 	constructor() {
@@ -262,6 +262,26 @@ export class WebGLRenderer extends Renderer {
 		const glMesh = this.meshes.get(mesh);
 		if (!glMesh) return;
 		throw 'not yet implemented';
+	}
+
+	uploadTexture(texture: Texture, unit: number = null) {
+		const gl = this.gl;
+
+		// Link a Texture with its WebGLRendererTexture
+		let glTexture = this.textures.get(texture);
+		if (!glTexture) {
+			glTexture = new WebGLRendererTexture(gl);
+			this.textures.set(texture, glTexture);
+		}
+		glTexture.upload(texture, unit != null ? unit : glTexture.unit);
+	}
+
+	bindTexture(texture: Texture): number {
+		let glTexture = this.textures.get(texture);
+		if (!glTexture) {
+			throw `Unable to find WebGLRendererTexture`;
+		}
+		return glTexture.bind();
 	}
 
 	createShader(vertSource: string, fragSource: string, options?: ShaderOptions): Shader {
