@@ -14,7 +14,7 @@ export class WebGLMesh<T extends Vertex> {
 		this.gl = gl;
 	}
 
-	async upload(mesh: Mesh<T>): Promise<void> {
+	upload(mesh: Mesh<T>): Promise<void> {
 		const gl = this.gl;
 		if (!this.buffer) {
 			this.buffer = gl.createBuffer();
