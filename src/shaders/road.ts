@@ -15,6 +15,10 @@ export class RoadShader extends Shader {
 					size: 1,
 					type: WebGLRenderingContext.FLOAT,
 				},
+				barycentric: {
+					type: WebGLRenderingContext.FLOAT,
+					size: 3,
+				},
 			},
 		});
 	}

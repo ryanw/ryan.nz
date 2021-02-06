@@ -10,6 +10,17 @@ export class TreeShader extends Shader {
 					type: WebGLRenderingContext.FLOAT,
 				},
 			},
+			attributes: {
+				barycentric: {
+					type: WebGLRenderingContext.FLOAT,
+					size: 3,
+				},
+				color: {
+					type: WebGLRenderingContext.FLOAT,
+					size: 4,
+					location: null,
+				},
+			},
 		});
 	}
 }

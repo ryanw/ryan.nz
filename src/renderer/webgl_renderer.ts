@@ -14,7 +14,7 @@ import defaultVertSource from '../shaders/wireframe.vert.glsl';
 import defaultFragSource from '../shaders/wireframe.frag.glsl';
 
 export class WebGLRenderer extends Renderer {
-	canvas = document.createElement('canvas');
+	canvas: HTMLCanvasElement;
 	defaultShader: Shader;
 	scale = 1.0 * window.devicePixelRatio;
 	lineWidth = 2 * window.devicePixelRatio;
@@ -34,8 +34,9 @@ export class WebGLRenderer extends Renderer {
 	private textures: Map<Texture, WebGLRendererTexture> = new Map();
 	private meshes: Map<Mesh<Vertex>, WebGLMesh<Vertex>> = new Map();
 
-	constructor() {
+	constructor(canvas: HTMLCanvasElement = document.createElement('canvas')) {
 		super();
+		this.canvas = canvas;
 		Object.assign(this.canvas.style, {
 			position: 'fixed',
 			zIndex: -1,
@@ -182,13 +183,16 @@ export class WebGLRenderer extends Renderer {
 			const uniforms = shader.uniforms;
 			shader.use(gl);
 
-			const glMesh = this.meshes.get(mesh);
+			let glMesh = this.meshes.get(mesh);
 			if (!glMesh) {
-				throw 'Unable to find WebGLMesh';
+				this.uploadMesh(mesh);
+				glMesh = this.meshes.get(mesh);
 			}
 			shader.bind(gl, glMesh);
 
-			gl.uniformMatrix4fv(uniforms.viewProj.location, false, projection.toArray());
+			if (projection) {
+				gl.uniformMatrix4fv(uniforms.viewProj.location, false, projection.toArray());
+			}
 			gl.uniform4fv(uniforms.fogColor.location, this.backgroundColor);
 			gl.uniform1f(uniforms.lineWidth.location, this.lineWidth);
 			gl.uniform1f(uniforms.time.location, performance.now());
@@ -345,8 +349,8 @@ export class WebGLRenderer extends Renderer {
 	/**
 	 * Insert the canvas into a HTMLElement
 	 */
-	attach(el: HTMLElement) {
-		el.appendChild(this.canvas);
+	attach(el: HTMLElement = null) {
+		el?.appendChild(this.canvas);
 		window.addEventListener('resize', this.updateSize.bind(this));
 		this.updateSize();
 		this.initWebGL();

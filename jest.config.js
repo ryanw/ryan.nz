@@ -5,4 +5,8 @@ module.exports = {
 	"transform": {
 		"^.+\\.tsx?$": "ts-jest"
 	},
+	"moduleNameMapper": {
+		"\\.frag\\.glsl": "<rootDir>/src/__mocks__/frag.glsl.ts",
+		"\\.vert\\.glsl": "<rootDir>/src/__mocks__/vert.glsl.ts",
+	}
 };

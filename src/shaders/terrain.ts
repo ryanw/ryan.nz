@@ -13,6 +13,12 @@ export class TerrainShader extends Shader {
 					type: WebGLRenderingContext.INT,
 				},
 			},
+			attributes: {
+				barycentric: {
+					type: WebGLRenderingContext.FLOAT,
+					size: 3,
+				},
+			},
 		});
 	}
 }

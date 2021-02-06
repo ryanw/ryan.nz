@@ -21,6 +21,10 @@ export class BuildingShader extends Shader {
 					type: WebGLRenderingContext.FLOAT,
 					size: 2,
 				},
+				barycentric: {
+					type: WebGLRenderingContext.FLOAT,
+					size: 3,
+				},
 			},
 		});
 	}

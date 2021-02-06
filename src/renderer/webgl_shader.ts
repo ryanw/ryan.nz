@@ -33,21 +33,6 @@ export class WebGLShader {
 			size: 3,
 			location: null,
 		},
-		normal: {
-			type: WebGLRenderingContext.FLOAT,
-			size: 3,
-			location: null,
-		},
-		barycentric: {
-			type: WebGLRenderingContext.FLOAT,
-			size: 3,
-			location: null,
-		},
-		color: {
-			type: WebGLRenderingContext.FLOAT,
-			size: 4,
-			location: null,
-		},
 	};
 	uniforms: WebGLUniformMap = {
 		time: {
