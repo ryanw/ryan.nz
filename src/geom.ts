@@ -4,6 +4,7 @@ export type Point2 = [number, number];
 export type Vector4 = [number, number, number, number];
 export type Vector3 = [number, number, number];
 export type Vector2 = [number, number];
+export type Rect = [number, number, number, number];
 
 export type Columns = [Vector4, Vector4, Vector4, Vector4];
 export type Rows = [Vector4, Vector4, Vector4, Vector4];

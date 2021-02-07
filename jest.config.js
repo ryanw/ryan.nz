@@ -1,4 +1,7 @@
 module.exports = {
+	"globals": {
+		"PRODUCTION": true,
+	},
 	"roots": [
 		"<rootDir>/src",
 	],

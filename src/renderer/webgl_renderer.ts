@@ -2,8 +2,6 @@ import { Renderer } from './renderer';
 import { Shader, ShaderOptions } from '../shader';
 import { Vertex } from './vertex';
 import { Pawn } from '../pawn';
-import { Camera } from '../camera';
-import { Color } from '../material';
 import { Matrix4 } from '../geom';
 import { Mesh } from '../mesh';
 import { Scene } from '../scene';
@@ -22,15 +20,9 @@ export class WebGLRenderer extends Renderer {
 	scale = 1.0 * window.devicePixelRatio;
 	lineWidth = 2 * window.devicePixelRatio;
 	antiAlias = true;
-	camera: Camera = new Camera();
 	vsync = true;
 	lastFrameAt = 0;
 	frameAverage = 0;
-	heldKeys = new Set();
-	mousePosition = [0.0, 0.0];
-	mouseMovement = [0.0, 0.0];
-	mouseButtons = new Set();
-	backgroundColor: Color = [0.2, 0.05, 0.4, 1.0];
 	frame = 0;
 	isGrabbed = false;
 	seed = Math.random();
@@ -38,9 +30,18 @@ export class WebGLRenderer extends Renderer {
 	private textures: Map<Texture, WebGLRendererTexture> = new Map();
 	private meshes: Map<Mesh<Vertex>, WebGLMesh<Vertex>> = new Map();
 
-	constructor(canvas: HTMLCanvasElement = document.createElement('canvas')) {
+	constructor(el: HTMLElement) {
 		super();
-		this.canvas = canvas;
+		if (el instanceof HTMLCanvasElement) {
+			this.canvas = el;
+		}
+		else {
+			this.canvas = document.createElement('canvas');
+			if (el instanceof HTMLElement) {
+				this.attach(el);
+			}
+		}
+
 		Object.assign(this.canvas.style, {
 			position: 'fixed',
 			zIndex: -1,
@@ -72,7 +73,7 @@ export class WebGLRenderer extends Renderer {
 
 		this.context = this.canvas.getContext('webgl', options) as WebGLRenderingContext;
 		if (!this.context) {
-			console.error('Failed to create WebGL context');
+			throw 'Failed to create WebGL context';
 		}
 
 		return this.context;
@@ -159,11 +160,6 @@ export class WebGLRenderer extends Renderer {
 		this.mouseMovement[0] += e.movementX;
 		this.mouseMovement[1] += e.movementY;
 	};
-
-	resetMouseMovement() {
-		this.mouseMovement[0] = 0;
-		this.mouseMovement[1] = 0;
-	}
 
 	clear() {
 		const gl = this.gl;
@@ -341,6 +337,9 @@ export class WebGLRenderer extends Renderer {
 	 * Update the framebuffer of the canvas to match its container's size
 	 */
 	updateSize() {
+		if (!this.parentElement) {
+			return;
+		}
 		const width = (this.parentElement.clientWidth * this.scale) | 0;
 		const height = (this.parentElement.clientHeight * this.scale) | 0;
 		this.camera.resize(width, height);
@@ -361,10 +360,11 @@ export class WebGLRenderer extends Renderer {
 		window.addEventListener('resize', this.updateSize.bind(this));
 		this.updateSize();
 		this.initWebGL();
+		this.addEventListeners();
 
 		if (DEBUG_ENABLED) {
 			this.debugEl = document.createElement('div');
-			el?.appendChild(this.debugEl);
+			this.canvas.parentElement?.appendChild(this.debugEl);
 			Object.assign(this.debugEl.style, {
 				position: 'fixed',
 				borderRadius: '12px',
