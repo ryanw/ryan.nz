@@ -72,6 +72,7 @@ export class WebGLRenderer extends Renderer {
 
 		this.context = this.canvas.getContext('webgl', options) as WebGLRenderingContext;
 		if (!this.context) {
+			this.parentElement.innerHTML = 'Failed to create a WebGL context';
 			throw 'Failed to create WebGL context';
 		}
 
