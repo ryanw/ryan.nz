@@ -40,7 +40,7 @@ export class Scene {
 			}
 			this.renderer.uploadTexture(texture, textureOrId);
 		} else {
-			const id = this.textures.indexOf(textureOrId)
+			const id = this.textures.indexOf(textureOrId);
 			if (id === -1) {
 				throw `Attempted to upload an unknown texture`;
 			}

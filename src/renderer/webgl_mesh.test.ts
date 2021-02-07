@@ -35,11 +35,9 @@ describe('WebGLMesh', () => {
 		expect(gl.createBuffer).toHaveBeenCalled();
 		expect(gl.bindBuffer).toHaveBeenCalledWith(gl.ARRAY_BUFFER, 'TEST_CREATEBUFFER');
 		expect(gl.bufferData).toHaveBeenCalledWith(gl.ARRAY_BUFFER, expect.any(Float32Array), gl.DYNAMIC_DRAW);
-		expect(Array.from(gl.bufferData.mock.calls[0][1])).toEqual(expect.arrayContaining([
-			6, 4, 5, 1, 2, 3,
-			66, 44, 55, 11, 22, 33,
-			666, 444, 555, 111, 222, 333,
-		]));
+		expect(Array.from(gl.bufferData.mock.calls[0][1])).toEqual(
+			expect.arrayContaining([6, 4, 5, 1, 2, 3, 66, 44, 55, 11, 22, 33, 666, 444, 555, 111, 222, 333])
+		);
 		expect(gl.bindBuffer).toHaveBeenCalledBefore(gl.bufferData);
 	});
 
@@ -84,4 +82,3 @@ describe('WebGLMesh', () => {
 		expect(glMesh.offsets.get('position')).toEqual(12);
 	});
 });
-

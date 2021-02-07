@@ -1,6 +1,5 @@
 import MockWebGLRenderingContext from './webgl';
 
-
 const MockCanvas = jest.fn().mockImplementation(() => {
 	const mock = document.createElement('canvas');
 	return Object.assign(mock, {

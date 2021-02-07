@@ -133,13 +133,15 @@ export class WebGLShader {
 		// Uniform locations
 		for (const uniformName in this.uniforms) {
 			// FIXME remove snake case
-			this.uniforms[uniformName].location = gl.getUniformLocation(program, uniformName) || gl.getUniformLocation(program, camelToSnake(uniformName));
+			this.uniforms[uniformName].location =
+				gl.getUniformLocation(program, uniformName) || gl.getUniformLocation(program, camelToSnake(uniformName));
 		}
 
 		// Attribute locations
 		for (const attributeName in this.attributes) {
 			// FIXME remove snake case
-			this.attributes[attributeName].location = gl.getAttribLocation(program, attributeName) || gl.getAttribLocation(program, camelToSnake(attributeName));
+			this.attributes[attributeName].location =
+				gl.getAttribLocation(program, attributeName) || gl.getAttribLocation(program, camelToSnake(attributeName));
 		}
 
 		gl.enable(gl.CULL_FACE);

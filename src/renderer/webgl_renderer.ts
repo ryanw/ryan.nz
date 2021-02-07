@@ -34,8 +34,7 @@ export class WebGLRenderer extends Renderer {
 		super();
 		if (el instanceof HTMLCanvasElement) {
 			this.canvas = el;
-		}
-		else {
+		} else {
 			this.canvas = document.createElement('canvas');
 			if (el instanceof HTMLElement) {
 				this.attach(el);
@@ -318,7 +317,7 @@ export class WebGLRenderer extends Renderer {
 				if (DEBUG_ENABLED && this.frame % 60 === 0) {
 					const frameRate = (performance.now() - this.frameAverage) / 60;
 					this.frameAverage = performance.now();
-					const fps = 1 / (frameRate / 1000) | 0;
+					const fps = (1 / (frameRate / 1000)) | 0;
 					this.debugEl.innerHTML = `${fps} fps`;
 					console.log('Draw time %o fps', fps);
 				}

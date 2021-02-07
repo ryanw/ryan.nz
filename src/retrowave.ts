@@ -107,7 +107,7 @@ export class Retrowave extends Scene {
 
 	private buildTrees() {
 		const treeMesh = new Tree();
-		const treeShader = new TreeShader()
+		const treeShader = new TreeShader();
 		for (let i = 0; i < 9; i++) {
 			const tree = new Pawn(treeMesh, {
 				model: Matrix4.translation(8.0, -3.5, i * -80.0),
@@ -138,8 +138,8 @@ export class Retrowave extends Scene {
 		this.addPawn(
 			new Pawn([this.car, carOutline], {
 				model: Matrix4.translation(0.0, -3.4, 0.0)
-				.multiply(Matrix4.rotation(0, Math.PI, 0))
-				.multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
+					.multiply(Matrix4.rotation(0, Math.PI, 0))
+					.multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
 			})
 		);
 	}
@@ -198,7 +198,6 @@ export class Retrowave extends Scene {
 				camera.translate(0.0, speed, 0.0);
 			}
 		}
-
 	}
 
 	private updateRoad() {
@@ -309,7 +308,6 @@ function createCityscape(radius: number, count: number): Pawn[] {
 	return pawns;
 }
 
-
 function rectOverlaps(rect0: Rect, rect1: Rect): boolean {
 	const l0 = rect0[0];
 	const t0 = rect0[1];
@@ -329,4 +327,3 @@ function rectOverlaps(rect0: Rect, rect1: Rect): boolean {
 
 	return true;
 }
-

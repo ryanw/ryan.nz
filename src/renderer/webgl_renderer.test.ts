@@ -63,11 +63,9 @@ describe('WebGLRenderer', () => {
 		expect(gl.createBuffer).toHaveBeenCalled();
 		expect(gl.bindBuffer).toHaveBeenCalledWith(gl.ARRAY_BUFFER, 'TEST_CREATEBUFFER');
 		expect(gl.bufferData).toHaveBeenCalledWith(gl.ARRAY_BUFFER, expect.any(Float32Array), gl.DYNAMIC_DRAW);
-		expect(Array.from(gl.bufferData.mock.calls[0][1])).toEqual(expect.arrayContaining([
-			6, 4, 5, 1, 2, 3,
-			66, 44, 55, 11, 22, 33,
-			666, 444, 555, 111, 222, 333,
-		]));
+		expect(Array.from(gl.bufferData.mock.calls[0][1])).toEqual(
+			expect.arrayContaining([6, 4, 5, 1, 2, 3, 66, 44, 55, 11, 22, 33, 666, 444, 555, 111, 222, 333])
+		);
 		expect(gl.bindBuffer).toHaveBeenCalledBefore(gl.bufferData);
 	});
 
@@ -89,12 +87,16 @@ describe('WebGLRenderer', () => {
 
 		const scene = new Scene(renderer);
 		scene.addPawn(new Pawn(new TestMesh()));
-		scene.addPawn(new Pawn(new Mesh([
-			{ position: [1.0,  2.0,    3.0],   foo: [4.0,   5.0],   bar: 6.0 },
-			{ position: [1.1,  2.2,    3.3],   foo: [4.4,   5.5],   bar: 6.6 },
-			{ position: [1.11, 2.22,   3.33],  foo: [4.44,  5.55],  bar: 6.66 },
-			{ position: [1.111, 2.222, 3.333], foo: [4.444, 5.555], bar: 6.666 },
-		])));
+		scene.addPawn(
+			new Pawn(
+				new Mesh([
+					{ position: [1.0, 2.0, 3.0], foo: [4.0, 5.0], bar: 6.0 },
+					{ position: [1.1, 2.2, 3.3], foo: [4.4, 5.5], bar: 6.6 },
+					{ position: [1.11, 2.22, 3.33], foo: [4.44, 5.55], bar: 6.66 },
+					{ position: [1.111, 2.222, 3.333], foo: [4.444, 5.555], bar: 6.666 },
+				])
+			)
+		);
 		await renderer.drawScene(scene);
 
 		// First pawn
