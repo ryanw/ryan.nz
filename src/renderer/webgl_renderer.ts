@@ -13,15 +13,19 @@ import { WebGLRendererTexture } from './webgl_texture';
 import defaultVertSource from '../shaders/wireframe.vert.glsl';
 import defaultFragSource from '../shaders/wireframe.frag.glsl';
 
+const DEBUG_ENABLED = !PRODUCTION || window.location.search.indexOf('debug') !== -1;
+
 export class WebGLRenderer extends Renderer {
 	canvas: HTMLCanvasElement;
+	debugEl: HTMLElement;
 	defaultShader: Shader;
 	scale = 1.0 * window.devicePixelRatio;
 	lineWidth = 2 * window.devicePixelRatio;
 	antiAlias = true;
 	camera: Camera = new Camera();
-	maxFps = 200;
+	vsync = true;
 	lastFrameAt = 0;
+	frameAverage = 0;
 	heldKeys = new Set();
 	mousePosition = [0.0, 0.0];
 	mouseMovement = [0.0, 0.0];
@@ -297,7 +301,7 @@ export class WebGLRenderer extends Renderer {
 	 */
 	async drawScene(scene: Scene): Promise<number> {
 		return new Promise((resolve) => {
-			window.requestAnimationFrame(() => {
+			const draw = () => {
 				const now = performance.now();
 				const dt = (now - this.lastFrameAt) / 1000.0;
 				this.lastFrameAt = now;
@@ -315,18 +319,21 @@ export class WebGLRenderer extends Renderer {
 				}
 
 				this.frame++;
-				const frametime = performance.now() - now;
-				if (this.frame % 60 === 0) {
-					//console.log('Draw time: %o ms', ((frametime * 100) | 0) / 100);
+				if (DEBUG_ENABLED && this.frame % 60 === 0) {
+					const frameRate = (performance.now() - this.frameAverage) / 60;
+					this.frameAverage = performance.now();
+					const fps = 1 / (frameRate / 1000) | 0;
+					this.debugEl.innerHTML = `${fps} fps`;
+					console.log('Draw time %o fps', fps);
 				}
 
-				const delay = 1000 / this.maxFps - frametime;
-				if (delay > 0.0) {
-					setTimeout(() => resolve(dt), delay);
-				} else {
-					resolve(dt);
-				}
-			});
+				resolve(dt);
+			};
+			if (this.vsync) {
+				window.requestAnimationFrame(draw);
+			} else {
+				setTimeout(draw, 0);
+			}
 		});
 	}
 
@@ -354,5 +361,21 @@ export class WebGLRenderer extends Renderer {
 		window.addEventListener('resize', this.updateSize.bind(this));
 		this.updateSize();
 		this.initWebGL();
+
+		if (DEBUG_ENABLED) {
+			this.debugEl = document.createElement('div');
+			el?.appendChild(this.debugEl);
+			Object.assign(this.debugEl.style, {
+				position: 'fixed',
+				borderRadius: '12px',
+				zIndex: 10,
+				right: '10px',
+				top: '10px',
+				color: 'red',
+				fontSize: '32px',
+				background: 'rgba(0, 0, 0, 0.5)',
+				padding: '10px',
+			});
+		}
 	}
 }
