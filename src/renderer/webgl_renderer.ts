@@ -190,16 +190,16 @@ export class WebGLRenderer extends Renderer {
 			shader.bind(gl, glMesh);
 
 			if (projection) {
-				gl.uniformMatrix4fv(uniforms.viewProj.location, false, projection.toArray());
+				gl.uniformMatrix4fv(uniforms.uViewProj.location, false, projection.toArray());
 			}
-			gl.uniform4fv(uniforms.fogColor.location, this.backgroundColor);
-			gl.uniform1f(uniforms.lineWidth.location, this.lineWidth);
-			gl.uniform1f(uniforms.time.location, performance.now());
-			gl.uniform2fv(uniforms.resolution.location, [this.camera.width, this.camera.height]);
-			gl.uniform1f(uniforms.seed.location, this.seed);
-			gl.uniformMatrix4fv(uniforms.model.location, false, pawnModel.toArray());
+			gl.uniform4fv(uniforms.uFogColor.location, this.backgroundColor);
+			gl.uniform1f(uniforms.uLineWidth.location, this.lineWidth);
+			gl.uniform1f(uniforms.uTime.location, performance.now());
+			gl.uniform2fv(uniforms.uResolution.location, [this.camera.width, this.camera.height]);
+			gl.uniform1f(uniforms.uSeed.location, this.seed);
+			gl.uniformMatrix4fv(uniforms.uModel.location, false, pawnModel.toArray());
 			if (material?.color) {
-				gl.uniform4fv(uniforms.fillColor.location, material.color);
+				gl.uniform4fv(uniforms.uFillColor.location, material.color);
 			}
 
 			for (const uniformName in pawn.uniforms) {

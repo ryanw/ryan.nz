@@ -1,22 +1,21 @@
-uniform float time;
-uniform mat4 view_proj;
-uniform mat4 model;
-uniform vec2 car_position;
+uniform float uTime;
+uniform mat4 uViewProj;
+uniform mat4 uModel;
+uniform vec2 uCarPosition;
 
 attribute vec3 position;
-attribute vec3 normal;
 
-varying vec4 frag_color;
+varying vec4 vFragColor;
 
 void main(void) {
-	mat4 car_trans = mat4(
-		1.0, 0.0, 0.0, car_position.x,
+	mat4 carTrans = mat4(
+		1.0, 0.0, 0.0, uCarPosition.x,
 		0.0, 1.0, 0.0, 0.0,
-		0.0, 0.0, 1.0, car_position.y,
+		0.0, 0.0, 1.0, uCarPosition.y,
 		0.0, 0.0, 0.0, 1.0
 	);
 
-	mat4 mvp = model * car_trans * view_proj;
+	mat4 mvp = uModel * carTrans * uViewProj;
 
 	gl_Position = vec4(position, 1.0) * mvp;
 }

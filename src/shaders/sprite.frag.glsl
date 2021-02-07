@@ -1,7 +1,8 @@
 precision mediump float;
 
-uniform float time;
+uniform float uTime;
 uniform sampler2D uSampler;
+
 varying vec2 vTexCoord;
 
 void main(void) {

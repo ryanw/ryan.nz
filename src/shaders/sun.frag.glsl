@@ -1,20 +1,20 @@
 precision mediump float;
 
-uniform float time;
-varying vec2 frag_uv;
+uniform float uTime;
+varying vec2 vTexCoord;
 
-vec3 sun_top = vec3(1.0, 1.0, 0.0);
-vec3 sun_bottom = vec3(1.0, 0.0, 1.0);
+#define SUN_TOP vec3(1.0, 1.0, 0.0)
+#define SUN_BOTTOM vec3(1.0, 0.0, 1.0)
 
 float map(float s, float a1, float a2, float b1, float b2) {
 	return b1 + (s-a1)*(b2-b1)/(a2-a1);
 }
 
 void main(void) {
-	float len = length(frag_uv.xy);
+	float len = length(vTexCoord.xy);
 	if (len < 1.0) {
 		float alpha = 1.0 - smoothstep(0.0, 1.0, map(len, 0.99, 1.0, 0.0, 1.0));
-		float grad = frag_uv.y;
+		float grad = vTexCoord.y;
 		// Some stripes
 		float stripe = (grad + 1.0) / 2.0;
 		if (
@@ -31,7 +31,7 @@ void main(void) {
 			gl_FragColor = vec4(0.2, 0.05, 0.4, 1.0);
 		} else {
 			grad = map(grad, 0.0, 1.0, 0.3, 1.3);
-			vec3 color = mix(sun_bottom, sun_top, grad);
+			vec3 color = mix(SUN_BOTTOM, SUN_TOP, grad);
 			gl_FragColor = vec4(color, alpha);
 		}
 	}

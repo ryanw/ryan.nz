@@ -17,10 +17,6 @@ export interface WebGLUniform {
 	type: number;
 }
 
-function camelToSnake(camel: string): string {
-	return camel.replace(/([A-Z])/g, '_$1').toLowerCase();
-}
-
 export type WebGLUniformMap = { [key: string]: WebGLUniform };
 export type WebGLAttributeMap = { [key: string]: WebGLAttribute };
 
@@ -35,35 +31,35 @@ export class WebGLShader {
 		},
 	};
 	uniforms: WebGLUniformMap = {
-		time: {
+		uTime: {
 			type: WebGLRenderingContext.FLOAT,
 			location: null,
 		},
-		viewProj: {
+		uViewProj: {
 			type: WebGLRenderingContext.FLOAT_MAT4,
 			location: null,
 		},
-		model: {
+		uModel: {
 			type: WebGLRenderingContext.FLOAT_MAT4,
 			location: null,
 		},
-		fillColor: {
+		uFillColor: {
 			type: WebGLRenderingContext.FLOAT_VEC4,
 			location: null,
 		},
-		fogColor: {
+		uFogColor: {
 			type: WebGLRenderingContext.FLOAT_VEC4,
 			location: null,
 		},
-		lineWidth: {
+		uLineWidth: {
 			type: WebGLRenderingContext.FLOAT,
 			location: null,
 		},
-		resolution: {
+		uResolution: {
 			type: WebGLRenderingContext.FLOAT_VEC2,
 			location: null,
 		},
-		seed: {
+		uSeed: {
 			type: WebGLRenderingContext.FLOAT,
 			location: null,
 		},
@@ -133,15 +129,13 @@ export class WebGLShader {
 		// Uniform locations
 		for (const uniformName in this.uniforms) {
 			// FIXME remove snake case
-			this.uniforms[uniformName].location =
-				gl.getUniformLocation(program, uniformName) || gl.getUniformLocation(program, camelToSnake(uniformName));
+			this.uniforms[uniformName].location = gl.getUniformLocation(program, uniformName);
 		}
 
 		// Attribute locations
 		for (const attributeName in this.attributes) {
 			// FIXME remove snake case
-			this.attributes[attributeName].location =
-				gl.getAttribLocation(program, attributeName) || gl.getAttribLocation(program, camelToSnake(attributeName));
+			this.attributes[attributeName].location = gl.getAttribLocation(program, attributeName);
 		}
 
 		gl.enable(gl.CULL_FACE);

@@ -6,7 +6,7 @@ export class TerrainShader extends Shader {
 	make(gl: WebGLRenderingContext) {
 		super.make(gl, vertexSource, fragmentSource, {
 			uniforms: {
-				roadOffset: {
+				uRoadOffset: {
 					type: WebGLRenderingContext.FLOAT,
 				},
 				uHeightMap: {

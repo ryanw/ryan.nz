@@ -6,7 +6,7 @@ export class CarShader extends Shader {
 	make(gl: WebGLRenderingContext) {
 		super.make(gl, vertexSource, fragmentSource, {
 			uniforms: {
-				carPosition: {
+				uCarPosition: {
 					type: WebGLRenderingContext.FLOAT_VEC2,
 				},
 			},

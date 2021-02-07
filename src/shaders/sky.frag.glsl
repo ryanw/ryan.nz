@@ -1,8 +1,9 @@
 precision highp float;
 
-uniform float time;
-uniform float seed;
-varying vec2 uv;
+uniform float uTime;
+uniform float uSeed;
+
+varying vec2 vTexCoord;
 
 mat2 rotation(float angle) {
 	float s = sin(angle);
@@ -31,7 +32,7 @@ float star(vec2 uv, float flare) {
 
 void main(void) {
 	vec4 color = vec4(vec3(1.0), 0.0);
-	vec2 pixel = uv * 6.0;
+	vec2 pixel = vTexCoord * 6.0;
 
 	vec2 gv = fract(pixel) - 0.5;
 	vec2 id = floor(pixel);
@@ -41,13 +42,13 @@ void main(void) {
 			vec2 tile = vec2(x, y);
 
 			// Some 'random' numbers
-			float r0 = rand(id + tile, seed);
+			float r0 = rand(id + tile, uSeed);
 			float r1 = fract(r0 * 12.34);
 			float r2 = fract(r1 * 12.34);
 			float r3 = fract(r2 * 12.34);
 
 			vec2 starOffset = vec2(r0, r1);
-			float twinkle = sin(r2 * (time / 300.0)) * 0.5 + 0.5;
+			float twinkle = sin(r2 * (uTime / 300.0)) * 0.5 + 0.5;
 			float size = r3 * mix(0.7, 1.0, twinkle);
 
 			color.a += star(gv - tile - starOffset + 0.5, smoothstep(0.5, 1.0, size)) * size;

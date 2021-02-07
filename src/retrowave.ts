@@ -204,17 +204,17 @@ export class Retrowave extends Scene {
 
 	private updateRoad() {
 		this.roadOffset = performance.now() * this.roadSpeed * 0.01;
-		this.road.uniforms.roadOffset = this.roadOffset;
+		this.road.uniforms.uRoadOffset = this.roadOffset;
 	}
 
 	private updateTrees() {
 		for (const tree of this.trees) {
-			tree.uniforms.roadOffset = this.roadOffset;
+			tree.uniforms.uRoadOffset = this.roadOffset;
 		}
 	}
 
 	private updateTerrain() {
-		this.terrain.uniforms.roadOffset = this.roadOffset;
+		this.terrain.uniforms.uRoadOffset = this.roadOffset;
 
 		for (let y = 0; y < this.terrainSize; y++) {
 			for (let x = 0; x < this.terrainSize; x++) {
@@ -260,7 +260,7 @@ export class Retrowave extends Scene {
 			this.carPosition[0] += Math.sin(carAngle) * carVelocity;
 			this.carPosition[1] += Math.cos(carAngle) * carVelocity;
 		}
-		this.car.uniforms.carPosition = this.carPosition;
+		this.car.uniforms.uCarPosition = this.carPosition;
 	}
 }
 

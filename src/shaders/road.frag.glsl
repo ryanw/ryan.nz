@@ -1,15 +1,15 @@
 precision mediump float;
 
-uniform float time;
-uniform vec4 fog_color;
+uniform float uTime;
+uniform vec4 uFogColor;
 
-varying float fog_depth;
-varying vec4 frag_color;
-varying vec3 frag_barycentric;
-varying float frag_direction;
-varying float frag_dash_length;
+varying float vFogDepth;
+varying vec4 vColor;
+varying vec3 vBarycentric;
+varying float vDirection;
+varying float vDashLength;
 
-float road_line_width = 0.0075;
+float road_uLineWidth = 0.0075;
 vec4 side_color = vec4(1.0, 0.3, 0.8, 1.0);
 vec4 tarmac_color = vec4(0.05, 0.0, 0.003, 1.0);
 vec4 line_color = vec4(1.0, 1.0, 0.2, 1.0);
@@ -18,14 +18,14 @@ void main(void) {
 	vec4 color = tarmac_color;
 
 	// Sides
-	if (frag_barycentric.x < road_line_width * 4.0) {
+	if (vBarycentric.x < road_uLineWidth * 4.0) {
 		color = side_color;
 	} else if (
-		(frag_barycentric.x > 1.0/3.0 - road_line_width && frag_barycentric.x < 1.0/3.0 + road_line_width)
-		|| (frag_barycentric.x > 1.0 - 1.0/3.0 - road_line_width && frag_barycentric.x < 1.0 - 1.0/3.0 + road_line_width)
+		(vBarycentric.x > 1.0/3.0 - road_uLineWidth && vBarycentric.x < 1.0/3.0 + road_uLineWidth)
+		|| (vBarycentric.x > 1.0 - 1.0/3.0 - road_uLineWidth && vBarycentric.x < 1.0 - 1.0/3.0 + road_uLineWidth)
 	) {
 		// Dashed lines
-		if (mod(frag_barycentric.y * 100.0, frag_dash_length * 5.0) > 1.5) {
+		if (mod(vBarycentric.y * 100.0, vDashLength * 5.0) > 1.5) {
 			// Paint
 			color = line_color;
 		}
@@ -33,6 +33,6 @@ void main(void) {
 	else {
 	}
 
-	gl_FragColor = mix(color, fog_color, fog_depth);
+	gl_FragColor = mix(color, uFogColor, vFogDepth);
 }
 

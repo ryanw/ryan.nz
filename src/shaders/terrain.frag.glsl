@@ -1,23 +1,23 @@
 precision highp float;
 
-uniform vec4 fog_color;
-uniform float line_width;
+uniform vec4 uFogColor;
+uniform float uLineWidth;
 
-varying float fog_depth;
-varying vec4 frag_color;
-varying vec3 frag_barycentric;
+varying float vFogDepth;
+varying vec4 vColor;
+varying vec3 vBarycentric;
 
 #pragma glslify: edgeDistance = require('./utils/edge_distance')
 
 void main(void) {
 	vec4 color = vec4(0.0);
-	float d = edgeDistance(frag_barycentric);
+	float d = edgeDistance(vBarycentric);
 	if (d < 1.0) {
-		color = vec4(frag_color.xyz * (1.0 - d), frag_color.a);
+		color = vec4(vColor.xyz * (1.0 - d), vColor.a);
 	}
 	else {
 		color = vec4(0.05, 0.0, 0.003, 1.0);
 	}
 
-	gl_FragColor = mix(color, fog_color, fog_depth);
+	gl_FragColor = mix(color, uFogColor, vFogDepth);
 }

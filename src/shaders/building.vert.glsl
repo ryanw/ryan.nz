@@ -1,5 +1,5 @@
-uniform mat4 view_proj;
-uniform mat4 model;
+uniform mat4 uViewProj;
+uniform mat4 uModel;
 
 attribute vec3 position;
 attribute vec3 normal;
@@ -7,34 +7,34 @@ attribute vec3 barycentric;
 attribute vec2 scale;
 attribute vec2 uv;
 
-varying float fog_depth;
-varying vec2 frag_uv;
-varying vec2 window_space;
-varying vec2 window_count;
-varying vec3 frag_barycentric;
+varying float vFogDepth;
+varying vec2 vTexCoord;
+varying vec2 vWindowSpace;
+varying vec2 vWindowCount;
+varying vec3 vBarycentric;
 varying float vSeed;
 
-float fog_dist = 1000.0;
-float window_mul = 3.0;
-float window_gap = 0.5;
+#define FOG_DIST 1000.0
+#define WINDOW_MUL 3.0
+#define WINDOW_GAP 0.5
 
 void main(void) {
 	// FIXME rounding off to avoid floating point errors
 	vSeed = floor(scale.x * scale.y * 10000.0);
 
-	mat4 mvp = model * view_proj;
+	mat4 mvp = uModel * uViewProj;
 	gl_Position = vec4(position, 1.0) * mvp;
 
-	vec2 round_scale = floor(scale);
-	window_space = vec2(window_gap) * vec2(1.0 / window_mul) * (1.0 / scale);
-	window_count = vec2(window_mul) * round_scale;
+	vec2 roundScale = floor(scale);
+	vWindowSpace = vec2(WINDOW_GAP) * vec2(1.0 / WINDOW_MUL) * (1.0 / scale);
+	vWindowCount = vec2(WINDOW_MUL) * roundScale;
 
-	vec2 remainder = vec2(scale.x - round_scale.x, scale.y - round_scale.y);
-	window_space.x += (remainder.x / scale.x) / (window_count.x + 1.0);
-	window_space.y += (remainder.y / scale.y) / (window_count.y + 1.0);
+	vec2 remainder = vec2(scale.x - roundScale.x, scale.y - roundScale.y);
+	vWindowSpace.x += (remainder.x / scale.x) / (vWindowCount.x + 1.0);
+	vWindowSpace.y += (remainder.y / scale.y) / (vWindowCount.y + 1.0);
 
-	fog_depth = max(0.0, min(1.0, gl_Position.z / fog_dist));
-	frag_barycentric = barycentric;
-	frag_uv = uv;
+	vFogDepth = max(0.0, min(1.0, gl_Position.z / FOG_DIST));
+	vBarycentric = barycentric;
+	vTexCoord = uv;
 }
 
