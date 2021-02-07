@@ -1,11 +1,13 @@
 import { Pawn } from './pawn';
 import { Texture } from './texture';
 import { Renderer } from './renderer';
+import { Color } from './material';
 
 export class Scene {
 	pawns: Pawn[] = [];
 	textures: Texture[] = [];
 	renderer: Renderer;
+	backgroundColor: Color = [0.0, 0.0, 0.0, 1.0];
 
 	constructor(renderer: Renderer) {
 		this.renderer = renderer;

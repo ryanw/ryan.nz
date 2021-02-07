@@ -297,6 +297,7 @@ export class WebGLRenderer extends Renderer {
 	async drawScene(scene: Scene): Promise<number> {
 		return new Promise((resolve) => {
 			const draw = () => {
+				this.backgroundColor = [...scene.backgroundColor];
 				const now = performance.now();
 				const dt = (now - this.lastFrameAt) / 1000.0;
 				this.lastFrameAt = now;

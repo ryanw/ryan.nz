@@ -11,6 +11,7 @@ import { Pawn } from './pawn';
 import { Camera } from './camera';
 import { Matrix4, Rect } from './geom';
 import { Texture } from './texture';
+import { Color } from './material';
 
 import deloreanObj from './delorean.obj';
 import { RoadShader } from './shaders/road';
@@ -27,6 +28,7 @@ export class Retrowave extends Scene {
 	roadSpeed = 4;
 	roadOffset = 0.0;
 	carPosition = [0.0, 0.0];
+	backgroundColor: Color = [0.2, 0.05, 0.4, 1.0];
 	private road: Pawn;
 	private car: Pawn;
 	private trees: Pawn[] = [];
