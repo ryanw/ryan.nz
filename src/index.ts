@@ -163,11 +163,12 @@ async function main() {
 
 	// Trees
 	const treeMesh = new Tree();
+	const treeShader = new TreeShader()
 	const trees: Pawn[] = [];
 	for (let i = 0; i < 9; i++) {
 		const tree = new Pawn(treeMesh, {
 			model: Matrix4.translation(8.0, -3.5, i * -80.0),
-			shader: new TreeShader(),
+			shader: treeShader,
 		});
 		scene.addPawn(tree);
 		trees.push(tree);
@@ -175,7 +176,7 @@ async function main() {
 	for (let i = 0; i < 9; i++) {
 		const tree = new Pawn(treeMesh, {
 			model: Matrix4.translation(-8.0, -3.5, -40 + i * -80.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
-			shader: new TreeShader(),
+			shader: treeShader,
 		});
 		scene.addPawn(tree);
 		trees.push(tree);
