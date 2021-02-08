@@ -1,7 +1,7 @@
 import { Renderer } from './renderer';
 import { Shader, ShaderOptions } from '../shader';
 import { Vertex } from './vertex';
-import { Pawn } from '../pawn';
+import { Pawn, Instance } from '../pawn';
 import { Matrix4 } from '../geom';
 import { Mesh } from '../mesh';
 import { Scene } from '../scene';
@@ -177,7 +177,7 @@ export class WebGLRenderer extends Renderer {
 			pawn.shader.make(this.gl);
 		}
 
-		if (mesh) {
+		if (mesh instanceof Mesh) {
 			const gl = this.gl;
 			const shader = pawn.shader || this.defaultShader;
 			const uniforms = shader.uniforms;
@@ -188,7 +188,6 @@ export class WebGLRenderer extends Renderer {
 				this.uploadMesh(mesh);
 				glMesh = this.meshes.get(mesh);
 			}
-			shader.bind(gl, glMesh);
 
 			if (projection) {
 				gl.uniformMatrix4fv(uniforms.uViewProj.location, false, projection.toArray());
@@ -242,7 +241,13 @@ export class WebGLRenderer extends Renderer {
 				}
 			}
 
-			glMesh.draw();
+			shader.bind(gl, glMesh);
+			if (pawn.hasInstances) {
+				shader.bindInstances(gl, glMesh);
+				glMesh.drawInstances();
+			} else {
+				glMesh.draw();
+			}
 		}
 
 		for (const child of children) {
@@ -250,7 +255,7 @@ export class WebGLRenderer extends Renderer {
 		}
 	}
 
-	uploadMesh(mesh: Mesh<Vertex>) {
+	uploadMesh(mesh: Mesh) {
 		const gl = this.gl;
 
 		// Link a Mesh with its WebGLMesh
@@ -260,6 +265,19 @@ export class WebGLRenderer extends Renderer {
 			this.meshes.set(mesh, glMesh);
 		}
 		glMesh.upload(mesh);
+	}
+
+	uploadMeshInstances<I extends Instance = Instance>(mesh: Mesh, instances: I[]) {
+		const gl = this.gl;
+
+		// Link a Mesh with its WebGLMesh
+		let glMesh = this.meshes.get(mesh);
+		if (!glMesh) {
+			glMesh = new WebGLMesh(gl);
+			this.meshes.set(mesh, glMesh);
+			glMesh.upload(mesh);
+		}
+		glMesh.uploadInstances(instances);
 	}
 
 	removeMesh(mesh: Mesh<Vertex>) {

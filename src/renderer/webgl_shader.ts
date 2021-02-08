@@ -3,6 +3,7 @@ import { WebGLMesh } from './webgl_mesh';
 
 export interface ShaderOptions {
 	attributes?: { [key: string]: WebGLAttribute };
+	instanceAttributes?: { [key: string]: WebGLAttribute };
 	uniforms?: { [key: string]: WebGLUniform };
 }
 
@@ -29,6 +30,8 @@ export class WebGLShader {
 			size: 3,
 			location: null,
 		},
+	};
+	instanceAttributes: WebGLAttributeMap = {
 	};
 	uniforms: WebGLUniformMap = {
 		uTime: {
@@ -88,6 +91,13 @@ export class WebGLShader {
 			};
 		}
 
+		if (options?.instanceAttributes) {
+			this.instanceAttributes = {
+				...this.instanceAttributes,
+				...options.instanceAttributes,
+			};
+		}
+
 		if (options?.uniforms) {
 			this.uniforms = {
 				...this.uniforms,
@@ -128,14 +138,15 @@ export class WebGLShader {
 
 		// Uniform locations
 		for (const uniformName in this.uniforms) {
-			// FIXME remove snake case
 			this.uniforms[uniformName].location = gl.getUniformLocation(program, uniformName);
 		}
 
 		// Attribute locations
 		for (const attributeName in this.attributes) {
-			// FIXME remove snake case
 			this.attributes[attributeName].location = gl.getAttribLocation(program, attributeName);
+		}
+		for (const attributeName in this.instanceAttributes) {
+			this.instanceAttributes[attributeName].location = gl.getAttribLocation(program, attributeName);
 		}
 
 		gl.enable(gl.CULL_FACE);
@@ -149,7 +160,7 @@ export class WebGLShader {
 		gl.useProgram(this.program);
 	}
 
-	bind<T extends Vertex>(gl: WebGLRenderingContext, mesh: WebGLMesh<T>) {
+	bind(gl: WebGLRenderingContext, mesh: WebGLMesh) {
 		gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
 		for (const attributeName in this.attributes) {
 			const attribute = this.attributes[attributeName];
@@ -164,6 +175,36 @@ export class WebGLShader {
 			}
 			gl.enableVertexAttribArray(attribute.location);
 			gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, stride, offset);
+			const ext = gl.getExtension('ANGLE_instanced_arrays');
+			ext.vertexAttribDivisorANGLE(attribute.location, 0);
+		}
+	}
+
+
+	bindInstances(gl: WebGLRenderingContext, mesh: WebGLMesh) {
+		const ext = gl.getExtension('ANGLE_instanced_arrays');
+		gl.bindBuffer(gl.ARRAY_BUFFER, mesh.instanceBuffer);
+		for (const attributeName in this.instanceAttributes) {
+			const attribute = this.instanceAttributes[attributeName];
+			if (attribute.location == null || attribute.location === -1) {
+				continue;
+			}
+
+			const stride = mesh.instanceStride;
+			let offset = mesh.instanceOffsets.get(attributeName);
+			if (offset == null) {
+				throw `Unable to find instanceOffset for ${attributeName}`;
+			}
+			// mat4 is really 4x vec4
+			if (attribute.size === 4 * 4) {
+				for (let i = 0; i < 4; i++) {
+					const location = attribute.location + i;
+					gl.enableVertexAttribArray(location + i);
+					gl.vertexAttribPointer(location, 4, attribute.type, false, stride, offset);
+					ext.vertexAttribDivisorANGLE(location, 1);
+					offset += 4 * 4;
+				}
+			}
 		}
 	}
 }

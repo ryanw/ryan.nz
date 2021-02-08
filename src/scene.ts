@@ -1,4 +1,5 @@
-import { Pawn } from './pawn';
+import { Mesh } from './mesh';
+import { Pawn, PawnInstance, Instance } from './pawn';
 import { Texture } from './texture';
 import { Renderer } from './renderer';
 import { Color } from './material';
@@ -14,17 +15,31 @@ export class Scene {
 	}
 
 	addPawn(pawn: Pawn): number {
-		if (pawn.mesh) {
-			this.renderer.uploadMesh(pawn.mesh);
+		const { mesh, children } = pawn;
+
+		if (mesh) {
+			this.renderer.uploadMesh(mesh);
 		}
 		this.pawns.push(pawn);
 
-		for (const child of pawn.children) {
+		for (const child of children) {
 			if (child.mesh) {
 				this.renderer.uploadMesh(child.mesh);
 			}
 		}
+
+		this.uploadPawnInstances(pawn);
 		return this.pawns.length - 1;
+	}
+
+	uploadPawnInstances(pawn: Pawn) {
+		const { mesh, hasInstances } = pawn;
+		if (!hasInstances || !mesh) {
+			return;
+		}
+
+		const data = Array.from(pawn.instances.values()).map((i: PawnInstance) => i.data)
+		this.renderer.uploadMeshInstances(mesh, data);
 	}
 
 	addTexture(texture: Texture): number {

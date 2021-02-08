@@ -436,11 +436,19 @@ const enums = {
 	UNPACK_COLORSPACE_CONVERSION_WEBGL: 37443,
 	BROWSER_DEFAULT_WEBGL: 37444,
 };
+
+const extensions: any = {
+	ANGLE_instanced_arrays: {
+		drawArraysInstancedANGLE: jest.fn(),
+		vertexAttribDivisorANGLE: jest.fn(),
+	},
+};
 const MockWebGLRenderingContext = jest.fn().mockImplementation(() => {
 	const mock: any = { ...enums };
 	for (const name of functions) {
 		mock[name] = jest.fn(() => `TEST_${name.toUpperCase()}`);
 	}
+	mock['getExtension'] = jest.fn((kind) => extensions[kind]);
 	return mock;
 });
 

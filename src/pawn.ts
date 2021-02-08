@@ -5,6 +5,15 @@ import { Shader } from './shader';
 
 export type UniformValues = { [key: string]: number | number[] };
 
+export interface Instance {
+	[key: string]: number | number[] | Matrix4;
+}
+
+export type PawnInstance<I extends Instance = Instance> = {
+	pawn: Pawn;
+	data: I;
+}
+
 export interface PawnOptions {
 	color?: Color;
 	material?: Material;
@@ -13,13 +22,15 @@ export interface PawnOptions {
 	uniforms?: UniformValues;
 }
 
-export class Pawn {
-	mesh: Mesh<Vertex>;
+export class Pawn<I extends Instance = Instance> {
+	mesh: Mesh;
 	model: Matrix4 = Matrix4.identity();
 	material: Material = new Material();
 	shader?: Shader;
 	uniforms: UniformValues = {};
 	children: Pawn[] = [];
+	instances: Map<number, PawnInstance> = new Map();
+	private nextInstanceId = 1;
 
 	constructor(meshOrChildren?: Mesh<Vertex> | Pawn[], options: PawnOptions = {}) {
 		const material = options.material || new Material();
@@ -47,6 +58,23 @@ export class Pawn {
 		} else if (meshOrChildren instanceof Mesh) {
 			this.mesh = meshOrChildren;
 		}
+	}
+
+	instance(data: I): number {
+		const id = this.nextInstanceId++;
+
+		const instance = {
+			id,
+			pawn: this,
+			data: { ...data },
+		};
+		this.instances.set(id, instance);
+
+		return id;
+	}
+
+	get hasInstances(): boolean {
+		return this.instances.size !== 0;
 	}
 
 	get translationMatrix(): Matrix4 {

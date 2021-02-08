@@ -1,5 +1,5 @@
 import { Mesh } from '../mesh';
-import { Vertex } from './vertex';
+import { Instance } from '../pawn';
 import { Scene } from '../scene';
 import { Texture } from '../texture';
 import { Camera } from '../camera';
@@ -17,7 +17,8 @@ export abstract class Renderer {
 		this.mouseMovement[0] = 0;
 		this.mouseMovement[1] = 0;
 	}
-	abstract uploadMesh(mesh: Mesh<Vertex>): void;
+	abstract uploadMesh(mesh: Mesh): void;
+	abstract uploadMeshInstances<I extends Instance = Instance>(mesh: Mesh, instances: I[]): void;
 	abstract uploadTexture(texture: Texture, unit: number): void;
 	abstract bindTexture(texture: Texture): number;
 	abstract async drawScene(scene: Scene): Promise<number>;

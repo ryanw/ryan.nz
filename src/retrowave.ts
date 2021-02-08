@@ -31,7 +31,7 @@ export class Retrowave extends Scene {
 	backgroundColor: Color = [0.2, 0.05, 0.4, 1.0];
 	private road: Pawn;
 	private car: Pawn;
-	private trees: Pawn[] = [];
+	private tree: Pawn;
 	private terrain: Pawn;
 	private heightMap = new Texture();
 	private hillNoise = new SimplexNoise();
@@ -108,24 +108,23 @@ export class Retrowave extends Scene {
 	}
 
 	private buildTrees() {
-		const treeMesh = new Tree();
-		const treeShader = new TreeShader();
+		this.tree = new Pawn(new Tree(), {
+			model: Matrix4.translation(0.0, -3.5, 0.0),
+			shader: new TreeShader(),
+		});
+
 		for (let i = 0; i < 9; i++) {
-			const tree = new Pawn(treeMesh, {
-				model: Matrix4.translation(8.0, -3.5, i * -80.0),
-				shader: treeShader,
+			// Right side
+			this.tree.instance({
+				model: Matrix4.translation(8.0, 0.0, i * -80.0),
 			});
-			this.addPawn(tree);
-			this.trees.push(tree);
-		}
-		for (let i = 0; i < 9; i++) {
-			const tree = new Pawn(treeMesh, {
-				model: Matrix4.translation(-8.0, -3.5, -40 + i * -80.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
-				shader: treeShader,
+			// Left side
+			this.tree.instance({
+				model: Matrix4.translation(-8.0, 0.0, -40 + i * -80.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
 			});
-			this.addPawn(tree);
-			this.trees.push(tree);
 		}
+
+		this.addPawn(this.tree);
 	}
 
 	private buildCar() {
@@ -208,9 +207,7 @@ export class Retrowave extends Scene {
 	}
 
 	private updateTrees() {
-		for (const tree of this.trees) {
-			tree.uniforms.uRoadOffset = this.roadOffset;
-		}
+		this.tree.uniforms.uRoadOffset = this.roadOffset;
 	}
 
 	private updateTerrain() {

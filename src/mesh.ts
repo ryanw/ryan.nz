@@ -6,11 +6,11 @@ export interface GeometryOptions {
 	transform?: Matrix4;
 }
 
-export class Geometry<T extends Vertex> {
-	vertices: T[] = [];
+export class Geometry<V extends Vertex> {
+	vertices: V[] = [];
 	transform: Matrix4 = Matrix4.identity();
 
-	constructor(vertices?: T[], options?: GeometryOptions) {
+	constructor(vertices?: V[], options?: GeometryOptions) {
 		if (vertices) {
 			this.vertices = [...vertices];
 		}
@@ -19,7 +19,7 @@ export class Geometry<T extends Vertex> {
 		}
 	}
 
-	clone(): Geometry<T> {
+	clone(): Geometry<V> {
 		return new Geometry(
 			this.vertices.map((v) => ({ ...v })),
 			{ transform: this.transform.clone() }
@@ -27,16 +27,16 @@ export class Geometry<T extends Vertex> {
 	}
 }
 
-export class Mesh<T extends Vertex> {
-	geometries: Geometry<T>[] = [];
+export class Mesh<V extends Vertex = Vertex> {
+	geometries: Geometry<V>[] = [];
 
-	constructor(geom?: Geometry<T> | Geometry<T>[] | T[]) {
+	constructor(geom?: Geometry<V> | Geometry<V>[] | V[]) {
 		if (geom) {
 			if (Array.isArray(geom)) {
 				if (geom.length === 0 || geom[0] instanceof Geometry) {
-					this.geometries = [...geom] as Geometry<T>[];
+					this.geometries = [...geom] as Geometry<V>[];
 				} else {
-					this.geometries = [new Geometry(geom as T[])];
+					this.geometries = [new Geometry(geom as V[])];
 				}
 			} else {
 				this.geometries = [geom];
@@ -44,7 +44,7 @@ export class Mesh<T extends Vertex> {
 		}
 	}
 
-	clone(): Mesh<T> {
+	clone(): Mesh<V> {
 		return new Mesh(this.geometries.map((g) => g.clone()));
 	}
 
@@ -56,9 +56,9 @@ export class Mesh<T extends Vertex> {
 		return count;
 	}
 
-	get vertices(): T[] {
+	get vertices(): V[] {
 		// Preallocate the array as it's much faster than a bunch of `Array.concat`
-		const data: T[] = new Array(this.vertexCount);
+		const data: V[] = new Array(this.vertexCount);
 
 		let i = 0;
 		for (const geom of this.geometries) {

@@ -21,6 +21,13 @@ export class TreeShader extends Shader {
 					location: null,
 				},
 			},
+			instanceAttributes: {
+				model: {
+					type: WebGLRenderingContext.FLOAT,
+					size: 4 * 4,
+					location: null,
+				},
+			},
 		});
 	}
 }

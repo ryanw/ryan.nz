@@ -4,6 +4,7 @@ uniform float uRoadOffset;
 uniform vec4 uFogColor;
 uniform float uLineWidth;
 
+attribute mat4 model;
 attribute vec3 position;
 attribute vec3 barycentric;
 attribute vec4 color;
@@ -23,7 +24,7 @@ void main(void) {
 		0.0, 0.0, 1.0, mod(uRoadOffset, 80.0),
 		0.0, 0.0, 0.0, 1.0
 	);
-	mat4 mvp = uModel * roadTrans * uViewProj;
+	mat4 mvp = model * uModel * roadTrans * uViewProj;
 
 	gl_Position = vec4(position, 1.0) * mvp;
 	vFogDepth = max(0.0, min(1.0, gl_Position.z / fog_dist));
