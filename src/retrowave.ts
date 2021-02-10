@@ -21,6 +21,7 @@ import { SunShader } from './shaders/sun';
 import { TreeShader } from './shaders/tree';
 import { TerrainShader } from './shaders/terrain';
 import { BuildingShader } from './shaders/building';
+import { SpriteShader } from './shaders/sprite';
 
 const DEBUG_ENABLED = !PRODUCTION || window.location.search.indexOf('debug') !== -1;
 
@@ -56,6 +57,9 @@ export class Retrowave extends Scene {
 		this.buildTrees();
 		this.buildCar();
 		this.buildTerrain();
+		if (DEBUG_ENABLED) {
+			this.buildDebug();
+		}
 	}
 
 	private update() {
@@ -64,6 +68,9 @@ export class Retrowave extends Scene {
 		this.updateTrees();
 		this.updateCar();
 		this.updateTerrain();
+		if (DEBUG_ENABLED) {
+			this.updateDebug();
+		}
 	}
 
 	private buildCamera() {
@@ -147,6 +154,7 @@ export class Retrowave extends Scene {
 
 	private buildTerrain() {
 		const pixels = new Uint8ClampedArray(this.terrainSize * this.terrainSize * 4);
+		pixels.fill(255);
 		this.heightMap.putPixels(new ImageData(pixels, this.terrainSize));
 		this.addTexture(this.heightMap);
 
@@ -156,6 +164,15 @@ export class Retrowave extends Scene {
 			shader: new TerrainShader(),
 		});
 		this.addPawn(this.terrain);
+	}
+
+	private buildDebug() {
+		const sprite = new Pawn(new Quad(), {
+			color: [1.0, 1.0, 1.0, 1.0],
+			model: Matrix4.translation(3.0, 0.0, -10.0),
+			shader: new SpriteShader(),
+		});
+		this.addPawn(sprite);
 	}
 
 	private updateCamera() {
@@ -222,7 +239,7 @@ export class Retrowave extends Scene {
 				let h = this.hillNoise.noise2D(x / scale, (mapOffset - y) / scale) * 0.5 + 0.5;
 				// Flatten near road
 				if (x == 31 || x == 32) h = 0.0;
-				h = h * Math.min(1.0, (Math.abs(x + 0.5 - this.terrainSize / 2) / this.terrainSize) * 10.0);
+				h *= Math.min(1.0, (Math.abs(x + 0.5 - this.terrainSize / 2) / this.terrainSize) * 10.0);
 				this.heightMap.data[i + 3] = (255 * h) | 0; // A
 			}
 		}
@@ -258,6 +275,9 @@ export class Retrowave extends Scene {
 			this.carPosition[1] += Math.cos(carAngle) * carVelocity;
 		}
 		this.car.uniforms.uCarPosition = this.carPosition;
+	}
+
+	private updateDebug() {
 	}
 }
 
