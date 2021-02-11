@@ -162,6 +162,7 @@ export class WebGLShader {
 
 	bind(gl: WebGLRenderingContext, mesh: WebGLMesh) {
 		gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
+		const ext = gl.getExtension('ANGLE_instanced_arrays');
 		for (const attributeName in this.attributes) {
 			const attribute = this.attributes[attributeName];
 			if (attribute.location == null || attribute.location === -1) {
@@ -175,7 +176,6 @@ export class WebGLShader {
 			}
 			gl.enableVertexAttribArray(attribute.location);
 			gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, stride, offset);
-			const ext = gl.getExtension('ANGLE_instanced_arrays');
 			ext.vertexAttribDivisorANGLE(attribute.location, 0);
 		}
 	}
@@ -199,7 +199,7 @@ export class WebGLShader {
 			if (attribute.size === 4 * 4) {
 				for (let i = 0; i < 4; i++) {
 					const location = attribute.location + i;
-					gl.enableVertexAttribArray(location + i);
+					gl.enableVertexAttribArray(location);
 					gl.vertexAttribPointer(location, 4, attribute.type, false, stride, offset);
 					ext.vertexAttribDivisorANGLE(location, 1);
 					offset += 4 * 4;
