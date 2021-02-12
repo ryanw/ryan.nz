@@ -377,6 +377,6 @@ export function cross(p0: Vector3, p1: Vector3): Vector3 {
 }
 
 export function normalize(v: Vector3): Vector3 {
-	const norm = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+	const norm = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 	return [v[0] / norm, v[1] / norm, v[2] / norm];
 }
