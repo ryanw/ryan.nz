@@ -5,6 +5,7 @@ type Face = [number, number, number];
 
 export type ObjVertex = {
 	position: Point3;
+	normal: Vector3;
 };
 
 export interface ObjOptions {
@@ -19,7 +20,7 @@ export interface ObjFile {
 
 export class Obj extends Mesh<ObjVertex> {
 	constructor(data: string, options?: ObjOptions) {
-		let { vertices } = parseObj(data);
+		let { vertices, normals } = parseObj(data);
 		if (options?.scale) {
 			const scaling = Matrix4.scaling(options.scale, options.scale, options.scale);
 			vertices = vertices.map((v) => scaling.transformPoint3(v));
@@ -33,13 +34,20 @@ export class Obj extends Mesh<ObjVertex> {
 			}
 		}
 
-		super(vertices.map((v) => ({ position: v })));
+		const geom: ObjVertex[] = vertices.map((position, i) => {
+			return {
+				position,
+				normal: normals[i],
+			};
+		});
+		super(geom);
 	}
 }
 
 function parseObj(data: string): ObjFile {
 	const vertices: Point3[] = [];
 	const faces: Face[] = [];
+	const normals: Vector3[] = [];
 
 	for (const line of data.split('\n')) {
 		const leader = line.split(' ')[0];
@@ -60,6 +68,7 @@ function parseObj(data: string): ObjFile {
 
 			// Vertex Normal
 			case 'vn':
+				normals.push(parseObjNormal(line));
 				break;
 		}
 	}
@@ -76,6 +85,14 @@ function parseObjVertex(line: string): Point3 {
 		.filter((s) => s)
 		.slice(1)
 		.map(parseFloat) as Point3;
+}
+
+function parseObjNormal(line: string): Vector3 {
+	return line
+		.split(' ')
+		.filter((s) => s)
+		.slice(1)
+		.map(parseFloat) as Vector3;
 }
 
 function parseObjFace(line: string): Face {
