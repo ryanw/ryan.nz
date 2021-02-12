@@ -1,11 +1,10 @@
-import { Mesh } from './mesh';
-import { Pawn, PawnInstance, Instance } from './pawn';
+import { Actor, ActorInstance } from './actor';
 import { Texture } from './texture';
 import { Renderer } from './renderer';
 import { Color } from './material';
 
 export class Scene {
-	pawns: Pawn[] = [];
+	actors: Actor[] = [];
 	textures: Texture[] = [];
 	renderer: Renderer;
 	backgroundColor: Color = [0.0, 0.0, 0.0, 1.0];
@@ -14,13 +13,13 @@ export class Scene {
 		this.renderer = renderer;
 	}
 
-	addPawn(pawn: Pawn): number {
-		const { mesh, children } = pawn;
+	addActor(actor: Actor): number {
+		const { mesh, children } = actor;
 
 		if (mesh) {
 			this.renderer.uploadMesh(mesh);
 		}
-		this.pawns.push(pawn);
+		this.actors.push(actor);
 
 		for (const child of children) {
 			if (child.mesh) {
@@ -28,17 +27,17 @@ export class Scene {
 			}
 		}
 
-		this.uploadPawnInstances(pawn);
-		return this.pawns.length - 1;
+		this.uploadActorInstances(actor);
+		return this.actors.length - 1;
 	}
 
-	uploadPawnInstances(pawn: Pawn) {
-		const { mesh, hasInstances } = pawn;
+	uploadActorInstances(actor: Actor) {
+		const { mesh, hasInstances } = actor;
 		if (!hasInstances || !mesh) {
 			return;
 		}
 
-		const data = Array.from(pawn.instances.values()).map((i: PawnInstance) => i.data)
+		const data = Array.from(actor.instances.values()).map((i: ActorInstance) => i.data)
 		this.renderer.uploadMeshInstances(mesh, data);
 	}
 

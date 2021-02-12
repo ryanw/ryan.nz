@@ -1,5 +1,5 @@
 import { Mesh } from '../mesh';
-import { Instance } from '../pawn';
+import { Instance } from '../actor';
 import { Scene } from '../scene';
 import { Texture } from '../texture';
 import { Camera } from '../camera';

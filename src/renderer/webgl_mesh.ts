@@ -1,7 +1,7 @@
 import { Matrix4 } from '../geom';
 import { Vertex } from './vertex';
 import { Mesh } from '../mesh';
-import { Instance } from '../pawn';
+import { Instance } from '../actor';
 
 const FLOAT32_SIZE: number = 4;
 

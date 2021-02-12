@@ -1,7 +1,7 @@
 import { Renderer } from './renderer';
 import { Shader, ShaderOptions } from '../shader';
 import { Vertex } from './vertex';
-import { Pawn, Instance } from '../pawn';
+import { Actor, Instance } from '../actor';
 import { Matrix4 } from '../geom';
 import { Mesh } from '../mesh';
 import { Scene } from '../scene';
@@ -169,17 +169,17 @@ export class WebGLRenderer extends Renderer {
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
-	drawPawn(pawn: Pawn, projection?: Matrix4, parentModel?: Matrix4) {
-		const { mesh, model, material, children } = pawn;
-		const pawnModel = parentModel ? parentModel.multiply(model) : model;
+	drawActor(actor: Actor, projection?: Matrix4, parentModel?: Matrix4) {
+		const { mesh, model, material, children } = actor;
+		const actorModel = parentModel ? parentModel.multiply(model) : model;
 
-		if (pawn.shader && !pawn.shader.compiled) {
-			pawn.shader.make(this.gl);
+		if (actor.shader && !actor.shader.compiled) {
+			actor.shader.make(this.gl);
 		}
 
 		if (mesh instanceof Mesh) {
 			const gl = this.gl;
-			const shader = pawn.shader || this.defaultShader;
+			const shader = actor.shader || this.defaultShader;
 			const uniforms = shader.uniforms;
 			shader.use(gl);
 
@@ -197,17 +197,17 @@ export class WebGLRenderer extends Renderer {
 			gl.uniform1f(uniforms.uTime.location, performance.now());
 			gl.uniform2fv(uniforms.uResolution.location, [this.camera.width, this.camera.height]);
 			gl.uniform1f(uniforms.uSeed.location, this.seed);
-			gl.uniformMatrix4fv(uniforms.uModel.location, false, pawnModel.toArray());
+			gl.uniformMatrix4fv(uniforms.uModel.location, false, actorModel.toArray());
 			if (material?.color) {
 				gl.uniform4fv(uniforms.uFillColor.location, material.color);
 			}
 
-			for (const uniformName in pawn.uniforms) {
+			for (const uniformName in actor.uniforms) {
 				const uniform = shader.uniforms[uniformName];
 				if (!uniform) {
 					throw `Unable to find '${uniformName}' uniform in shader`;
 				}
-				const value = pawn.uniforms[uniformName];
+				const value = actor.uniforms[uniformName];
 				switch (uniform.type) {
 					case WebGLRenderingContext.FLOAT:
 						if (typeof value !== 'number') {
@@ -242,7 +242,7 @@ export class WebGLRenderer extends Renderer {
 			}
 
 			shader.bind(gl, glMesh);
-			if (pawn.hasInstances) {
+			if (actor.hasInstances) {
 				shader.bindInstances(gl, glMesh);
 				glMesh.drawInstances();
 			} else {
@@ -251,7 +251,7 @@ export class WebGLRenderer extends Renderer {
 		}
 
 		for (const child of children) {
-			this.drawPawn(child, projection, pawnModel);
+			this.drawActor(child, projection, actorModel);
 		}
 	}
 
@@ -329,8 +329,8 @@ export class WebGLRenderer extends Renderer {
 				const view = this.camera.view.inverse();
 				const viewProj = proj.multiply(view);
 
-				for (const pawn of scene.pawns) {
-					this.drawPawn(pawn, viewProj);
+				for (const actor of scene.actors) {
+					this.drawActor(actor, viewProj);
 				}
 
 				this.frame++;

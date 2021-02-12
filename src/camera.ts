@@ -1,7 +1,7 @@
 import { Matrix4, Point3, Vector3 } from './geom';
-import { Pawn } from './pawn';
+import { Actor } from './actor';
 
-export class Camera extends Pawn {
+export class Camera extends Actor {
 	width: number;
 	height: number;
 	near: number = 1.0;

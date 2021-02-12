@@ -7,7 +7,7 @@ import { Building } from './meshes/building';
 import { Quad } from './meshes/quad';
 import { Road } from './meshes/road';
 import { Tree } from './meshes/tree';
-import { Pawn } from './pawn';
+import { Actor } from './actor';
 import { Camera } from './camera';
 import { Matrix4, Rect } from './geom';
 import { Texture } from './texture';
@@ -30,10 +30,10 @@ export class Retrowave extends Scene {
 	roadOffset = 0.0;
 	carPosition = [0.0, 0.0];
 	backgroundColor: Color = [0.2, 0.05, 0.4, 1.0];
-	private road: Pawn;
-	private car: Pawn;
-	private tree: Pawn;
-	private terrain: Pawn;
+	private road: Actor;
+	private car: Actor;
+	private tree: Actor;
+	private terrain: Actor;
 	private heightMap = new Texture();
 	private hillNoise = new SimplexNoise();
 	private terrainSize = 64;
@@ -75,7 +75,7 @@ export class Retrowave extends Scene {
 
 	private buildCamera() {
 		const camera = new Camera();
-		this.addPawn(camera);
+		this.addActor(camera);
 		this.renderer.camera = camera;
 		this.renderer.updateSize();
 
@@ -85,37 +85,37 @@ export class Retrowave extends Scene {
 	}
 
 	private buildSky() {
-		const sky = new Pawn(new Quad(), { shader: new SkyShader() });
-		this.addPawn(sky);
+		const sky = new Actor(new Quad(), { shader: new SkyShader() });
+		this.addActor(sky);
 	}
 
 	private buildCity() {
-		const city = new Pawn(createCityscape(150, 50), {
+		const city = new Actor(createCityscape(150, 50), {
 			model: Matrix4.translation(0, -5.0, -650.0),
 		});
-		this.addPawn(city);
+		this.addActor(city);
 	}
 
 	private buildRoad() {
-		this.road = new Pawn(new Road(), {
+		this.road = new Actor(new Road(), {
 			color: [1.0, 0.0, 1.0, 1.0],
 			model: Matrix4.translation(0.0, -4.75, -300.0).multiply(Matrix4.scaling(5, 1, 400)),
 			shader: new RoadShader(),
 		});
-		this.addPawn(this.road);
+		this.addActor(this.road);
 	}
 
 	private buildSun() {
-		const sun = new Pawn(new Quad(), {
+		const sun = new Actor(new Quad(), {
 			color: [1.0, 1.0, 0.0, 1.0],
 			model: Matrix4.translation(0.0, 50.0, -1000.0).multiply(Matrix4.scaling(175, 175, 175)),
 			shader: new SunShader(),
 		});
-		this.addPawn(sun);
+		this.addActor(sun);
 	}
 
 	private buildTrees() {
-		this.tree = new Pawn(new Tree(), {
+		this.tree = new Actor(new Tree(), {
 			model: Matrix4.translation(0.0, -3.5, 0.0),
 			shader: new TreeShader(),
 		});
@@ -131,20 +131,20 @@ export class Retrowave extends Scene {
 			});
 		}
 
-		this.addPawn(this.tree);
+		this.addActor(this.tree);
 	}
 
 	private buildCar() {
-		this.car = new Pawn(new Obj(deloreanObj), {
+		this.car = new Actor(new Obj(deloreanObj), {
 			color: [0.0, 0.0, 0.0, 1.0],
 			shader: new CarShader(),
 		});
-		const carOutline = new Pawn(new Obj(deloreanObj, { flipFaces: true, scale: 1.03 }), {
+		const carOutline = new Actor(new Obj(deloreanObj, { flipFaces: true, scale: 1.03 }), {
 			color: [0.0, 1.0, 1.0, 1.0],
 			shader: this.car.shader,
 		});
-		this.addPawn(
-			new Pawn([this.car, carOutline], {
+		this.addActor(
+			new Actor([this.car, carOutline], {
 				model: Matrix4.translation(0.0, -3.4, 0.0)
 					.multiply(Matrix4.rotation(0, Math.PI, 0))
 					.multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
@@ -158,21 +158,21 @@ export class Retrowave extends Scene {
 		this.heightMap.putPixels(new ImageData(pixels, this.terrainSize));
 		this.addTexture(this.heightMap);
 
-		this.terrain = new Pawn(new Terrain(), {
+		this.terrain = new Actor(new Terrain(), {
 			color: [0.0, 0.8, 1.0, 0.0],
 			model: Matrix4.translation(0.0, -4.0, -320.0).multiply(Matrix4.scaling(9.9, 1.0, 20.0)),
 			shader: new TerrainShader(),
 		});
-		this.addPawn(this.terrain);
+		this.addActor(this.terrain);
 	}
 
 	private buildDebug() {
-		const sprite = new Pawn(new Quad(), {
+		const sprite = new Actor(new Quad(), {
 			color: [1.0, 1.0, 1.0, 1.0],
 			model: Matrix4.translation(3.0, 0.0, -10.0),
 			shader: new SpriteShader(),
 		});
-		this.addPawn(sprite);
+		this.addActor(sprite);
 	}
 
 	private updateCamera() {
@@ -281,8 +281,8 @@ export class Retrowave extends Scene {
 	}
 }
 
-function createCityscape(radius: number, count: number): Pawn[] {
-	const pawns: Pawn[] = [];
+function createCityscape(radius: number, count: number): Actor[] {
+	const actors: Actor[] = [];
 	const buildings: Rect[] = [];
 	const buildingShader = new BuildingShader();
 
@@ -314,8 +314,8 @@ function createCityscape(radius: number, count: number): Pawn[] {
 
 			buildings.push(newBuilding);
 
-			pawns.push(
-				new Pawn(new Building(width / 5, height / 5, depth / 5), {
+			actors.push(
+				new Actor(new Building(width / 5, height / 5, depth / 5), {
 					color: [1.0, 0.0, 0.0, 1.0],
 					model: Matrix4.translation(x, y, z).multiply(Matrix4.scaling(width, height, depth)),
 					shader: buildingShader,
@@ -324,7 +324,7 @@ function createCityscape(radius: number, count: number): Pawn[] {
 			break pos;
 		}
 	}
-	return pawns;
+	return actors;
 }
 
 function rectOverlaps(rect0: Rect, rect1: Rect): boolean {

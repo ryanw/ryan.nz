@@ -6,7 +6,7 @@ import '../__mocks__/webgl';
 import { WebGLRenderer } from './webgl_renderer';
 import { Point2, Point3 } from '../geom';
 import { Mesh } from '../mesh';
-import { Pawn } from '../pawn';
+import { Actor } from '../actor';
 import { Scene } from '../scene';
 
 describe('WebGLRenderer', () => {
@@ -69,13 +69,13 @@ describe('WebGLRenderer', () => {
 		expect(gl.bindBuffer).toHaveBeenCalledBefore(gl.bufferData);
 	});
 
-	it('should draw a Pawn', () => {
+	it('should draw a Actor', () => {
 		const renderer = new WebGLRenderer(new MockCanvas());
 		renderer.attach();
 		const gl = renderer.gl as any;
 
-		const pawn = new Pawn(new TestMesh());
-		renderer.drawPawn(pawn);
+		const actor = new Actor(new TestMesh());
+		renderer.drawActor(actor);
 
 		expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 3);
 	});
@@ -86,9 +86,9 @@ describe('WebGLRenderer', () => {
 		const gl = renderer.gl as any;
 
 		const scene = new Scene(renderer);
-		scene.addPawn(new Pawn(new TestMesh()));
-		scene.addPawn(
-			new Pawn(
+		scene.addActor(new Actor(new TestMesh()));
+		scene.addActor(
+			new Actor(
 				new Mesh([
 					{ position: [1.0, 2.0, 3.0], foo: [4.0, 5.0], bar: 6.0 },
 					{ position: [1.1, 2.2, 3.3], foo: [4.4, 5.5], bar: 6.6 },
@@ -99,9 +99,9 @@ describe('WebGLRenderer', () => {
 		);
 		await renderer.drawScene(scene);
 
-		// First pawn
+		// First actor
 		expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 3);
-		// Second pawn
+		// Second actor
 		expect(gl.drawArrays).toHaveBeenCalledWith(gl.TRIANGLES, 0, 4);
 	});
 });

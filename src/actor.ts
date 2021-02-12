@@ -2,6 +2,7 @@ import { Matrix4, Point3, Vector3 } from './geom';
 import { Mesh, Vertex } from './mesh';
 import { Material, Color } from './material';
 import { Shader } from './shader';
+import { Component } from './component';
 
 export type UniformValues = { [key: string]: number | number[] };
 
@@ -9,12 +10,12 @@ export interface Instance {
 	[key: string]: number | number[] | Matrix4;
 }
 
-export type PawnInstance<I extends Instance = Instance> = {
-	pawn: Pawn;
+export type ActorInstance<I extends Instance = Instance> = {
+	pawn: Actor;
 	data: I;
 }
 
-export interface PawnOptions {
+export interface ActorOptions {
 	color?: Color;
 	material?: Material;
 	model?: Matrix4;
@@ -22,17 +23,16 @@ export interface PawnOptions {
 	uniforms?: UniformValues;
 }
 
-export class Pawn<I extends Instance = Instance> {
-	mesh: Mesh;
+export class Actor<I extends Instance = Instance> {
 	model: Matrix4 = Matrix4.identity();
 	material: Material = new Material();
 	shader?: Shader;
 	uniforms: UniformValues = {};
-	children: Pawn[] = [];
-	instances: Map<number, PawnInstance> = new Map();
+	children: Actor[] = [];
+	instances: Map<number, ActorInstance> = new Map();
 	private nextInstanceId = 1;
 
-	constructor(meshOrChildren?: Mesh<Vertex> | Pawn[], options: PawnOptions = {}) {
+	constructor(meshOrChildren?: Mesh<Vertex> | Actor[], options: ActorOptions = {}) {
 		const material = options.material || new Material();
 		material.color = options.color || material.color;
 
