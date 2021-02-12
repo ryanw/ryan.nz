@@ -2,6 +2,7 @@ import { Actor, ActorInstance } from './actor';
 import { Texture } from './texture';
 import { Renderer } from './renderer';
 import { Color } from './material';
+import { StaticMesh } from './components/static_mesh';
 
 export class Scene {
 	actors: Actor[] = [];
@@ -14,31 +15,35 @@ export class Scene {
 	}
 
 	addActor(actor: Actor): number {
-		const { mesh, children } = actor;
+		const { children } = actor;
 
-		if (mesh) {
-			this.renderer.uploadMesh(mesh);
+		for (const component of actor.getComponentsOfType(StaticMesh)) {
+			this.renderer.uploadMesh(component.mesh);
 		}
-		this.actors.push(actor);
 
 		for (const child of children) {
-			if (child.mesh) {
-				this.renderer.uploadMesh(child.mesh);
+			for (const component of child.getComponentsOfType(StaticMesh)) {
+				this.renderer.uploadMesh(component.mesh);
 			}
 		}
 
 		this.uploadActorInstances(actor);
+
+		this.actors.push(actor);
 		return this.actors.length - 1;
 	}
 
 	uploadActorInstances(actor: Actor) {
-		const { mesh, hasInstances } = actor;
-		if (!hasInstances || !mesh) {
+		const { hasInstances } = actor;
+		if (!hasInstances) {
 			return;
 		}
 
 		const data = Array.from(actor.instances.values()).map((i: ActorInstance) => i.data)
-		this.renderer.uploadMeshInstances(mesh, data);
+
+		for (const component of actor.getComponentsOfType(StaticMesh)) {
+			this.renderer.uploadMeshInstances(component.mesh, data);
+		}
 	}
 
 	addTexture(texture: Texture): number {

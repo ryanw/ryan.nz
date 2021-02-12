@@ -3,6 +3,7 @@ import { Mesh, Vertex } from './mesh';
 import { Material, Color } from './material';
 import { Shader } from './shader';
 import { Component } from './component';
+import { StaticMesh } from './components/static_mesh';
 
 export type UniformValues = { [key: string]: number | number[] };
 
@@ -24,6 +25,7 @@ export interface ActorOptions {
 }
 
 export class Actor<I extends Instance = Instance> {
+	components: Component[] = [];
 	model: Matrix4 = Matrix4.identity();
 	material: Material = new Material();
 	shader?: Shader;
@@ -56,7 +58,7 @@ export class Actor<I extends Instance = Instance> {
 		if (meshOrChildren instanceof Array) {
 			this.children = meshOrChildren;
 		} else if (meshOrChildren instanceof Mesh) {
-			this.mesh = meshOrChildren;
+			this.components.push(new StaticMesh(meshOrChildren));
 		}
 	}
 
@@ -100,5 +102,9 @@ export class Actor<I extends Instance = Instance> {
 	get rotationVector(): Vector3 {
 		const vec = this.model.multiplyVector4([0.0, 0.0, 1.0, 0.0]);
 		return [vec[0], vec[1], vec[2]];
+	}
+
+	getComponentsOfType<C extends Component>(klass: Constructable<C>): C[] {
+		return this.components.filter(c => c instanceof klass) as C[];
 	}
 }

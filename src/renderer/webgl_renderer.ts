@@ -8,6 +8,7 @@ import { Scene } from '../scene';
 import { Texture } from '../texture';
 import { WebGLMesh } from './webgl_mesh';
 import { WebGLRendererTexture } from './webgl_texture';
+import { StaticMesh } from '../components/static_mesh';
 import defaultVertSource from '../shaders/wireframe.vert.glsl';
 import defaultFragSource from '../shaders/wireframe.frag.glsl';
 
@@ -170,8 +171,11 @@ export class WebGLRenderer extends Renderer {
 	}
 
 	drawActor(actor: Actor, projection?: Matrix4, parentModel?: Matrix4) {
-		const { mesh, model, material, children } = actor;
+		const { model, material, children } = actor;
 		const actorModel = parentModel ? parentModel.multiply(model) : model;
+
+		// TODO support multiple meshes on one actor?
+		const mesh = actor.getComponentsOfType(StaticMesh)[0]?.mesh;
 
 		if (actor.shader && !actor.shader.compiled) {
 			actor.shader.make(this.gl);

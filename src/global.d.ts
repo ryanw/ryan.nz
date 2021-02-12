@@ -6,3 +6,7 @@ declare module '*.glsl' {
 declare module '*.obj' {
 	export default string;
 }
+
+interface Constructable<Z = unknown, A extends unknown[] = unknown[]> {
+	new(...args: A): Z
+}
