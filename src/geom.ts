@@ -94,7 +94,10 @@ export class Matrix4 {
 		]);
 	}
 
-	static scaling(x: number, y: number, z: number): Matrix4 {
+	static scaling(x: number, y?: number, z?: number): Matrix4 {
+		if (y == null) y = x;
+		if (z == null) z = y;
+
 		return new Matrix4([
 			x, 0, 0, 0,
 			0, y, 0, 0,
