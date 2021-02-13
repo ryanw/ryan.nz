@@ -8,7 +8,9 @@ import { Scene } from '../scene';
 import { Texture } from '../texture';
 import { WebGLMesh } from './webgl_mesh';
 import { WebGLRendererTexture } from './webgl_texture';
+import { WebGLRenderTarget } from './webgl_render_target';
 import { StaticMesh } from '../components/static_mesh';
+import { RenderTexture } from '../render_texture';
 import defaultVertSource from '../shaders/wireframe.vert.glsl';
 import defaultFragSource from '../shaders/wireframe.frag.glsl';
 
@@ -30,6 +32,7 @@ export class WebGLRenderer extends Renderer {
 	private context: WebGLRenderingContext;
 	private textures: Map<Texture, WebGLRendererTexture> = new Map();
 	private meshes: Map<Mesh<Vertex>, WebGLMesh<Vertex>> = new Map();
+	private renderTargets: Map<RenderTexture, WebGLRenderTarget> = new Map();
 
 	constructor(el: HTMLElement) {
 		super();
@@ -290,7 +293,7 @@ export class WebGLRenderer extends Renderer {
 		throw 'not yet implemented';
 	}
 
-	uploadTexture(texture: Texture, unit: number = null) {
+	uploadTexture(texture: Texture, unit: number = null): number {
 		const gl = this.gl;
 
 		// Link a Texture with its WebGLRendererTexture
@@ -299,7 +302,12 @@ export class WebGLRenderer extends Renderer {
 			glTexture = new WebGLRendererTexture(gl);
 			this.textures.set(texture, glTexture);
 		}
+		if (!unit && !glTexture.unit) {
+			unit = this.textures.size;
+		}
 		glTexture.upload(texture, unit != null ? unit : glTexture.unit);
+
+		return unit;
 	}
 
 	bindTexture(texture: Texture): number {
@@ -317,25 +325,12 @@ export class WebGLRenderer extends Renderer {
 	/**
 	 * Wait for next animation frame and redraw everything
 	 */
-	async drawScene(scene: Scene): Promise<number> {
+	async drawScene(scene: Scene, target?: RenderTexture): Promise<number> {
 		return new Promise((resolve) => {
 			const draw = () => {
-				this.backgroundColor = [...scene.backgroundColor];
 				const now = performance.now();
 				const dt = (now - this.lastFrameAt) / 1000.0;
-				this.lastFrameAt = now;
-
-				this.gl.viewport(0, 0, this.camera.width, this.camera.height);
-				this.clear();
-
-				// Uniforms
-				const proj = this.camera.projection.clone();
-				const view = this.camera.view.inverse();
-				const viewProj = proj.multiply(view);
-
-				for (const actor of scene.actors) {
-					this.drawActor(actor, viewProj);
-				}
+				this.drawSync(scene, target);
 
 				this.frame++;
 				if (DEBUG_ENABLED && this.frame % 60 === 0) {
@@ -348,7 +343,9 @@ export class WebGLRenderer extends Renderer {
 
 				resolve(dt);
 			};
-			if (this.vsync) {
+			if (target) {
+				draw();
+			} else if (this.vsync) {
 				window.requestAnimationFrame(draw);
 			} else {
 				setTimeout(draw, 0);
@@ -356,23 +353,65 @@ export class WebGLRenderer extends Renderer {
 		});
 	}
 
+	drawSync(scene: Scene, target?: RenderTexture) {
+		// Drawing to a texture
+		let glTarget;
+		if (target) {
+			glTarget = this.renderTargets.get(target);
+			if (!glTarget) {
+				this.uploadTexture(target);
+				const glTexture = this.textures.get(target);
+				glTarget = new WebGLRenderTarget(this.gl, target.size, glTexture);
+				this.renderTargets.set(target, glTarget);
+			}
+			
+			// Resize to match size of texture
+			this.updateSize(target.size, target.size);
+			glTarget.bind();
+		}
+
+		this.backgroundColor = [...scene.backgroundColor];
+		const now = performance.now();
+		this.lastFrameAt = now;
+
+		this.gl.viewport(0, 0, this.camera.width, this.camera.height);
+		this.clear();
+
+		// Uniforms
+		const proj = this.camera.projection.clone();
+		const view = this.camera.view.inverse();
+		const viewProj = proj.multiply(view);
+
+		for (const actor of scene.actors) {
+			this.drawActor(actor, viewProj);
+		}
+
+		// Cleanup after drawing to texture
+		if (target) {
+			glTarget.unbind();
+			this.updateSize();
+		}
+	}
+
 	/**
 	 * Update the framebuffer of the canvas to match its container's size
 	 */
-	updateSize() {
+	updateSize(width?: number, height?: number) {
 		if (!this.parentElement) {
 			return;
 		}
-		const width = (this.parentElement.clientWidth * this.scale) | 0;
-		const height = (this.parentElement.clientHeight * this.scale) | 0;
+		const parentWidth = this.parentElement.clientWidth * this.scale | 0;
+		const parentHeight = this.parentElement.clientHeight * this.scale | 0;
+		width = width != null ? width : parentWidth;
+		height = height != null ? height : parentHeight;
 		this.camera.resize(width, height);
 
 		this.canvas.style.imageRendering = 'crisp-edges'; // Firefox
 		this.canvas.style.imageRendering = 'pixelated'; // Webkit
 		this.canvas.style.width = this.parentElement.clientWidth + 'px';
 		this.canvas.style.height = this.parentElement.clientHeight + 'px';
-		this.canvas.setAttribute('width', width.toString());
-		this.canvas.setAttribute('height', height.toString());
+		this.canvas.setAttribute('width', parentWidth.toString());
+		this.canvas.setAttribute('height', parentHeight.toString());
 	}
 
 	/**

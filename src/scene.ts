@@ -6,7 +6,7 @@ import { StaticMesh } from './components/static_mesh';
 
 export class Scene {
 	actors: Actor[] = [];
-	textures: Texture[] = [];
+	textures: Map<number, Texture> = new Map();
 	renderer: Renderer;
 	backgroundColor: Color = [0.0, 0.0, 0.0, 1.0];
 
@@ -47,22 +47,29 @@ export class Scene {
 	}
 
 	addTexture(texture: Texture): number {
-		this.textures.push(texture);
-		const id = this.textures.length - 1;
-		this.renderer.uploadTexture(texture, id);
+		const id = this.renderer.uploadTexture(texture);
+		this.textures.set(id, texture);
 		return id;
+	}
+
+	getIdOfTexture(texture: Texture): number | null {
+		for (let [id, value] of this.textures.entries()) {
+			if (value === texture) return id;
+		}
+
+		return null;
 	}
 
 	updateTexture(textureOrId: Texture | number) {
 		if (typeof textureOrId === 'number') {
-			const texture = this.textures[textureOrId];
+			const texture = this.textures.get(textureOrId);
 			if (!texture) {
 				throw `Unable to find texture ${textureOrId}`;
 			}
 			this.renderer.uploadTexture(texture, textureOrId);
 		} else {
-			const id = this.textures.indexOf(textureOrId);
-			if (id === -1) {
+			const id = this.getIdOfTexture(textureOrId);
+			if (id == null) {
 				throw `Attempted to upload an unknown texture`;
 			}
 			this.renderer.uploadTexture(textureOrId, id);
@@ -70,10 +77,9 @@ export class Scene {
 	}
 
 	bindTexture(textureOrId: Texture | number): number {
-		const texture = typeof textureOrId === 'number' ? this.textures[textureOrId] : textureOrId;
-		const unit = this.textures.indexOf(texture);
+		const texture = typeof textureOrId === 'number' ? this.textures.get(textureOrId) : textureOrId;
 		if (!texture) {
-			throw `Unable to find texture ID: ${unit}`;
+			throw `Unable to find texture`;
 		}
 		return this.renderer.bindTexture(texture);
 	}
