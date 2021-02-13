@@ -423,7 +423,7 @@ export class WebGLRenderer extends Renderer {
 	 */
 	attach(el: HTMLElement = null) {
 		el?.appendChild(this.canvas);
-		window.addEventListener('resize', this.updateSize.bind(this));
+		window.addEventListener('resize', this.updateSize.bind(this, null, null));
 		this.updateSize();
 		this.initWebGL();
 		this.addEventListeners();
