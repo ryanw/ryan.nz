@@ -1,27 +1,27 @@
 import SimplexNoise from 'simplex-noise';
-import { Scene } from './scene';
-import { Renderer } from './renderer';
-import { Terrain } from './meshes/terrain';
-import { Obj } from './meshes/obj';
-import { Building } from './meshes/building';
-import { Quad } from './meshes/quad';
-import { Road } from './meshes/road';
-import { Tree } from './meshes/tree';
-import { Actor } from './actor';
-import { Camera } from './camera';
-import { Matrix4, Rect } from './geom';
-import { Texture } from './texture';
-import { Color } from './material';
+import { Scene } from '../scene';
+import { Renderer } from '../renderer';
+import { Terrain } from '../meshes/terrain';
+import { Obj } from '../meshes/obj';
+import { Building } from '../meshes/building';
+import { Quad } from '../meshes/quad';
+import { Road } from '../meshes/road';
+import { Tree } from '../meshes/tree';
+import { Actor } from '../actor';
+import { Camera } from '../camera';
+import { Matrix4, Rect } from '../geom';
+import { Texture } from '../texture';
+import { Color } from '../material';
 
-import deloreanObj from './delorean.obj';
-import { RoadShader } from './shaders/road';
-import { CarShader } from './shaders/car';
-import { SkyShader } from './shaders/sky';
-import { SunShader } from './shaders/sun';
-import { TreeShader } from './shaders/tree';
-import { TerrainShader } from './shaders/terrain';
-import { BuildingShader } from './shaders/building';
-import { SpriteShader } from './shaders/sprite';
+import deloreanObj from '../delorean.obj';
+import { RoadShader } from '../shaders/road';
+import { CarShader } from '../shaders/car';
+import { SkyShader } from '../shaders/sky';
+import { SunShader } from '../shaders/sun';
+import { TreeShader } from '../shaders/tree';
+import { TerrainShader } from '../shaders/terrain';
+import { BuildingShader } from '../shaders/building';
+import { SpriteShader } from '../shaders/sprite';
 
 const DEBUG_ENABLED = !PRODUCTION || window.location.search.indexOf('debug') !== -1;
 
@@ -62,7 +62,7 @@ export class Retrowave extends Scene {
 		}
 	}
 
-	private update() {
+	update() {
 		this.updateCamera();
 		this.updateRoad();
 		this.updateTrees();
@@ -173,10 +173,11 @@ export class Retrowave extends Scene {
 			shader: new SpriteShader(),
 		});
 		this.addActor(sprite);
+		sprite.uniforms.uSampler = this.bindTexture(this.heightMap);
 	}
 
 	private updateCamera() {
-		if (DEBUG_ENABLED) {
+		if (false && DEBUG_ENABLED) {
 			const renderer = this.renderer;
 			const camera = renderer.camera;
 
