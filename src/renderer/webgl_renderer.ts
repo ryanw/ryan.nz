@@ -184,6 +184,9 @@ export class WebGLRenderer extends Renderer {
 			actor.shader.make(this.gl);
 		}
 
+		// FIXME reuse this
+		const view = this.camera.view.inverse();
+
 		if (mesh instanceof Mesh) {
 			const gl = this.gl;
 			const shader = actor.shader || this.defaultShader;
@@ -199,6 +202,7 @@ export class WebGLRenderer extends Renderer {
 			if (projection) {
 				gl.uniformMatrix4fv(uniforms.uViewProj.location, false, projection.toArray());
 			}
+			gl.uniformMatrix4fv(uniforms.uView.location, false, view.toArray());
 			gl.uniform4fv(uniforms.uFogColor.location, this.backgroundColor);
 			gl.uniform1f(uniforms.uLineWidth.location, this.lineWidth);
 			gl.uniform1f(uniforms.uTime.location, performance.now());

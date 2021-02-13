@@ -42,6 +42,10 @@ export class WebGLShader {
 			type: WebGLRenderingContext.FLOAT_MAT4,
 			location: null,
 		},
+		uView: {
+			type: WebGLRenderingContext.FLOAT_MAT4,
+			location: null,
+		},
 		uModel: {
 			type: WebGLRenderingContext.FLOAT_MAT4,
 			location: null,
