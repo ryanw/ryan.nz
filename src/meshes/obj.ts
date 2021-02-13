@@ -1,11 +1,12 @@
 import { Mesh } from '../mesh';
-import { Point3, Vector3, Matrix4 } from '../geom';
+import { Point2, Point3, Vector3, Matrix4 } from '../geom';
 
-type Face = [number, number, number];
+type Face = [number[], number[], number[]];
 
 export type ObjVertex = {
 	position: Point3;
 	normal: Vector3;
+	uv: Point2;
 };
 
 export interface ObjOptions {
@@ -16,11 +17,12 @@ export interface ObjOptions {
 export interface ObjFile {
 	vertices: Point3[];
 	normals: Vector3[];
+	uvs: Point2[];
 }
 
 export class Obj extends Mesh<ObjVertex> {
 	constructor(data: string, options?: ObjOptions) {
-		let { vertices, normals } = parseObj(data);
+		let { vertices, normals, uvs } = parseObj(data);
 		if (options?.scale) {
 			const scaling = Matrix4.scaling(options.scale, options.scale, options.scale);
 			vertices = vertices.map((v) => scaling.transformPoint3(v));
@@ -38,6 +40,7 @@ export class Obj extends Mesh<ObjVertex> {
 			return {
 				position,
 				normal: normals[i],
+				uv: uvs[i],
 			};
 		});
 		super(geom);
@@ -48,6 +51,7 @@ function parseObj(data: string): ObjFile {
 	const vertices: Point3[] = [];
 	const faces: Face[] = [];
 	const normals: Vector3[] = [];
+	const uvs: Point2[] = [];
 
 	for (const line of data.split('\n')) {
 		const leader = line.split(' ')[0];
@@ -64,6 +68,7 @@ function parseObj(data: string): ObjFile {
 
 			// Vertex Texture
 			case 'vt':
+				uvs.push(parseObjUV(line));
 				break;
 
 			// Vertex Normal
@@ -74,8 +79,9 @@ function parseObj(data: string): ObjFile {
 	}
 
 	return {
-		vertices: (faces as any).flat().map((f: number) => vertices[f]),
-		normals: [],
+		vertices: (faces as any).flat().map((f: number[]) => vertices[f[0]]),
+		normals: (faces as any).flat().map((f: number[]) => normals[f[2]]),
+		uvs: (faces as any).flat().map((f: number[]) => uvs[f[1]]),
 	};
 }
 
@@ -95,10 +101,20 @@ function parseObjNormal(line: string): Vector3 {
 		.map(parseFloat) as Vector3;
 }
 
+function parseObjUV(line: string): Point2 {
+	const p = line
+		.split(' ')
+		.filter((s) => s)
+		.slice(1)
+		.map(i => parseFloat(i)) as Point2;
+
+	return [p[0], 1 - p[1]];
+}
+
 function parseObjFace(line: string): Face {
 	return line
 		.split(' ')
 		.filter((s) => s)
 		.slice(1)
-		.map((f) => parseInt(f.split('/')[0], 10) - 1) as Face;
+		.map((f) => f.split('/').map(i => parseInt(i, 10) - 1)) as Face;
 }
