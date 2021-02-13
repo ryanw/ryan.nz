@@ -1,0 +1,4 @@
+{
+	"entryPoints": ["./src/"],
+	"exclude": ["src/__mocks__", "src/**/*.test.ts"]
+}
