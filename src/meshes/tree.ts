@@ -1,11 +1,12 @@
-import { Mesh, Vertex, Geometry } from '../mesh';
-import { Point3, Matrix4 } from '../geom';
+import { Mesh, Geometry } from '../mesh';
+import { Point3, Vector3, Matrix4 } from '../geom';
 import { Color } from '../material';
 
 export type TreeVertex = {
 	position: Point3;
 	color: Color;
 	barycentric: Point3;
+	normal: Vector3;
 };
 
 function createCircle(radius: number = 1, segments: number = 12): TreeVertex[] {
@@ -20,9 +21,9 @@ function createCircle(radius: number = 1, segments: number = 12): TreeVertex[] {
 		const p1: Point3 = rot.transformPoint3([radius, 0.0, 0.0]);
 		rot = rot.multiply(segmentRot);
 		const p2: Point3 = rot.transformPoint3([radius, 0.0, 0.0]);
-		vertices.push({ position: p0, color: [1.0, 0.0, 0.0, 1.0], barycentric: [1.0, 1.0, 1.0] });
-		vertices.push({ position: p1, color: [1.0, 0.0, 0.0, 1.0], barycentric: [0.0, 1.0, 1.0] });
-		vertices.push({ position: p2, color: [1.0, 0.0, 0.0, 1.0], barycentric: [0.0, 1.0, 1.0] });
+		vertices.push({ position: p0, color: [1.0, 0.0, 0.0, 1.0], barycentric: [1.0, 1.0, 1.0], normal: [0.0, 0.0, 1.0] });
+		vertices.push({ position: p1, color: [1.0, 0.0, 0.0, 1.0], barycentric: [0.0, 1.0, 1.0], normal: [0.0, 0.0, 1.0] });
+		vertices.push({ position: p2, color: [1.0, 0.0, 0.0, 1.0], barycentric: [0.0, 1.0, 1.0], normal: [0.0, 0.0, 1.0] });
 	}
 
 	return vertices;
@@ -67,16 +68,16 @@ function createCylinder(radius: number | [number, number], length: number, segme
 		const p0 = vertices[idx1 + 2].position;
 		const p1 = vertices[idx1 + 1].position;
 		const p2 = vertices[idx0 + 1].position;
-		vertices.push({ position: p0, color: [0.0, 1.0, 0.0, 1.0], barycentric: [1.0, 0.0, 0.0] });
-		vertices.push({ position: p1, color: [0.0, 1.0, 0.0, 1.0], barycentric: [0.0, 1.0, 0.0] });
-		vertices.push({ position: p2, color: [0.0, 1.0, 0.0, 1.0], barycentric: [1.0, 0.0, 1.0] });
+		vertices.push({ position: p0, color: [0.0, 1.0, 0.0, 1.0], barycentric: [1.0, 0.0, 0.0], normal: [1.0, 0.0, 0.0] });
+		vertices.push({ position: p1, color: [0.0, 1.0, 0.0, 1.0], barycentric: [0.0, 1.0, 0.0], normal: [1.0, 0.0, 0.0] });
+		vertices.push({ position: p2, color: [0.0, 1.0, 0.0, 1.0], barycentric: [1.0, 0.0, 1.0], normal: [1.0, 0.0, 0.0] });
 
 		const p3 = vertices[idx1 + 1].position;
 		const p4 = vertices[idx0 + 2].position;
 		const p5 = vertices[idx0 + 1].position;
-		vertices.push({ position: p3, color: [1.0, 0.0, 1.0, 1.0], barycentric: [1.0, 0.0, 1.0] });
-		vertices.push({ position: p4, color: [1.0, 0.0, 1.0, 1.0], barycentric: [1.0, 0.0, 0.0] });
-		vertices.push({ position: p5, color: [1.0, 0.0, 1.0, 1.0], barycentric: [0.0, 1.0, 0.0] });
+		vertices.push({ position: p3, color: [1.0, 0.0, 1.0, 1.0], barycentric: [1.0, 0.0, 1.0], normal: [1.0, 0.0, 0.0] });
+		vertices.push({ position: p4, color: [1.0, 0.0, 1.0, 1.0], barycentric: [1.0, 0.0, 0.0], normal: [1.0, 0.0, 0.0] });
+		vertices.push({ position: p5, color: [1.0, 0.0, 1.0, 1.0], barycentric: [0.0, 1.0, 0.0], normal: [1.0, 0.0, 0.0] });
 	}
 
 	return vertices;
@@ -102,27 +103,27 @@ export class Tree extends Mesh<TreeVertex> {
 		const leafColor: Color = [0.0, 1.0, 0.0, 1.0];
 		const leaf: TreeVertex[] = [
 			// Tip
-			{ position: [-5.0, -1.0, -1.0], barycentric: [1.0, 0.0, 0.0], color: leafColor },
-			{ position: [-5.0, 1.0, -1.0], barycentric: [0.0, 1.0, 0.0], color: leafColor },
-			{ position: [-7.0, 0.0, -4.0], barycentric: [0.0, 0.0, 1.0], color: leafColor },
+			{ position: [-5.0, -1.0, -1.0], barycentric: [1.0, 0.0, 0.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
+			{ position: [-5.0, 1.0, -1.0], barycentric: [0.0, 1.0, 0.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
+			{ position: [-7.0, 0.0, -4.0], barycentric: [0.0, 0.0, 1.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
 
 			// Middle
-			{ position: [-2.0, -0.8, 0.0], barycentric: [1.0, 0.0, 0.0], color: leafColor },
-			{ position: [-2.0, 0.8, 0.0], barycentric: [0.0, 1.0, 0.0], color: leafColor },
-			{ position: [-5.0, -1.0, -1.0], barycentric: [1.0, 0.0, 1.0], color: leafColor },
+			{ position: [-2.0, -0.8, 0.0], barycentric: [1.0, 0.0, 0.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
+			{ position: [-2.0, 0.8, 0.0], barycentric: [0.0, 1.0, 0.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
+			{ position: [-5.0, -1.0, -1.0], barycentric: [1.0, 0.0, 1.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
 
-			{ position: [-5.0, -1.0, -1.0], barycentric: [1.0, 0.0, 0.0], color: leafColor },
-			{ position: [-2.0, 0.8, 0.0], barycentric: [0.0, 1.0, 1.0], color: leafColor },
-			{ position: [-5.0, 1.0, -1.0], barycentric: [0.0, 1.0, 1.0], color: leafColor },
+			{ position: [-5.0, -1.0, -1.0], barycentric: [1.0, 0.0, 0.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
+			{ position: [-2.0, 0.8, 0.0], barycentric: [0.0, 1.0, 1.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
+			{ position: [-5.0, 1.0, -1.0], barycentric: [0.0, 1.0, 1.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
 
 			// Base
-			{ position: [0.0, -0.5, -0.5], barycentric: [1.0, 0.0, 0.0], color: leafColor },
-			{ position: [0.0, 0.5, -0.5], barycentric: [0.0, 1.0, 0.0], color: leafColor },
-			{ position: [-2.0, -1.0, 0.0], barycentric: [1.0, 0.0, 1.0], color: leafColor },
+			{ position: [0.0, -0.5, -0.5], barycentric: [1.0, 0.0, 0.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
+			{ position: [0.0, 0.5, -0.5], barycentric: [0.0, 1.0, 0.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
+			{ position: [-2.0, -1.0, 0.0], barycentric: [1.0, 0.0, 1.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
 
-			{ position: [-2.0, -1.0, 0.0], barycentric: [1.0, 0.0, 1.0], color: leafColor },
-			{ position: [0.0, 0.5, -0.5], barycentric: [0.0, 1.0, 1.0], color: leafColor },
-			{ position: [-2.0, 1.0, 0.0], barycentric: [0.0, 0.0, 1.0], color: leafColor },
+			{ position: [-2.0, -1.0, 0.0], barycentric: [1.0, 0.0, 1.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
+			{ position: [0.0, 0.5, -0.5], barycentric: [0.0, 1.0, 1.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
+			{ position: [-2.0, 1.0, 0.0], barycentric: [0.0, 0.0, 1.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
 		];
 		// Duplicate and flip faces for backside
 		for (let i = 0, len = leaf.length; i < len; i += 3) {
@@ -130,9 +131,9 @@ export class Tree extends Mesh<TreeVertex> {
 			const v1 = leaf[i + 1];
 			const v2 = leaf[i + 2];
 
-			leaf.push({ position: [...v2.position], barycentric: [...v2.barycentric], color: leafColor });
-			leaf.push({ position: [...v1.position], barycentric: [...v1.barycentric], color: leafColor });
-			leaf.push({ position: [...v0.position], barycentric: [...v0.barycentric], color: leafColor });
+			leaf.push({ position: [...v2.position], barycentric: [...v2.barycentric], color: leafColor, normal: [0.0, 0.0, 0.0] });
+			leaf.push({ position: [...v1.position], barycentric: [...v1.barycentric], color: leafColor, normal: [0.0, 0.0, 0.0] });
+			leaf.push({ position: [...v0.position], barycentric: [...v0.barycentric], color: leafColor, normal: [0.0, 0.0, 0.0] });
 		}
 
 		for (let i = 0; i < 8; i++) {
@@ -146,5 +147,6 @@ export class Tree extends Mesh<TreeVertex> {
 		}
 
 		super(geoms);
+		this.calculateNormals();
 	}
 }

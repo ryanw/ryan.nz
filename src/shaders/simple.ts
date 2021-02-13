@@ -10,6 +10,10 @@ export class SimpleShader extends Shader {
 					type: WebGLRenderingContext.FLOAT,
 					size: 4,
 				},
+				normal: {
+					type: WebGLRenderingContext.FLOAT,
+					size: 3,
+				},
 			},
 		});
 	}
