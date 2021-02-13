@@ -172,18 +172,31 @@ export class WebGLShader {
 			if (attribute.location == null || attribute.location === -1) {
 				continue;
 			}
+			ext.vertexAttribDivisorANGLE(attribute.location, 0);
 
 			const stride = mesh.stride;
 			const offset = mesh.offsets.get(attributeName);
 			if (offset == null) {
-				throw `Unable to find offset for ${attributeName}`;
+				if (!PRODUCTION) {
+					console.warn(`Unable to find attribute offset for ${attributeName}`);
+				}
+				gl.disableVertexAttribArray(attribute.location);
+				continue;
 			}
 			gl.enableVertexAttribArray(attribute.location);
 			gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, stride, offset);
-			ext.vertexAttribDivisorANGLE(attribute.location, 0);
 		}
 	}
 
+	unbind(gl: WebGLRenderingContext) {
+		for (const attributeName in this.attributes) {
+			const attribute = this.attributes[attributeName];
+			if (attribute.location == null || attribute.location === -1) {
+				continue;
+			}
+			gl.disableVertexAttribArray(attribute.location);
+		}
+	}
 
 	bindInstances(gl: WebGLRenderingContext, mesh: WebGLMesh) {
 		const ext = gl.getExtension('ANGLE_instanced_arrays');
@@ -207,6 +220,25 @@ export class WebGLShader {
 					gl.vertexAttribPointer(location, 4, attribute.type, false, stride, offset);
 					ext.vertexAttribDivisorANGLE(location, 1);
 					offset += 4 * 4;
+				}
+			}
+		}
+	}
+
+	unbindInstances(gl: WebGLRenderingContext) {
+		const ext = gl.getExtension('ANGLE_instanced_arrays');
+		for (const attributeName in this.instanceAttributes) {
+			const attribute = this.instanceAttributes[attributeName];
+			if (attribute.location == null || attribute.location === -1) {
+				continue;
+			}
+
+			// mat4 is really 4x vec4
+			if (attribute.size === 4 * 4) {
+				for (let i = 0; i < 4; i++) {
+					const location = attribute.location + i;
+					gl.disableVertexAttribArray(location);
+					ext.vertexAttribDivisorANGLE(location, 0);
 				}
 			}
 		}
