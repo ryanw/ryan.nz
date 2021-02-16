@@ -177,7 +177,7 @@ export class Retrowave extends Scene {
 	}
 
 	private updateCamera() {
-		if (false && DEBUG_ENABLED) {
+		if (DEBUG_ENABLED) {
 			const renderer = this.renderer;
 			const camera = renderer.camera;
 
