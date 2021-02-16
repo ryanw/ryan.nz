@@ -9,6 +9,6 @@ varying vec2 vTexCoord;
 void main(void) {
 	mat4 mvp = uModel * uViewProj;
 	gl_Position = vec4(position, 1.0) * mvp;
-	vTexCoord = uv;
+	vTexCoord = vec2(uv.x, 1.0 - uv.y);
 }
 

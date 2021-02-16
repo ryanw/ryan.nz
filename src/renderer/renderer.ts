@@ -22,6 +22,7 @@ export abstract class Renderer {
 	abstract uploadMeshInstances<I extends Instance = Instance>(mesh: Mesh, instances: I[]): void;
 	abstract uploadTexture(texture: Texture, unit?: number): number;
 	abstract bindTexture(texture: Texture): number;
+	abstract unbindTexture(texture: Texture): void;
 	abstract async drawScene(scene: Scene, target?: RenderTexture): Promise<number>;
 	abstract get width(): number;
 	abstract get height(): number;

@@ -3,12 +3,14 @@ import { Texture } from './texture';
 import { Renderer } from './renderer';
 import { Color } from './material';
 import { StaticMesh } from './components/static_mesh';
+import { UniformValues } from './shader';
 
 export class Scene {
 	actors: Actor[] = [];
 	textures: Map<number, Texture> = new Map();
 	renderer: Renderer;
 	backgroundColor: Color = [0.0, 0.0, 0.0, 1.0];
+	uniforms?: UniformValues = {};
 
 	constructor(renderer: Renderer) {
 		this.renderer = renderer;
@@ -82,6 +84,14 @@ export class Scene {
 			throw `Unable to find texture`;
 		}
 		return this.renderer.bindTexture(texture);
+	}
+
+	unbindTexture(textureOrId: Texture | number) {
+		const texture = typeof textureOrId === 'number' ? this.textures.get(textureOrId) : textureOrId;
+		if (!texture) {
+			throw `Unable to find texture`;
+		}
+		this.renderer.unbindTexture(texture);
 	}
 
 	async draw(): Promise<number> {

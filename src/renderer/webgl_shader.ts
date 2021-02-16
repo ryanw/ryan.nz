@@ -1,4 +1,4 @@
-import { Vertex } from './vertex';
+import { Matrix4 } from '../geom';
 import { WebGLMesh } from './webgl_mesh';
 
 export interface ShaderOptions {
@@ -22,6 +22,7 @@ export type WebGLUniformMap = { [key: string]: WebGLUniform };
 export type WebGLAttributeMap = { [key: string]: WebGLAttribute };
 
 export class WebGLShader {
+	gl: WebGLRenderingContext;
 	compiled = false;
 	program: WebGLProgram;
 	attributes: WebGLAttributeMap = {
@@ -79,6 +80,7 @@ export class WebGLShader {
 	}
 
 	make(gl: WebGLRenderingContext, vertSource?: string, fragSource?: string, options?: ShaderOptions) {
+		this.gl = gl;
 		if (!vertSource) {
 			throw 'You must provide vertex shader source code';
 		}
@@ -160,11 +162,12 @@ export class WebGLShader {
 		this.compiled = true;
 	}
 
-	use(gl: WebGLRenderingContext) {
-		gl.useProgram(this.program);
+	use() {
+		this.gl.useProgram(this.program);
 	}
 
-	bind(gl: WebGLRenderingContext, mesh: WebGLMesh) {
+	bind(mesh: WebGLMesh) {
+		const gl = this.gl;
 		gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
 		const ext = gl.getExtension('ANGLE_instanced_arrays');
 		for (const attributeName in this.attributes) {
@@ -188,7 +191,8 @@ export class WebGLShader {
 		}
 	}
 
-	unbind(gl: WebGLRenderingContext) {
+	unbind() {
+		const gl = this.gl;
 		for (const attributeName in this.attributes) {
 			const attribute = this.attributes[attributeName];
 			if (attribute.location == null || attribute.location === -1) {
@@ -243,4 +247,65 @@ export class WebGLShader {
 			}
 		}
 	}
+
+	setUniform(name: string, value: number | number[] | Matrix4) {
+		const gl = this.gl;
+
+		const uniform = this.uniforms[name];
+		if (!uniform) {
+			throw `Unable to find '${name}' uniform in shader`;
+		}
+		switch (uniform.type) {
+			case WebGLRenderingContext.FLOAT:
+				if (typeof value !== 'number') {
+					throw `Uniform '${name}' expected number but got: ${typeof value}`;
+				}
+				gl.uniform1f(uniform.location, value);
+				break;
+
+			case WebGLRenderingContext.INT:
+				if (typeof value !== 'number') {
+					throw `Uniform '${name}' expected number but got: ${typeof value}`;
+				}
+				gl.uniform1i(uniform.location, value);
+				break;
+
+			case WebGLRenderingContext.FLOAT_VEC2:
+				if (
+					!Array.isArray(value) ||
+					value.length !== 2 ||
+					typeof value[0] !== 'number' ||
+					typeof value[1] !== 'number'
+				) {
+					throw `Uniform '${name}' expected an array of 2 numbers but got something else`;
+				}
+				gl.uniform2fv(uniform.location, value);
+				break;
+
+			case WebGLRenderingContext.FLOAT_VEC3:
+				if (
+					!Array.isArray(value) ||
+					value.length !== 3 ||
+					typeof value[0] !== 'number' ||
+					typeof value[1] !== 'number' ||
+					typeof value[2] !== 'number'
+				) {
+					throw `Uniform '${name}' expected an array of 3 numbers but got something else`;
+				}
+				gl.uniform3fv(uniform.location, value);
+				break;
+
+			case WebGLRenderingContext.FLOAT_MAT4:
+				if (!(value instanceof Matrix4)) {
+					throw `Uniform '${name}' expected a Matrix4 but got something else`;
+				}
+				gl.uniformMatrix4fv(uniform.location, false, value.toArray());
+				break;
+
+			// TODO other uniform types
+			default:
+				throw `Unsupported uniform type: ${uniform.type}`;
+		}
+	}
+
 }

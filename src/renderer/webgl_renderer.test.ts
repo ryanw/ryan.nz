@@ -49,7 +49,6 @@ describe('WebGLRenderer', () => {
 		renderer.clear();
 		expect(gl.clearDepth).toHaveBeenCalledWith(1.0);
 		expect(gl.clearColor).toHaveBeenCalledWith(0.1, 0.2, 0.3, 0.4);
-		expect(gl.colorMask).toHaveBeenCalledWith(true, true, true, false);
 		expect(gl.clear).toHaveBeenCalledWith(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	});
 

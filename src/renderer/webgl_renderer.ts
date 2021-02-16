@@ -10,7 +10,7 @@ import { WebGLMesh } from './webgl_mesh';
 import { WebGLRendererTexture } from './webgl_texture';
 import { WebGLRenderTarget } from './webgl_render_target';
 import { StaticMesh } from '../components/static_mesh';
-import { RenderTexture } from '../render_texture';
+import { RenderTexture, Attachment } from '../render_texture';
 import defaultVertSource from '../shaders/wireframe.vert.glsl';
 import defaultFragSource from '../shaders/wireframe.frag.glsl';
 
@@ -169,7 +169,6 @@ export class WebGLRenderer extends Renderer {
 		const gl = this.gl;
 		gl.clearDepth(1.0);
 		gl.clearColor(...this.backgroundColor);
-		gl.colorMask(true, true, true, false);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	}
 
@@ -191,7 +190,7 @@ export class WebGLRenderer extends Renderer {
 			const gl = this.gl;
 			const shader = actor.shader || this.defaultShader;
 			const uniforms = shader.uniforms;
-			shader.use(gl);
+			shader.use();
 
 			let glMesh = this.meshes.get(mesh);
 			if (!glMesh) {
@@ -214,45 +213,10 @@ export class WebGLRenderer extends Renderer {
 			}
 
 			for (const uniformName in actor.uniforms) {
-				const uniform = shader.uniforms[uniformName];
-				if (!uniform) {
-					throw `Unable to find '${uniformName}' uniform in shader`;
-				}
-				const value = actor.uniforms[uniformName];
-				switch (uniform.type) {
-					case WebGLRenderingContext.FLOAT:
-						if (typeof value !== 'number') {
-							throw `Uniform '${uniformName}' expected number but got: ${typeof value}`;
-						}
-						gl.uniform1f(uniform.location, value);
-						break;
-
-					case WebGLRenderingContext.INT:
-						if (typeof value !== 'number') {
-							throw `Uniform '${uniformName}' expected number but got: ${typeof value}`;
-						}
-						gl.uniform1i(uniform.location, value);
-						break;
-
-					case WebGLRenderingContext.FLOAT_VEC2:
-						if (
-							!Array.isArray(value) ||
-							value.length !== 2 ||
-							typeof value[0] !== 'number' ||
-							typeof value[1] !== 'number'
-						) {
-							throw `Uniform '${uniformName}' expected an array of 2 numbers but got something else`;
-						}
-						gl.uniform2fv(uniform.location, value);
-						break;
-
-					// TODO other uniform types
-					default:
-						throw `Unsupported uniform type: ${uniform.type}`;
-				}
+				shader.setUniform(uniformName, actor.uniforms[uniformName]);
 			}
 
-			shader.bind(gl, glMesh);
+			shader.bind(glMesh);
 			if (actor.hasInstances) {
 				shader.bindInstances(gl, glMesh);
 				glMesh.drawInstances();
@@ -303,7 +267,7 @@ export class WebGLRenderer extends Renderer {
 		// Link a Texture with its WebGLRendererTexture
 		let glTexture = this.textures.get(texture);
 		if (!glTexture) {
-			glTexture = new WebGLRendererTexture(gl);
+			glTexture = WebGLRendererTexture.fromTexture(gl, texture);
 			this.textures.set(texture, glTexture);
 		}
 		if (!unit && !glTexture.unit) {
@@ -320,6 +284,14 @@ export class WebGLRenderer extends Renderer {
 			throw `Unable to find WebGLRendererTexture`;
 		}
 		return glTexture.bind();
+	}
+
+	unbindTexture(texture: Texture) {
+		let glTexture = this.textures.get(texture);
+		if (!glTexture) {
+			return;
+		}
+		glTexture.unbind();
 	}
 
 	createShader(vertSource: string, fragSource: string, options?: ShaderOptions): Shader {
@@ -342,13 +314,14 @@ export class WebGLRenderer extends Renderer {
 					this.frameAverage = performance.now();
 					const fps = (1 / (frameRate / 1000)) | 0;
 					this.debugEl.innerHTML = `${fps} fps`;
-					console.log('Draw time %o fps', fps);
 				}
 
 				resolve(dt);
 			};
+
 			if (target) {
-				draw();
+				this.drawSync(scene, target);
+				resolve(0);
 			} else if (this.vsync) {
 				window.requestAnimationFrame(draw);
 			} else {
@@ -357,21 +330,25 @@ export class WebGLRenderer extends Renderer {
 		});
 	}
 
-	drawSync(scene: Scene, target?: RenderTexture) {
+	drawSync(scene: Scene, texture?: RenderTexture) {
 		// Drawing to a texture
-		let glTarget;
-		if (target) {
-			glTarget = this.renderTargets.get(target);
-			if (!glTarget) {
-				this.uploadTexture(target);
-				const glTexture = this.textures.get(target);
-				glTarget = new WebGLRenderTarget(this.gl, target.size, glTexture);
-				this.renderTargets.set(target, glTarget);
+		let target;
+		if (texture) {
+			target = this.renderTargets.get(texture);
+			if (!target) {
+				this.uploadTexture(texture);
+				const glTexture = this.textures.get(texture);
+				target = new WebGLRenderTarget(this.gl, texture.size, glTexture);
+				if (texture.attachment === Attachment.DEPTH) {
+					target.attachment = this.gl.DEPTH_ATTACHMENT;
+				}
+
+				this.renderTargets.set(texture, target);
 			}
 			
 			// Resize to match size of texture
-			this.updateSize(target.size, target.size);
-			glTarget.bind();
+			this.updateSize(texture.size, texture.size);
+			target.bind();
 		}
 
 		this.backgroundColor = [...scene.backgroundColor];
@@ -388,12 +365,24 @@ export class WebGLRenderer extends Renderer {
 
 		for (const actor of scene.actors) {
 			this.drawActor(actor, viewProj);
+
+			// Apply the Scene's uniforms to the current shader
+			if (actor.shader) {
+				for (const uniformName in scene.uniforms) {
+					if (!actor.uniforms[uniformName] && actor.shader.uniforms[uniformName]) {
+						actor.shader.setUniform(uniformName, scene.uniforms[uniformName]);
+					}
+				}
+			}
 		}
 
 		// Cleanup after drawing to texture
-		if (target) {
-			glTarget.unbind();
-			this.updateSize();
+		if (texture) {
+			target.unbind();
+			// FIXME depth attachment check is so we don't resize the light (which is assigned to this.camera)
+			if (texture.attachment != Attachment.DEPTH) {
+				this.updateSize();
+			}
 		}
 	}
 

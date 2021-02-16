@@ -6,6 +6,7 @@ export class WebGLRenderTarget {
 	size: number;
 	framebuffer: WebGLFramebuffer;
 	renderbuffer: WebGLRenderbuffer;
+	attachment =  WebGLRenderingContext.COLOR_ATTACHMENT0;
 
 	constructor(gl: WebGLRenderingContext, size: number, texture: WebGLRendererTexture) {
 		this.gl = gl;
@@ -22,15 +23,17 @@ export class WebGLRenderTarget {
 
 		gl.framebufferTexture2D(
 			gl.FRAMEBUFFER,
-			gl.COLOR_ATTACHMENT0,
+			this.attachment,
 			gl.TEXTURE_2D,
 			this.texture.texture,
 			0,
 		);
 
-		gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
-		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.size, this.size);
-		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.renderbuffer);
+		if (this.attachment !== WebGLRenderingContext.DEPTH_ATTACHMENT) {
+			gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
+			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.size, this.size);
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.renderbuffer);
+		}
 	}
 
 	unbind() {

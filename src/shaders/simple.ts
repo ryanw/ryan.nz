@@ -14,6 +14,21 @@ export class SimpleShader extends Shader {
 					type: WebGLRenderingContext.FLOAT,
 					size: 3,
 				},
+				uv: {
+					type: WebGLRenderingContext.FLOAT,
+					size: 2,
+				},
+			},
+			uniforms: {
+				uLight: {
+					type: WebGLRenderingContext.FLOAT_MAT4,
+				},
+				uLightDir: {
+					type: WebGLRenderingContext.FLOAT_VEC3,
+				},
+				uShadow: {
+					type: WebGLRenderingContext.INT,
+				},
 			},
 		});
 	}

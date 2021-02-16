@@ -16,7 +16,7 @@ export class WebGLRendererTexture {
 	}
 
 	upload(texture: Texture, unit: number = null) {
-		const pixels = texture.pixels;
+		const pixels = texture instanceof RenderTexture ? null : texture.pixels;
 
 		if (pixels instanceof HTMLImageElement && !pixels.complete) {
 			throw 'Attempted to use incomplete image as texture';
@@ -25,7 +25,30 @@ export class WebGLRendererTexture {
 
 		const gl = this.gl;
 		this.bind();
-		gl.texImage2D(gl.TEXTURE_2D, this.level, this.internalFormat, this.srcFormat, this.srcType, pixels);
+
+		if (texture instanceof RenderTexture) {
+			gl.texImage2D(
+				gl.TEXTURE_2D,
+				this.level,
+				this.internalFormat,
+				texture.size,
+				texture.size,
+				0,
+				this.srcFormat,
+				this.srcType,
+				null,
+			);
+		}
+		else {
+			gl.texImage2D(
+				gl.TEXTURE_2D,
+				this.level,
+				this.internalFormat,
+				this.srcFormat,
+				this.srcType,
+				pixels,
+			);
+		}
 
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -41,5 +64,14 @@ export class WebGLRendererTexture {
 		gl.activeTexture(gl.TEXTURE0 + this.unit);
 		gl.bindTexture(gl.TEXTURE_2D, this.texture);
 		return this.unit;
+	}
+
+	unbind() {
+		if (this.unit == null) {
+			throw `Cannot unbind texture that hasn't been uploaded`;
+		}
+		const gl = this.gl;
+		gl.activeTexture(gl.TEXTURE0 + this.unit);
+		gl.bindTexture(gl.TEXTURE_2D, null);
 	}
 }

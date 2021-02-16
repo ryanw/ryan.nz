@@ -1,11 +1,9 @@
 import { Matrix4, Point3, Vector3 } from './geom';
 import { Mesh, Vertex } from './mesh';
 import { Material, Color } from './material';
-import { Shader } from './shader';
+import { Shader, UniformValues } from './shader';
 import { Component } from './component';
 import { StaticMesh } from './components/static_mesh';
-
-export type UniformValues = { [key: string]: number | number[] };
 
 export interface Instance {
 	[key: string]: number | number[] | Matrix4;

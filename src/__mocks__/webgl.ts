@@ -438,6 +438,7 @@ const enums = {
 };
 
 const extensions: any = {
+	WEBGL_depth_texture: {},
 	ANGLE_instanced_arrays: {
 		drawArraysInstancedANGLE: jest.fn(),
 		vertexAttribDivisorANGLE: jest.fn(),
