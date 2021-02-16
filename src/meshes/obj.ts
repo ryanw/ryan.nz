@@ -45,6 +45,12 @@ export class Obj extends Mesh<ObjVertex> {
 		});
 		super(geom);
 	}
+
+	static async fromUrl(url: string): Promise<Obj> {
+		const response = await fetch(url);
+		const data = await response.text();
+		return new Obj(data);
+	}
 }
 
 function parseObj(data: string): ObjFile {

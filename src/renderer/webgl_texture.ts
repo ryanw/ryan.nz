@@ -1,4 +1,10 @@
-import { Texture } from '../texture';
+import { Texture, ScaleFilter } from '../texture';
+import { RenderTexture, Attachment } from '../render_texture';
+
+const FILTER_MAP: { [key: string]: number } = {
+	[ScaleFilter.LINEAR]: WebGLRenderingContext.LINEAR,
+	[ScaleFilter.NEAREST]: WebGLRenderingContext.NEAREST,
+};
 
 export class WebGLRendererTexture {
 	texture: WebGLTexture;
@@ -9,6 +15,21 @@ export class WebGLRendererTexture {
 	internalFormat = WebGLRenderingContext.RGBA;
 	srcFormat = WebGLRenderingContext.RGBA;
 	srcType = WebGLRenderingContext.UNSIGNED_BYTE;
+	minFilter = WebGLRenderingContext.LINEAR;
+	magFilter = WebGLRenderingContext.LINEAR;
+
+	static fromTexture(gl: WebGLRenderingContext, src: Texture) {
+		const texture = new WebGLRendererTexture(gl);
+		texture.minFilter = FILTER_MAP[src.minFilter];
+		texture.magFilter = FILTER_MAP[src.magFilter];
+
+		if (src instanceof RenderTexture && src.attachment === Attachment.DEPTH) {
+			texture.internalFormat = gl.DEPTH_COMPONENT;
+			texture.srcFormat = gl.DEPTH_COMPONENT;
+			texture.srcType = gl.UNSIGNED_INT;
+		}
+		return texture;
+	}
 
 	constructor(gl: WebGLRenderingContext) {
 		this.gl = gl;
@@ -52,8 +73,8 @@ export class WebGLRendererTexture {
 
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this.minFilter);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this.magFilter);
 	}
 
 	bind(): number {

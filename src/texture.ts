@@ -1,5 +1,12 @@
+export enum ScaleFilter {
+	LINEAR,
+	NEAREST,
+}
+
 export class Texture {
 	pixels: ImageData | HTMLImageElement;
+	minFilter = ScaleFilter.LINEAR;
+	magFilter = ScaleFilter.LINEAR;
 
 	constructor(imageOrURL?: HTMLImageElement | ImageData | string) {
 		this.putPixels(new ImageData(new Uint8ClampedArray([255, 0, 255, 255]), 1, 1));
