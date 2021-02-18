@@ -29,7 +29,16 @@ export class WebGLRenderTarget {
 			0,
 		);
 
-		if (this.attachment !== WebGLRenderingContext.DEPTH_ATTACHMENT) {
+		if (this.attachment == WebGLRenderingContext.DEPTH_ATTACHMENT) {
+			// Safari requries a Color texture, even if we're only rendering to a Depth texture
+			gl.framebufferTexture2D(
+				gl.FRAMEBUFFER,
+				gl.COLOR_ATTACHMENT0,
+				gl.TEXTURE_2D,
+				this.texture.unusedColorTexture,
+				0,
+			);
+		} else {
 			gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
 			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.size, this.size);
 			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, this.renderbuffer);
