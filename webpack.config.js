@@ -18,7 +18,7 @@ module.exports = {
 		port: 8088,
 		historyApiFallback: true,
 		static: {
-			directory: __dirname,
+			directory: path.join(__dirname, 'public'),
 		},
 	},
 	module: {
