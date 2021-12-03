@@ -207,6 +207,7 @@ export class WebGLShader {
 		for (const attributeName in this.instanceAttributes) {
 			const attribute = this.instanceAttributes[attributeName];
 			if (attribute.location == null || attribute.location === -1) {
+				console.warn(`Unable to find instance attribute ${attributeName}`);
 				continue;
 			}
 
@@ -224,6 +225,10 @@ export class WebGLShader {
 					ext.vertexAttribDivisorANGLE(location, 1);
 					offset += 4 * 4;
 				}
+			} else {
+				gl.enableVertexAttribArray(attribute.location);
+				gl.vertexAttribPointer(attribute.location, attribute.size, attribute.type, false, stride, offset);
+				ext.vertexAttribDivisorANGLE(attribute.location, 1);
 			}
 		}
 	}
