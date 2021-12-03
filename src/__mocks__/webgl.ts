@@ -454,7 +454,6 @@ const MockWebGLRenderingContext = jest.fn().mockImplementation(() => {
 });
 
 Object.assign(MockWebGLRenderingContext, enums);
-// @ts-ignore
-global.window.WebGLRenderingContext = MockWebGLRenderingContext;
+(global.window as any).WebGLRenderingContext = MockWebGLRenderingContext;
 
 export default MockWebGLRenderingContext;
