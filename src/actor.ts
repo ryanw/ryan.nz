@@ -12,7 +12,7 @@ export interface Instance {
 export type ActorInstance<I extends Instance = Instance> = {
 	pawn: Actor;
 	data: I;
-}
+};
 
 export interface ActorOptions {
 	color?: Color;

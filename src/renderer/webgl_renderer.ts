@@ -302,7 +302,7 @@ export class WebGLRenderer extends Renderer {
 	 * Wait for next animation frame and redraw everything
 	 */
 	async drawScene(scene: Scene, target?: RenderTexture): Promise<number> {
-		return new Promise((resolve) => {
+		return new Promise(resolve => {
 			const draw = () => {
 				const now = performance.now();
 				const dt = (now - this.lastFrameAt) / 1000.0;
@@ -345,7 +345,7 @@ export class WebGLRenderer extends Renderer {
 
 				this.renderTargets.set(texture, target);
 			}
-			
+
 			// Resize to match size of texture
 			this.updateSize(texture.size, texture.size);
 			target.bind();
@@ -393,8 +393,8 @@ export class WebGLRenderer extends Renderer {
 		if (!this.parentElement) {
 			return;
 		}
-		const parentWidth = this.parentElement.clientWidth * this.scale | 0;
-		const parentHeight = this.parentElement.clientHeight * this.scale | 0;
+		const parentWidth = (this.parentElement.clientWidth * this.scale) | 0;
+		const parentHeight = (this.parentElement.clientHeight * this.scale) | 0;
 		width = width != null ? width : parentWidth;
 		height = height != null ? height : parentHeight;
 		this.camera.resize(width, height);

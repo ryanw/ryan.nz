@@ -21,14 +21,14 @@ export class Geometry<V extends Vertex> {
 
 	clone(): Geometry<V> {
 		return new Geometry(
-			this.vertices.map((v) => ({ ...v })),
+			this.vertices.map(v => ({ ...v })),
 			{ transform: this.transform.clone() }
 		);
 	}
 
 	calculateNormals() {
 		if (this.vertices.length === 0) return;
-		const vertices = this.vertices as any[] as { position: Point3, normal: Vector3 }[];
+		const vertices = (this.vertices as any[]) as { position: Point3; normal: Vector3 }[];
 
 		if (!('normal' in vertices[0])) {
 			throw `Geometry Vertex doesn't have a 'normal' attribute`;
@@ -67,7 +67,7 @@ export class Mesh<V extends Vertex = Vertex> {
 	}
 
 	clone(): Mesh<V> {
-		return new Mesh(this.geometries.map((g) => g.clone()));
+		return new Mesh(this.geometries.map(g => g.clone()));
 	}
 
 	get vertexCount(): number {

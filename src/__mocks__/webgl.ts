@@ -449,7 +449,7 @@ const MockWebGLRenderingContext = jest.fn().mockImplementation(() => {
 	for (const name of functions) {
 		mock[name] = jest.fn(() => `TEST_${name.toUpperCase()}`);
 	}
-	mock['getExtension'] = jest.fn((kind) => extensions[kind]);
+	mock['getExtension'] = jest.fn(kind => extensions[kind]);
 	return mock;
 });
 

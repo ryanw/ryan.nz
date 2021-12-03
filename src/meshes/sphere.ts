@@ -49,11 +49,7 @@ export class Sphere extends Mesh<SphereVertex> {
 }
 
 function sphericalToCartesian(lon: number, lat: number): Point3 {
-	return [
-		Math.cos(lat) * Math.sin(lon),
-		Math.sin(lat),
-		Math.cos(lat) * Math.cos(lon),
-	];
+	return [Math.cos(lat) * Math.sin(lon), Math.sin(lat), Math.cos(lat) * Math.cos(lon)];
 }
 
 function sphericalToUV(lon: number, lat: number): Point2 {

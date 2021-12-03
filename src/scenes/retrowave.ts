@@ -278,8 +278,7 @@ export class Retrowave extends Scene {
 		this.car.uniforms.uCarPosition = this.carPosition;
 	}
 
-	private updateDebug() {
-	}
+	private updateDebug() {}
 }
 
 function createCityscape(radius: number, count: number): Actor[] {

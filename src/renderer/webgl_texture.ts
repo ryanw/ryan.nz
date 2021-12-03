@@ -54,17 +54,7 @@ export class WebGLRendererTexture {
 			if (this.unusedColorTexture) {
 				gl.activeTexture(gl.TEXTURE0 + this.unit);
 				gl.bindTexture(gl.TEXTURE_2D, this.unusedColorTexture);
-				gl.texImage2D(
-					gl.TEXTURE_2D,
-					0,
-					gl.RGBA,
-					texture.size,
-					texture.size,
-					0,
-					gl.RGBA,
-					gl.UNSIGNED_BYTE,
-					null,
-				);
+				gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, texture.size, texture.size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
 				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -82,20 +72,11 @@ export class WebGLRendererTexture {
 				0,
 				this.srcFormat,
 				this.srcType,
-				null,
+				null
 			);
-
-		}
-		else {
+		} else {
 			this.bind();
-			gl.texImage2D(
-				gl.TEXTURE_2D,
-				this.level,
-				this.internalFormat,
-				this.srcFormat,
-				this.srcType,
-				pixels,
-			);
+			gl.texImage2D(gl.TEXTURE_2D, this.level, this.internalFormat, this.srcFormat, this.srcType, pixels);
 		}
 
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);

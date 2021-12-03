@@ -25,7 +25,7 @@ export class Obj extends Mesh<ObjVertex> {
 		let { vertices, normals, uvs } = parseObj(data);
 		if (options?.scale) {
 			const scaling = Matrix4.scaling(options.scale, options.scale, options.scale);
-			vertices = vertices.map((v) => scaling.transformPoint3(v));
+			vertices = vertices.map(v => scaling.transformPoint3(v));
 		}
 		if (options?.flipFaces) {
 			for (let i = 0; i < vertices.length; i += 3) {
@@ -94,7 +94,7 @@ function parseObj(data: string): ObjFile {
 function parseObjVertex(line: string): Point3 {
 	return line
 		.split(' ')
-		.filter((s) => s)
+		.filter(s => s)
 		.slice(1)
 		.map(parseFloat) as Point3;
 }
@@ -102,7 +102,7 @@ function parseObjVertex(line: string): Point3 {
 function parseObjNormal(line: string): Vector3 {
 	return line
 		.split(' ')
-		.filter((s) => s)
+		.filter(s => s)
 		.slice(1)
 		.map(parseFloat) as Vector3;
 }
@@ -110,7 +110,7 @@ function parseObjNormal(line: string): Vector3 {
 function parseObjUV(line: string): Point2 {
 	const p = line
 		.split(' ')
-		.filter((s) => s)
+		.filter(s => s)
 		.slice(1)
 		.map(i => parseFloat(i)) as Point2;
 
@@ -120,7 +120,7 @@ function parseObjUV(line: string): Point2 {
 function parseObjFace(line: string): Face {
 	return line
 		.split(' ')
-		.filter((s) => s)
+		.filter(s => s)
 		.slice(1)
-		.map((f) => f.split('/').map(i => parseInt(i, 10) - 1)) as Face;
+		.map(f => f.split('/').map(i => parseInt(i, 10) - 1)) as Face;
 }

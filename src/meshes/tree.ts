@@ -38,7 +38,7 @@ function createCylinder(radius: number | [number, number], length: number, segme
 	// Bottom
 	const circle0 = createCircle(rad0, segments);
 	vertices = vertices.concat(
-		circle0.map((v) => {
+		circle0.map(v => {
 			const position = [v.position[0], v.position[1], length / 2] as Point3;
 			return { ...v, position };
 		})
@@ -54,7 +54,7 @@ function createCylinder(radius: number | [number, number], length: number, segme
 		circle1[i + 2].position = p0;
 	}
 	vertices = vertices.concat(
-		circle1.map((v) => {
+		circle1.map(v => {
 			const position = [v.position[0], v.position[1], -length / 2] as Point3;
 			return { ...v, position };
 		})
@@ -90,7 +90,7 @@ export class Tree extends Mesh<TreeVertex> {
 		// Trunk
 		const rot = Matrix4.rotation(Math.PI / 2.0, 0.0, 0.0);
 		const vertices = createCylinder([0.13, 0.2], 0.66, 8);
-		vertices.forEach((v) => (v.color = [1.0, 0.0, 1.0, 1.0]));
+		vertices.forEach(v => (v.color = [1.0, 0.0, 1.0, 1.0]));
 		geoms.push(new Geometry(vertices, { transform: rot }));
 		for (let i = 0; i < 12; i++) {
 			const geom = geoms[geoms.length - 1].clone();
@@ -131,9 +131,24 @@ export class Tree extends Mesh<TreeVertex> {
 			const v1 = leaf[i + 1];
 			const v2 = leaf[i + 2];
 
-			leaf.push({ position: [...v2.position], barycentric: [...v2.barycentric], color: leafColor, normal: [0.0, 0.0, 0.0] });
-			leaf.push({ position: [...v1.position], barycentric: [...v1.barycentric], color: leafColor, normal: [0.0, 0.0, 0.0] });
-			leaf.push({ position: [...v0.position], barycentric: [...v0.barycentric], color: leafColor, normal: [0.0, 0.0, 0.0] });
+			leaf.push({
+				position: [...v2.position],
+				barycentric: [...v2.barycentric],
+				color: leafColor,
+				normal: [0.0, 0.0, 0.0],
+			});
+			leaf.push({
+				position: [...v1.position],
+				barycentric: [...v1.barycentric],
+				color: leafColor,
+				normal: [0.0, 0.0, 0.0],
+			});
+			leaf.push({
+				position: [...v0.position],
+				barycentric: [...v0.barycentric],
+				color: leafColor,
+				normal: [0.0, 0.0, 0.0],
+			});
 		}
 
 		for (let i = 0; i < 8; i++) {

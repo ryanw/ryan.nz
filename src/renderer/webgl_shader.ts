@@ -32,8 +32,7 @@ export class WebGLShader {
 			location: null,
 		},
 	};
-	instanceAttributes: WebGLAttributeMap = {
-	};
+	instanceAttributes: WebGLAttributeMap = {};
 	uniforms: WebGLUniformMap = {
 		uTime: {
 			type: WebGLRenderingContext.FLOAT,
@@ -307,5 +306,4 @@ export class WebGLShader {
 				throw `Unsupported uniform type: ${uniform.type}`;
 		}
 	}
-
 }

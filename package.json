@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "lint": "eslint -c eslint.json --fix 'src/**/*.ts' || true",
+    "lint": "prettier --config prettier.config.js -w src/ || true",
     "server": "webpack serve",
     "build": "webpack",
     "docs": "typedoc",

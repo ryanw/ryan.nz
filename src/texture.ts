@@ -31,7 +31,7 @@ export class Texture {
 			image.addEventListener('load', () => {
 				resolve(new Texture(image));
 			});
-			image.addEventListener('error', (e) => {
+			image.addEventListener('error', e => {
 				reject(e);
 			});
 		});
