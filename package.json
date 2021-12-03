@@ -18,16 +18,16 @@
     "eslint": "^7.6.0",
     "glslify-loader": "^2.0.0",
     "jest": "^26.5.2",
-    "jest-extended": "^0.11.5",
+    "jest-extended": "^1.2.0",
     "prettier": "^2.2.1",
     "raw-loader": "^4.0.1",
     "ts-jest": "^26.4.1",
     "ts-loader": "^8.0.2",
     "typedoc": "^0.20.24",
     "typescript": "^3.9.7",
-    "webpack": "^5.0.0",
-    "webpack-cli": "^4.0.0",
-    "webpack-dev-server": "^3.11.0"
+    "webpack": "^5.64.0",
+    "webpack-cli": "^4.9.0",
+    "webpack-dev-server": "^4.6.0"
   },
   "dependencies": {
     "simplex-noise": "^2.4.0"
