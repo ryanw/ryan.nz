@@ -1,5 +1,5 @@
-import { WebGLRenderer } from './renderer/webgl_renderer';
-import { Retrowave } from './scenes/retrowave';
+import { WebGLRenderer } from 'toru';
+import { Retrowave } from './retrowave';
 
 async function main() {
 	const renderer = new WebGLRenderer(document.body);

@@ -1,5 +1,4 @@
-import { Mesh } from '../mesh';
-import { Point3, Point2 } from '../geom';
+import { Mesh, Point3, Point2 } from 'toru';
 
 export type Vertex = {
 	position: Point3;

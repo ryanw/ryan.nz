@@ -1,29 +1,21 @@
 import SimplexNoise from 'simplex-noise';
-import { Scene } from '../scene';
-import { Renderer } from '../renderer';
-import { Terrain } from '../meshes/terrain';
-import { SnowFlake } from '../meshes/snow';
-import { Obj } from '../meshes/obj';
-import { Building } from '../meshes/building';
-import { Quad } from '../meshes/quad';
-import { Road } from '../meshes/road';
-import { Tree } from '../meshes/tree';
-import { Actor } from '../actor';
-import { Camera } from '../camera';
-import { Matrix4, Rect } from '../geom';
-import { Texture } from '../texture';
-import { Color } from '../material';
+import { Scene, Renderer, Actor, Obj, Quad, BasicCamera, Matrix4, Rect, Material, Color, Texture } from 'toru';
+import { Terrain } from './meshes/terrain';
+import { Building } from './meshes/building';
+import { Road } from './meshes/road';
+import { Tree } from './meshes/tree';
+import { SnowFlake } from './meshes/snow';
 
-import deloreanObj from '../delorean.obj';
-import { RoadShader } from '../shaders/road';
-import { CarShader } from '../shaders/car';
-import { SkyShader } from '../shaders/sky';
-import { SunShader } from '../shaders/sun';
-import { TreeShader } from '../shaders/tree';
-import { TerrainShader } from '../shaders/terrain';
-import { BuildingShader } from '../shaders/building';
-import { SpriteShader } from '../shaders/sprite';
-import { SnowShader } from '../shaders/snow';
+import { SpriteShader } from 'toru';
+import deloreanObj from './delorean.obj';
+import { RoadShader } from './shaders/road';
+import { CarShader } from './shaders/car';
+import { SkyShader } from './shaders/sky';
+import { SunShader } from './shaders/sun';
+import { TreeShader } from './shaders/tree';
+import { TerrainShader } from './shaders/terrain';
+import { BuildingShader } from './shaders/building';
+import { SnowShader } from './shaders/snow';
 
 const DEBUG_ENABLED = !PRODUCTION || window.location.search.indexOf('debug') !== -1;
 
@@ -32,6 +24,7 @@ export class Retrowave extends Scene {
 	roadOffset = 0.0;
 	carPosition = [0.0, 0.0];
 	backgroundColor: Color = [0.2, 0.05, 0.4, 1.0];
+	camera: BasicCamera;
 	private road: Actor;
 	private car: Actor;
 	private tree: Actor;
@@ -78,9 +71,10 @@ export class Retrowave extends Scene {
 	}
 
 	private buildCamera() {
-		const camera = new Camera();
+		const camera = new BasicCamera();
 		this.addActor(camera);
 		this.renderer.camera = camera;
+		this.camera = camera;
 		this.renderer.updateSize();
 
 		// Start mouse in the center
@@ -96,6 +90,7 @@ export class Retrowave extends Scene {
 	private buildCity() {
 		const city = new Actor(createCityscape(150, 50), {
 			model: Matrix4.translation(0, -5.0, -650.0),
+			shader: new BuildingShader(),
 		});
 		this.addActor(city);
 	}
@@ -140,15 +135,18 @@ export class Retrowave extends Scene {
 
 	private buildCar() {
 		this.car = new Actor(new Obj(deloreanObj), {
-			color: [0.0, 0.0, 0.0, 1.0],
-			shader: new CarShader(),
+			material: new Material({
+				color: [0.0, 0.0, 0.0, 1.0],
+			}),
 		});
 		const carOutline = new Actor(new Obj(deloreanObj, { flipFaces: true, scale: 1.03 }), {
-			color: [0.0, 1.0, 1.0, 1.0],
-			shader: this.car.shader,
+			material: new Material({
+				color: [0.0, 1.0, 1.0, 1.0],
+			}),
 		});
 		this.addActor(
 			new Actor([this.car, carOutline], {
+				shader: new CarShader(),
 				model: Matrix4.translation(0.0, -3.4, 0.0)
 					.multiply(Matrix4.rotation(0, Math.PI, 0))
 					.multiply(Matrix4.scaling(3.0, 3.0, 3.0)),
@@ -211,7 +209,7 @@ export class Retrowave extends Scene {
 	private updateCamera() {
 		if (DEBUG_ENABLED) {
 			const renderer = this.renderer;
-			const camera = renderer.camera;
+			const camera = this.camera;
 
 			if (renderer.mouseButtons.has(0)) {
 				const mouseSpeed = 0.0005;
@@ -316,7 +314,6 @@ export class Retrowave extends Scene {
 function createCityscape(radius: number, count: number): Actor[] {
 	const actors: Actor[] = [];
 	const buildings: Rect[] = [];
-	const buildingShader = new BuildingShader();
 
 	const maxAttempts = count * 10;
 	let attempts = 0;
@@ -348,9 +345,10 @@ function createCityscape(radius: number, count: number): Actor[] {
 
 			actors.push(
 				new Actor(new Building(width / 5, height / 5, depth / 5), {
-					color: [1.0, 0.0, 0.0, 1.0],
 					model: Matrix4.translation(x, y, z).multiply(Matrix4.scaling(width, height, depth)),
-					shader: buildingShader,
+					material: new Material({
+						color: [1.0, 0.0, 0.0, 1.0],
+					}),
 				})
 			);
 			break pos;

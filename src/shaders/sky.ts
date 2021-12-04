@@ -1,4 +1,4 @@
-import { Shader } from '../shader';
+import { Shader } from 'toru';
 import vertexSource from './sky.vert.glsl';
 import fragmentSource from './sky.frag.glsl';
 

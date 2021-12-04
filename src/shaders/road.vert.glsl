@@ -1,7 +1,9 @@
-uniform float uRoadOffset;
 uniform mat4 uViewProj;
+uniform mat4 uView;
 uniform mat4 uModel;
+uniform mat4 uLight;
 uniform vec4 uFillColor;
+uniform float uRoadOffset;
 
 attribute vec3 position;
 attribute vec3 normal;
@@ -13,6 +15,7 @@ varying vec4 vColor;
 varying vec3 vBarycentric;
 varying float vDirection;
 varying float vDashLength;
+varying vec4 vPositionInLight;
 
 #define FOG_DIST 700.0
 #define DASH_LENGTH 0.6
@@ -35,5 +38,6 @@ void main(void) {
 	vBarycentric = barycentric;
 	vDirection = direction;
 	vDashLength = DASH_LENGTH;
+	vPositionInLight = vec4(position, 1.0) * uModel * roadTrans * uLight;
 }
 

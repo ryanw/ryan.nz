@@ -1,4 +1,4 @@
-import { Shader } from '../shader';
+import { Shader } from 'toru';
 import vertexSource from './snow.vert.glsl';
 import fragmentSource from './snow.frag.glsl';
 

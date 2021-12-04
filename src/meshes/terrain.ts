@@ -1,5 +1,4 @@
-import { Mesh, Geometry } from '../mesh';
-import { Point3 } from '../geom';
+import { Mesh, Geometry, Point3 } from 'toru';
 
 export type HeightFunction = (x: number, y: number, t?: number) => number;
 

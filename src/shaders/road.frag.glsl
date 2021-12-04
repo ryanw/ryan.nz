@@ -2,12 +2,14 @@ precision mediump float;
 
 uniform float uTime;
 uniform vec4 uFogColor;
+uniform sampler2D uShadowMap;
 
 varying float vFogDepth;
 varying vec4 vColor;
 varying vec3 vBarycentric;
 varying float vDirection;
 varying float vDashLength;
+varying vec4 vPositionInLight;
 
 float road_uLineWidth = 0.0075;
 vec4 side_color = vec4(1.0, 0.3, 0.8, 1.0);
@@ -30,9 +32,16 @@ void main(void) {
 			color = line_color;
 		}
 	}
-	else {
-	}
 
-	gl_FragColor = mix(color, uFogColor, vFogDepth);
+	vec3 shadowPos = (vPositionInLight.xyz / vPositionInLight.w) * 0.5 + 0.5;
+	bool inShadowMap = (shadowPos.x < 1.0 && shadowPos.y < 1.0 && shadowPos.x > 0.0 && shadowPos.y > 0.0);
+	float shadow = texture2D(uShadowMap, vec2(shadowPos.x, shadowPos.y)).r;
+	float distanceFromLight = shadowPos.z;
+	if (inShadowMap && distanceFromLight > shadow + 1.0/100000.0) {
+		gl_FragColor = mix(vec4(1.0, 0.0, 1.0, 1.0), uFogColor, vFogDepth);
+	}
+	else {
+		gl_FragColor = mix(color, uFogColor, vFogDepth);
+	}
 }
 

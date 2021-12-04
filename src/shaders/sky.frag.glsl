@@ -5,6 +5,8 @@ uniform float uSeed;
 
 varying vec2 vTexCoord;
 
+#pragma glslify: rand = require('toru/src/shaders/utils/rand')
+
 mat2 rotation(float angle) {
 	float s = sin(angle);
 	float c = cos(angle);
@@ -28,7 +30,6 @@ float star(vec2 uv, float flare) {
 	return m;
 }
 
-#pragma glslify: rand = require('./utils/rand')
 
 void main(void) {
 	vec4 color = vec4(vec3(1.0), 0.0);

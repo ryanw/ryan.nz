@@ -6,7 +6,7 @@ varying vec3 vBarycentric;
 varying float vLineWidth;
 varying vec4 vColor;
 
-#pragma glslify: edgeDistance = require('./utils/edge_distance')
+#pragma glslify: edgeDistance = require('toru/src/shaders/utils/edge_distance')
 
 void main(void) {
 	vec4 lineColor = vColor;

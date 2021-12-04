@@ -1,5 +1,7 @@
 uniform mat4 uViewProj;
+uniform mat4 uView;
 uniform mat4 uModel;
+uniform mat4 uLight;
 uniform vec4 uFillColor;
 uniform float uRoadOffset;
 uniform sampler2D uHeightMap;
@@ -11,13 +13,11 @@ attribute vec3 barycentric;
 varying float vFogDepth;
 varying vec4 vColor;
 varying vec3 vBarycentric;
+varying vec4 vPositionInLight;
 
 float fog_dist = 500.0;
 
 void main(void) {
-	vec3 light = vec3(0.8, 0.4, -0.5);
-	float shade = dot(normalize(light), (uModel * normalize(vec4(position, 1.0))).xyz);
-
 	vec2 uv = vec2(position.x / 32.0, position.z / 16.0) * 0.5 + 0.5;
 	vec4 height = texture2D(uHeightMap, uv);
 	float vert = smoothstep(0.0, 1.0, height.a) * 30.0;
@@ -41,5 +41,5 @@ void main(void) {
 	vFogDepth = max(0.0, min(1.0, gl_Position.z / fog_dist));
 	vColor = surface;
 	vBarycentric = barycentric;
-
+	vPositionInLight = pos * uModel * uLight;
 }

@@ -1,4 +1,4 @@
-import { Shader } from '../shader';
+import { Shader } from 'toru';
 import vertexSource from './road.vert.glsl';
 import fragmentSource from './road.frag.glsl';
 
@@ -8,6 +8,15 @@ export class RoadShader extends Shader {
 			uniforms: {
 				uRoadOffset: {
 					type: WebGLRenderingContext.FLOAT,
+				},
+				uLight: {
+					type: WebGLRenderingContext.FLOAT_MAT4,
+				},
+				uLightDir: {
+					type: WebGLRenderingContext.FLOAT_VEC3,
+				},
+				uShadowMap: {
+					type: WebGLRenderingContext.INT,
 				},
 			},
 			attributes: {

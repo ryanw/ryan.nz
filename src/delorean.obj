@@ -1,5 +1,6 @@
 # Blender v2.91.2 OBJ File: ''
 # www.blender.org
+mtllib delorean.mtl
 o Plane03_Mesh
 v -0.356504 0.356083 -0.293309
 v -0.356504 0.359631 0.281379

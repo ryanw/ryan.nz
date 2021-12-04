@@ -1,4 +1,4 @@
-import { Shader } from '../shader';
+import { Shader } from 'toru';
 import vertexSource from './terrain.vert.glsl';
 import fragmentSource from './terrain.frag.glsl';
 
@@ -10,6 +10,15 @@ export class TerrainShader extends Shader {
 					type: WebGLRenderingContext.FLOAT,
 				},
 				uHeightMap: {
+					type: WebGLRenderingContext.INT,
+				},
+				uLight: {
+					type: WebGLRenderingContext.FLOAT_MAT4,
+				},
+				uLightDir: {
+					type: WebGLRenderingContext.FLOAT_VEC3,
+				},
+				uShadowMap: {
 					type: WebGLRenderingContext.INT,
 				},
 			},

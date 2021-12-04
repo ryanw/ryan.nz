@@ -14,8 +14,8 @@ varying float vSeed;
 #define BUILDING_COLOR vec4(0.05, 0.0, 0.003, 1.0)
 #define EDGE_COLOR vec4(1.0, 0.0, 1.0, 1.0)
 
-#pragma glslify: rand = require('./utils/rand')
-#pragma glslify: edgeDistance = require('./utils/edge_distance')
+#pragma glslify: rand = require('toru/src/shaders/utils/rand')
+#pragma glslify: edgeDistance = require('toru/src/shaders/utils/edge_distance')
 
 void main(void) {
 	// FIXME rounding off to avoid floating point errors

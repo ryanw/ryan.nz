@@ -1,4 +1,4 @@
-import { Shader } from '../shader';
+import { Shader } from 'toru';
 import vertexSource from './tree.vert.glsl';
 import fragmentSource from './tree.frag.glsl';
 

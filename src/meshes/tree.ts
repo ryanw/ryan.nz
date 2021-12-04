@@ -1,6 +1,4 @@
-import { Mesh, Geometry } from '../mesh';
-import { Point3, Vector3, Matrix4 } from '../geom';
-import { Color } from '../material';
+import { Mesh, Geometry, Point3, Vector3, Matrix4, Color } from 'toru';
 
 export type TreeVertex = {
 	position: Point3;

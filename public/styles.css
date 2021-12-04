@@ -1,11 +1,11 @@
 @font-face {
 	font-family: "IBM CGA";
-	src: url("/PxPlus_IBM_CGA.ttf");
+	src: url("./PxPlus_IBM_CGA.ttf");
 }
 
 @font-face {
 	font-family: "Future Outrun";
-	src: url("/future-outrun.otf");
+	src: url("./future-outrun.otf");
 }
 
 * {
@@ -103,4 +103,7 @@ a:hover {
 }
 .grabbed main p, .grabbed footer {
 	opacity: 0;
+}
+main, footer {
+	z-index: 10;
 }
