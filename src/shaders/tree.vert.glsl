@@ -7,13 +7,15 @@ uniform float uLineWidth;
 attribute mat4 model;
 attribute vec3 position;
 attribute vec3 barycentric;
-attribute vec4 color;
+attribute vec4 faceColor;
+attribute vec4 wireColor;
 
 varying vec4 vFogColor;
 varying float vFogDepth;
 varying vec3 vBarycentric;
 varying float vLineWidth;
-varying vec4 vColor;
+varying vec4 vFaceColor;
+varying vec4 vWireColor;
 
 float fog_dist = 1000.0;
 
@@ -31,7 +33,8 @@ void main(void) {
 	vFogColor = uFogColor;
 	vLineWidth = uLineWidth;
 
-	vColor = color;
+	vFaceColor = faceColor;
+	vWireColor = wireColor;
 	vBarycentric = barycentric;
 }
 

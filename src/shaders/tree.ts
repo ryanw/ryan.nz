@@ -15,7 +15,12 @@ export class TreeShader extends Shader {
 					type: WebGLRenderingContext.FLOAT,
 					size: 3,
 				},
-				color: {
+				faceColor: {
+					type: WebGLRenderingContext.FLOAT,
+					size: 4,
+					location: null,
+				},
+				wireColor: {
 					type: WebGLRenderingContext.FLOAT,
 					size: 4,
 					location: null,

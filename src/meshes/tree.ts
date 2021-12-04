@@ -123,31 +123,6 @@ export class Tree extends Mesh<TreeVertex> {
 			{ position: [0.0, 0.5, -0.5], barycentric: [0.0, 1.0, 1.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
 			{ position: [-2.0, 1.0, 0.0], barycentric: [0.0, 0.0, 1.0], color: leafColor, normal: [0.0, 0.0, 1.0] },
 		];
-		// Duplicate and flip faces for backside
-		for (let i = 0, len = leaf.length; i < len; i += 3) {
-			const v0 = leaf[i];
-			const v1 = leaf[i + 1];
-			const v2 = leaf[i + 2];
-
-			leaf.push({
-				position: [...v2.position],
-				barycentric: [...v2.barycentric],
-				color: leafColor,
-				normal: [0.0, 0.0, 0.0],
-			});
-			leaf.push({
-				position: [...v1.position],
-				barycentric: [...v1.barycentric],
-				color: leafColor,
-				normal: [0.0, 0.0, 0.0],
-			});
-			leaf.push({
-				position: [...v0.position],
-				barycentric: [...v0.barycentric],
-				color: leafColor,
-				normal: [0.0, 0.0, 0.0],
-			});
-		}
 
 		for (let i = 0; i < 8; i++) {
 			const transform = Matrix4.identity()
@@ -161,5 +136,6 @@ export class Tree extends Mesh<TreeVertex> {
 
 		super(geoms);
 		this.calculateNormals();
+		this.doubleSided = true;
 	}
 }

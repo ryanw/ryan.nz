@@ -3,7 +3,7 @@ import { Scene, Renderer, Actor, Obj, Quad, BasicCamera, Matrix4, Rect, Material
 import { Terrain } from './meshes/terrain';
 import { Building } from './meshes/building';
 import { Road } from './meshes/road';
-import { Tree } from './meshes/tree';
+import { XmasTree } from './meshes/xmas_tree';
 import { SnowFlake } from './meshes/snow';
 
 import { SpriteShader } from 'toru';
@@ -114,19 +114,19 @@ export class Retrowave extends Scene {
 	}
 
 	private buildTrees() {
-		this.tree = new Actor(new Tree(), {
-			model: Matrix4.translation(0.0, -3.5, 0.0),
+		this.tree = new Actor(new XmasTree(), {
+			model: Matrix4.translation(0.0, -3.0, 0.0),
 			shader: new TreeShader(),
 		});
 
 		for (let i = 0; i < 9; i++) {
 			// Right side
 			this.tree.instance({
-				model: Matrix4.translation(8.0, 0.0, i * -80.0),
+				model: Matrix4.translation(7.0, 0.0, i * -80.0),
 			});
 			// Left side
 			this.tree.instance({
-				model: Matrix4.translation(-8.0, 0.0, -40 + i * -80.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
+				model: Matrix4.translation(-7.0, 0.0, -40 + i * -80.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
 			});
 		}
 
