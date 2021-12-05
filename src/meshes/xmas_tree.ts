@@ -5,8 +5,100 @@ export type TreeVertex = {
 	faceColor: Color;
 	wireColor: Color;
 	barycentric: Point3;
-	normal: Vector3;
 };
+
+export class XmasTree extends Mesh<TreeVertex> {
+	constructor() {
+		const geoms: Geometry<TreeVertex>[] = [];
+
+		// Leaves
+		const leaf = createCone(1.0, 8, 1.0, [0.0, 0.15, 0.0, 1.0]);
+		const backLeaf = createCone(1.0, 8, 1.0, [0.0, 1.0, 0.0, 1.0]).reverse();
+
+		let transform;
+		for (let i = 0; i < 4; i++) {
+			transform = Matrix4.identity()
+				.multiply(Matrix4.translation(0.0, 3.5 - i, 0.0))
+				.multiply(Matrix4.scaling(1 + i * 0.2));
+			geoms.push(new Geometry(leaf, { transform }));
+			transform = transform.multiply(Matrix4.translation(0.0, -0.05, 0.0)).multiply(Matrix4.scaling(1.125));
+			geoms.push(new Geometry(backLeaf, { transform }));
+		}
+
+		// Trunk
+		const trunk = createCylinder(0.6, 1.5, 8, [0.0, 0.0, 0.0, 1.0], [1.0, 0.0, 1.0, 1.0]);
+		geoms.push(new Geometry(trunk));
+
+		// Star
+		const star = createStar(1.0, 0.6);
+		transform = Matrix4.translation(0.0, 4.8, 0.0).multiply(Matrix4.scaling(0.4));
+		geoms.push(new Geometry(star, { transform }));
+
+		super(geoms);
+	}
+}
+
+function createStar(
+	radius: number,
+	innerRadius: number,
+	faceColor: Color = [0.0, 0.0, 0.0, 1.0],
+	wireColor: Color = [1.0, 1.0, 0.0, 1.0]
+): TreeVertex[] {
+	const spikes = 5;
+	const segWidth = 0.729;
+
+	const vertices: TreeVertex[] = [];
+
+	let transform = Matrix4.identity();
+	for (let i = 0; i < spikes; i++) {
+		const points: Point3[] = [
+			[0.0, 2.0 * radius, 0.0], // Top
+			[-1.0 * innerRadius * segWidth, 1.0 * innerRadius, 0.0], // Left
+			[1.0 * innerRadius * segWidth, 1.0 * innerRadius, 0.0], // Right
+			[0.0, 0.0, 0.0], // Bottom
+		];
+		vertices.push({
+			position: transform.transformPoint3(points[0]),
+			faceColor,
+			wireColor,
+			barycentric: [1.0, 0.0, 0.0],
+		});
+		vertices.push({
+			position: transform.transformPoint3(points[1]),
+			faceColor,
+			wireColor,
+			barycentric: [1.0, 1.0, 0.0],
+		});
+		vertices.push({
+			position: transform.transformPoint3(points[2]),
+			faceColor,
+			wireColor,
+			barycentric: [0.0, 0.0, 1.0],
+		});
+
+		vertices.push({
+			position: transform.transformPoint3(points[2]),
+			faceColor,
+			wireColor,
+			barycentric: [0.0, 0.0, 1.0],
+		});
+		vertices.push({
+			position: transform.transformPoint3(points[1]),
+			faceColor,
+			wireColor,
+			barycentric: [0.0, 1.0, 1.0],
+		});
+		vertices.push({
+			position: transform.transformPoint3(points[3]),
+			faceColor,
+			wireColor,
+			barycentric: [1.0, 1.0, 1.0],
+		});
+		transform = transform.multiply(Matrix4.rotation(0.0, 0.0, (2 * Math.PI) / spikes));
+	}
+
+	return vertices;
+}
 
 function createCone(
 	radius: number = 1,
@@ -31,21 +123,18 @@ function createCone(
 			faceColor,
 			wireColor,
 			barycentric: [1.0, 1.0, 1.0],
-			normal: [0.0, 0.0, 1.0],
 		});
 		vertices.push({
 			position: p1,
 			faceColor,
 			wireColor,
 			barycentric: [0.0, 1.0, 1.0],
-			normal: [0.0, 0.0, 1.0],
 		});
 		vertices.push({
 			position: p2,
 			faceColor,
 			wireColor,
 			barycentric: [0.0, 1.0, 1.0],
-			normal: [0.0, 0.0, 1.0],
 		});
 	}
 
@@ -107,44 +196,17 @@ function createCylinder(
 		const p0 = vertices[idx1 + 2].position;
 		const p1 = vertices[idx1 + 1].position;
 		const p2 = vertices[idx0 + 1].position;
-		vertices.push({ position: p0, faceColor, wireColor, barycentric: [1.0, 0.0, 0.0], normal: [1.0, 0.0, 0.0] });
-		vertices.push({ position: p1, faceColor, wireColor, barycentric: [0.0, 1.0, 0.0], normal: [1.0, 0.0, 0.0] });
-		vertices.push({ position: p2, faceColor, wireColor, barycentric: [1.0, 0.0, 1.0], normal: [1.0, 0.0, 0.0] });
+		vertices.push({ position: p0, faceColor, wireColor, barycentric: [1.0, 0.0, 0.0] });
+		vertices.push({ position: p1, faceColor, wireColor, barycentric: [0.0, 1.0, 0.0] });
+		vertices.push({ position: p2, faceColor, wireColor, barycentric: [1.0, 0.0, 1.0] });
 
 		const p3 = vertices[idx1 + 1].position;
 		const p4 = vertices[idx0 + 2].position;
 		const p5 = vertices[idx0 + 1].position;
-		vertices.push({ position: p3, faceColor, wireColor, barycentric: [1.0, 0.0, 1.0], normal: [1.0, 0.0, 0.0] });
-		vertices.push({ position: p4, faceColor, wireColor, barycentric: [1.0, 0.0, 0.0], normal: [1.0, 0.0, 0.0] });
-		vertices.push({ position: p5, faceColor, wireColor, barycentric: [0.0, 1.0, 0.0], normal: [1.0, 0.0, 0.0] });
+		vertices.push({ position: p3, faceColor, wireColor, barycentric: [1.0, 0.0, 1.0] });
+		vertices.push({ position: p4, faceColor, wireColor, barycentric: [1.0, 0.0, 0.0] });
+		vertices.push({ position: p5, faceColor, wireColor, barycentric: [0.0, 1.0, 0.0] });
 	}
 
 	return vertices;
-}
-
-export class XmasTree extends Mesh<TreeVertex> {
-	constructor() {
-		const geoms: Geometry<TreeVertex>[] = [];
-
-		// Leaves
-		const leaf = createCone(1.0, 8, 1.0);
-		const backLeaf = createCone(1.0, 8, 1.0, [0.0, 1.0, 0.0, 1.0]).reverse();
-
-		let transform;
-		for (let i = 0; i < 4; i++) {
-			transform = Matrix4.identity()
-				.multiply(Matrix4.translation(0.0, 3.5 - i, 0.0))
-				.multiply(Matrix4.scaling(1 + i * 0.2));
-			geoms.push(new Geometry(leaf, { transform }));
-			transform = transform.multiply(Matrix4.translation(0.0, -0.05, 0.0)).multiply(Matrix4.scaling(1.125));
-			geoms.push(new Geometry(backLeaf, { transform }));
-		}
-
-		// Trunk
-		const trunk = createCylinder(0.6, 1.5, 8, [0.0, 0.0, 0.0, 1.0], [1.0, 0.0, 1.0, 1.0]);
-		transform = Matrix4.translation(0.0, 0.0, 0.0);
-		geoms.push(new Geometry(trunk, { transform }));
-
-		super(geoms);
-	}
 }

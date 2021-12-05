@@ -126,7 +126,8 @@ export class Retrowave extends Scene {
 			});
 			// Left side
 			this.tree.instance({
-				model: Matrix4.translation(-7.0, 0.0, -40 + i * -80.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
+				//model: Matrix4.translation(-7.0, 0.0, -40 + i * -80.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
+				model: Matrix4.translation(-7.0, 0.0, -40 + i * -80.0),
 			});
 		}
 
