@@ -49,7 +49,7 @@ void main(void) {
 			float r3 = fract(r2 * 12.34);
 
 			vec2 starOffset = vec2(r0, r1);
-			float twinkle = sin(r2 * (uTime / 300.0)) * 0.5 + 0.5;
+			float twinkle = sin(r2 * (uTime / 300.0)) * 0.7 + 0.05;
 			float size = r3 * mix(0.7, 1.0, twinkle);
 
 			color.a += star(gv - tile - starOffset + 0.5, smoothstep(0.5, 1.0, size)) * size;
