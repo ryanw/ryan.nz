@@ -3,8 +3,7 @@ import { Scene, Renderer, Actor, Obj, Quad, BasicCamera, Matrix4, Rect, Material
 import { Terrain } from './meshes/terrain';
 import { Building } from './meshes/building';
 import { Road } from './meshes/road';
-import { XmasTree } from './meshes/xmas_tree';
-import { SnowFlake } from './meshes/snow';
+import { Tree } from './meshes/tree';
 
 import { SpriteShader } from 'toru';
 import deloreanObj from './delorean.obj';
@@ -15,7 +14,6 @@ import { SunShader } from './shaders/sun';
 import { TreeShader } from './shaders/tree';
 import { TerrainShader } from './shaders/terrain';
 import { BuildingShader } from './shaders/building';
-import { SnowShader } from './shaders/snow';
 
 const DEBUG_ENABLED = !PRODUCTION || window.location.search.indexOf('debug') !== -1;
 
@@ -28,7 +26,6 @@ export class Retrowave extends Scene {
 	private road: Actor;
 	private car: Actor;
 	private tree: Actor;
-	private snowflake: Actor;
 	private terrain: Actor;
 	private heightMap = new Texture();
 	private hillNoise = new SimplexNoise();
@@ -53,7 +50,6 @@ export class Retrowave extends Scene {
 		this.buildTrees();
 		this.buildCar();
 		this.buildTerrain();
-		this.buildSnow();
 		if (DEBUG_ENABLED) {
 			this.buildDebug();
 		}
@@ -114,20 +110,19 @@ export class Retrowave extends Scene {
 	}
 
 	private buildTrees() {
-		this.tree = new Actor(new XmasTree(), {
-			model: Matrix4.translation(0.0, -3.0, 0.0),
+		this.tree = new Actor(new Tree(), {
+			model: Matrix4.translation(0.0, -3.5, 0.0),
 			shader: new TreeShader(),
 		});
 
 		for (let i = 0; i < 9; i++) {
 			// Right side
 			this.tree.instance({
-				model: Matrix4.translation(7.0, 0.0, i * -80.0),
+				model: Matrix4.translation(8.0, 0.0, i * -80.0),
 			});
 			// Left side
 			this.tree.instance({
-				//model: Matrix4.translation(-7.0, 0.0, -40 + i * -80.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
-				model: Matrix4.translation(-7.0, 0.0, -40 + i * -80.0),
+				model: Matrix4.translation(-8.0, 0.0, -40 + i * -80.0).multiply(Matrix4.rotation(0.0, Math.PI, 0.0)),
 			});
 		}
 
@@ -167,34 +162,6 @@ export class Retrowave extends Scene {
 			shader: new TerrainShader(),
 		});
 		this.addActor(this.terrain);
-	}
-
-	private buildSnow() {
-		const count = 4000;
-		const depth = 200;
-		const width = 200;
-		const height = 100;
-
-		this.snowflake = new Actor(new SnowFlake(), {
-			model: Matrix4.translation(0.0, 0.0, 0.0),
-			shader: new SnowShader(),
-		});
-
-		for (let i = 0; i < count; i++) {
-			const x = Math.random() * width - width / 2;
-			const y = Math.random() * height;
-			const z = 10 - Math.random() * depth;
-			const size = Math.random() * 0.3 + 0.05;
-			const speed = Math.random() * 5.0 + 0.5;
-			const freq = Math.random();
-			this.snowflake.instance({
-				speed,
-				freq,
-				model: Matrix4.identity().multiply(Matrix4.translation(x, y, z)).multiply(Matrix4.scaling(size)),
-			});
-		}
-
-		this.addActor(this.snowflake);
 	}
 
 	private buildDebug() {
